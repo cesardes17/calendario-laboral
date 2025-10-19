@@ -9,8 +9,9 @@ Esta herramienta permite a trabajadores con patrones laborales no convencionales
 ### Características principales
 
 - **Dos modos de configuración**:
+
   - **Ciclo semanal**: máscara de 7 días (L-D) para patrones semanales
-  - **Ciclo por partes**: bloques personalizados de trabajo/descanso (ej: 6-3, 6-3, 6-3, 6-2)
+  - **Ciclo por partes**: bloques personalizados de trabajo/descanso (ej: 6-3, 6-3, 6-3, 6-2; 4-2; 6-2, etc)
 
 - **Gestión de inicio de contrato**: soporte para contratos que comienzan en el año actual o que vienen de años anteriores (con offset de ciclo)
 
