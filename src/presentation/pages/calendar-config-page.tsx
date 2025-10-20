@@ -105,6 +105,7 @@ export const CalendarConfigPage: React.FC = () => {
 
               <EmploymentStatusSelector
                 year={yearObject}
+                workCycle={workCycle}
                 onConfigurationChange={handleEmploymentStatusChange}
                 className="mb-4"
               />

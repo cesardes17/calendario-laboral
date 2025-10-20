@@ -18,12 +18,19 @@ import { useEmploymentStatus } from '@/src/application/hooks/use-employment-stat
 import { EmploymentStatusType } from '@/src/core/domain/employment-status';
 import { CycleDayType } from '@/src/core/domain/cycle-offset';
 import { Year } from '@/src/core/domain/year';
+import { WorkCycle } from '@/src/core/domain/work-cycle';
+import { ConfigureWorkCycleUseCase } from '@/src/core/usecases/configure-work-cycle.usecase';
 
 export interface EmploymentStatusSelectorProps {
   /**
    * The year context for validation
    */
   year: Year;
+
+  /**
+   * The configured work cycle (for validating offset)
+   */
+  workCycle: WorkCycle;
 
   /**
    * Callback when configuration is complete and valid
@@ -38,9 +45,11 @@ export interface EmploymentStatusSelectorProps {
 
 export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> = ({
   year,
+  workCycle,
   onConfigurationChange,
   className = '',
 }) => {
+  const cycleUseCase = React.useMemo(() => new ConfigureWorkCycleUseCase(), []);
   const {
     state,
     selectStatus,
@@ -103,10 +112,23 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
       const dayWithinPart = parseInt(dayStr, 10);
 
       if (!isNaN(partNumber) && !isNaN(dayWithinPart)) {
-        setCycleOffset(partNumber, dayWithinPart, type);
+        // Validate offset against the configured cycle
+        const offsetValidation = cycleUseCase.validateOffsetForCycle(
+          workCycle,
+          partNumber,
+          dayWithinPart
+        );
+
+        if (offsetValidation.isValid) {
+          setCycleOffset(partNumber, dayWithinPart, type);
+        }
+        // Note: errors will be shown through state.errors from the use case
       }
     }
   };
+
+  // Get cycle information for contextual help
+  const cycleInfo = React.useMemo(() => cycleUseCase.getCycleInfo(workCycle), [workCycle, cycleUseCase]);
 
   // Validate and notify parent on state changes
   React.useEffect(() => {
@@ -199,6 +221,17 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
       {/* Conditional: Cycle offset inputs */}
       {state.status?.type === EmploymentStatusType.WORKED_BEFORE && (
         <div className="mb-4 pl-7 space-y-4">
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg mb-4">
+            <p className="text-sm text-blue-900 font-medium mb-1">
+              Tu ciclo configurado: {workCycle.getDisplayText()}
+            </p>
+            <p className="text-xs text-blue-700">
+              {cycleInfo.mode === 'parts' && cycleInfo.totalParts > 0
+                ? `Tu ciclo tiene ${cycleInfo.totalParts} parte${cycleInfo.totalParts > 1 ? 's' : ''}`
+                : 'Ciclo semanal (no usa partes)'}
+            </p>
+          </div>
+
           <p className="text-sm text-gray-600 mb-3">
             Indica en qué punto del ciclo te encontrabas el 1 de enero:
           </p>
@@ -215,6 +248,7 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
               type="number"
               id="part-number"
               min="1"
+              max={cycleInfo.mode === 'parts' ? cycleInfo.totalParts : undefined}
               value={partNumberInput}
               onChange={handlePartNumberChange}
               placeholder="Ej: 3"
@@ -225,7 +259,9 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
               `}
             />
             <p className="mt-1 text-xs text-gray-500">
-              Número de la parte del ciclo (empezando desde 1)
+              {cycleInfo.mode === 'parts' && cycleInfo.totalParts > 0
+                ? `Tu ciclo tiene ${cycleInfo.totalParts} parte${cycleInfo.totalParts > 1 ? 's' : ''} (1-${cycleInfo.totalParts})`
+                : 'Número de la parte del ciclo (empezando desde 1)'}
             </p>
           </div>
 
@@ -251,7 +287,17 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
               `}
             />
             <p className="mt-1 text-xs text-gray-500">
-              Día dentro de esa parte (empezando desde 1)
+              {partNumberInput && cycleInfo.parts
+                ? (() => {
+                    const partNum = parseInt(partNumberInput, 10);
+                    const part = workCycle.getPart(partNum);
+                    if (part) {
+                      const totalDays = part.workDays + part.restDays;
+                      return `La parte ${partNum} tiene ${totalDays} días (${part.workDays} trabajo + ${part.restDays} descanso)`;
+                    }
+                    return 'Día dentro de esa parte (empezando desde 1)';
+                  })()
+                : 'Día dentro de esa parte (empezando desde 1)'}
             </p>
           </div>
 
