@@ -6,7 +6,6 @@
  */
 
 import { SelectYearUseCase } from '../select-year.usecase';
-import { Year } from '../../domain/year';
 
 describe('SelectYearUseCase', () => {
   let useCase: SelectYearUseCase;

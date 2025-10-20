@@ -34,7 +34,7 @@ describe('SelectEmploymentStatusUseCase', () => {
     });
 
     it('should fail with invalid status type', () => {
-      const result = useCase.selectStatus('INVALID' as any);
+      const result = useCase.selectStatus('INVALID' as unknown as EmploymentStatusType);
 
       expect(result.isFailure()).toBe(true);
     });

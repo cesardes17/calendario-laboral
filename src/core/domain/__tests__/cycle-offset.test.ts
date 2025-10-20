@@ -40,7 +40,7 @@ describe('CycleOffset Value Object', () => {
     });
 
     it('should fail when day type is invalid', () => {
-      const offset = CycleOffset.create(1, 1, 'INVALID' as any);
+      const offset = CycleOffset.create(1, 1, 'INVALID' as unknown as CycleDayType);
 
       expect(offset.isFailure()).toBe(true);
       expect(offset.errorValue()).toContain('tipo de día válido');

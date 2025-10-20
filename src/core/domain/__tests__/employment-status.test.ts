@@ -24,7 +24,7 @@ describe('EmploymentStatus Value Object', () => {
     });
 
     it('should fail when type is invalid', () => {
-      const status = EmploymentStatus.create('INVALID' as any);
+      const status = EmploymentStatus.create('INVALID' as unknown as EmploymentStatusType);
 
       expect(status.isFailure()).toBe(true);
       expect(status.errorValue()).toContain('válido');

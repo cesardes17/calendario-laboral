@@ -4,3 +4,9 @@
 
 export { useYearSelection } from './use-year-selection';
 export type { UseYearSelectionReturn } from './use-year-selection';
+
+export { useEmploymentStatus } from './use-employment-status';
+export type {
+  UseEmploymentStatusReturn,
+  EmploymentStatusState,
+} from './use-employment-status';
