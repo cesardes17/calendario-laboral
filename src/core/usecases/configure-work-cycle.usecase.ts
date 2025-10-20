@@ -9,7 +9,7 @@
  */
 
 import { Result } from '../domain/result';
-import { WorkCycle, CycleMode, WeeklyMask, CyclePart } from '../domain/work-cycle';
+import { WorkCycle, WeeklyMask, CyclePart } from '../domain/work-cycle';
 
 export interface ValidationResult {
   isValid: boolean;

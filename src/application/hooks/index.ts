@@ -10,3 +10,6 @@ export type {
   UseEmploymentStatusReturn,
   EmploymentStatusState,
 } from './use-employment-status';
+
+export { useWorkCycle } from './use-work-cycle';
+export type { UseWorkCycleReturn, WorkCycleState } from './use-work-cycle';
