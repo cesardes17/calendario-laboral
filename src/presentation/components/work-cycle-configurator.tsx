@@ -79,6 +79,17 @@ export const WorkCycleConfigurator: React.FC<WorkCycleConfiguratorProps> = ({
   // Handle part input change
   const handlePartChange = (index: number, field: 'workDays' | 'restDays', value: string) => {
     const newParts = [...parts];
+
+    // Allow empty string for easier editing
+    if (value === '') {
+      newParts[index] = {
+        ...newParts[index],
+        [field]: 0,
+      };
+      setParts(newParts);
+      return;
+    }
+
     const numValue = parseInt(value, 10);
 
     if (!isNaN(numValue) && numValue >= 0) {
@@ -88,8 +99,10 @@ export const WorkCycleConfigurator: React.FC<WorkCycleConfiguratorProps> = ({
       };
       setParts(newParts);
 
-      // Auto-configure when user changes values
-      configureParts(newParts);
+      // Auto-configure when user changes values (only if valid)
+      if (numValue > 0) {
+        configureParts(newParts);
+      }
     }
   };
 
@@ -230,11 +243,12 @@ export const WorkCycleConfigurator: React.FC<WorkCycleConfiguratorProps> = ({
 
               <div className="flex items-center gap-2">
                 <input
-                  type="number"
-                  min="1"
-                  value={part.workDays}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={part.workDays || ''}
                   onChange={(e) => handlePartChange(index, 'workDays', e.target.value)}
-                  className="w-16 px-2 py-1 border border-gray-300 rounded text-sm"
+                  className="w-16 px-2 py-1 border border-gray-300 rounded text-sm text-center"
                   placeholder="6"
                 />
                 <span className="text-xs text-gray-600">días trabajo</span>
@@ -242,11 +256,12 @@ export const WorkCycleConfigurator: React.FC<WorkCycleConfiguratorProps> = ({
 
               <div className="flex items-center gap-2">
                 <input
-                  type="number"
-                  min="1"
-                  value={part.restDays}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={part.restDays || ''}
                   onChange={(e) => handlePartChange(index, 'restDays', e.target.value)}
-                  className="w-16 px-2 py-1 border border-gray-300 rounded text-sm"
+                  className="w-16 px-2 py-1 border border-gray-300 rounded text-sm text-center"
                   placeholder="3"
                 />
                 <span className="text-xs text-gray-600">días descanso</span>

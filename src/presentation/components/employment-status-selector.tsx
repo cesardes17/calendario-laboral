@@ -88,23 +88,35 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
   };
 
   // Handle cycle offset inputs
-  const handlePartNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePartNumberChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     setPartNumberInput(value);
-    updateCycleOffset(value, dayWithinPartInput, dayTypeInput);
+    // Reset day when part changes
+    setDayWithinPartInput('');
+    if (value) {
+      // Don't update offset yet, wait for day selection
+    }
   };
 
-  const handleDayWithinPartChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDayWithinPartChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     setDayWithinPartInput(value);
-    updateCycleOffset(partNumberInput, value, dayTypeInput);
+
+    // Auto-detect day type based on selected day
+    if (value && partNumberInput) {
+      const partNum = parseInt(partNumberInput, 10);
+      const dayNum = parseInt(value, 10);
+      const part = workCycle.getPart(partNum);
+
+      if (part) {
+        // If day is within work days range, it's WORK, otherwise REST
+        const autoDetectedType = dayNum <= part.workDays ? CycleDayType.WORK : CycleDayType.REST;
+        setDayTypeInput(autoDetectedType);
+        updateCycleOffset(partNumberInput, value, autoDetectedType);
+      }
+    }
   };
 
-  const handleDayTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value as CycleDayType;
-    setDayTypeInput(value);
-    updateCycleOffset(partNumberInput, dayWithinPartInput, value);
-  };
 
   const updateCycleOffset = (partStr: string, dayStr: string, type: CycleDayType) => {
     if (partStr && dayStr) {
@@ -244,24 +256,32 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
             >
               Número de parte
             </label>
-            <input
-              type="number"
+            <select
               id="part-number"
-              min="1"
-              max={cycleInfo.mode === 'parts' ? cycleInfo.totalParts : undefined}
               value={partNumberInput}
               onChange={handlePartNumberChange}
-              placeholder="Ej: 3"
               className={`
                 w-full px-4 py-2 border rounded-lg
                 focus:outline-none focus:ring-2 focus:ring-blue-500
                 ${state.errors.length > 0 ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'}
               `}
-            />
+            >
+              <option value="">Selecciona una parte...</option>
+              {cycleInfo.mode === 'parts' &&
+                Array.from({ length: cycleInfo.totalParts }, (_, i) => i + 1).map((partNum) => {
+                  const part = workCycle.getPart(partNum);
+                  return (
+                    <option key={partNum} value={partNum}>
+                      Parte {partNum}
+                      {part ? ` (${part.workDays} trabajo + ${part.restDays} descanso)` : ''}
+                    </option>
+                  );
+                })}
+            </select>
             <p className="mt-1 text-xs text-gray-500">
               {cycleInfo.mode === 'parts' && cycleInfo.totalParts > 0
-                ? `Tu ciclo tiene ${cycleInfo.totalParts} parte${cycleInfo.totalParts > 1 ? 's' : ''} (1-${cycleInfo.totalParts})`
-                : 'Número de la parte del ciclo (empezando desde 1)'}
+                ? `Tu ciclo tiene ${cycleInfo.totalParts} parte${cycleInfo.totalParts > 1 ? 's' : ''}`
+                : 'Selecciona la parte del ciclo'}
             </p>
           </div>
 
@@ -273,19 +293,48 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
             >
               Día dentro de la parte
             </label>
-            <input
-              type="number"
+            <select
               id="day-within-part"
-              min="1"
               value={dayWithinPartInput}
               onChange={handleDayWithinPartChange}
-              placeholder="Ej: 4"
+              disabled={!partNumberInput}
               className={`
                 w-full px-4 py-2 border rounded-lg
                 focus:outline-none focus:ring-2 focus:ring-blue-500
+                ${!partNumberInput ? 'bg-gray-100 cursor-not-allowed' : ''}
                 ${state.errors.length > 0 ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'}
               `}
-            />
+            >
+              <option value="">
+                {partNumberInput ? 'Selecciona un día...' : 'Primero selecciona una parte'}
+              </option>
+              {partNumberInput &&
+                (() => {
+                  const partNum = parseInt(partNumberInput, 10);
+                  const part = workCycle.getPart(partNum);
+                  if (part) {
+                    const options = [];
+                    // Generate work days options
+                    for (let i = 1; i <= part.workDays; i++) {
+                      options.push(
+                        <option key={`work-${i}`} value={i}>
+                          Día {i} (Trabajo)
+                        </option>
+                      );
+                    }
+                    // Generate rest days options
+                    for (let i = 1; i <= part.restDays; i++) {
+                      options.push(
+                        <option key={`rest-${i}`} value={part.workDays + i}>
+                          Día {part.workDays + i} (Descanso)
+                        </option>
+                      );
+                    }
+                    return options;
+                  }
+                  return null;
+                })()}
+            </select>
             <p className="mt-1 text-xs text-gray-500">
               {partNumberInput && cycleInfo.parts
                 ? (() => {
@@ -293,34 +342,11 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
                     const part = workCycle.getPart(partNum);
                     if (part) {
                       const totalDays = part.workDays + part.restDays;
-                      return `La parte ${partNum} tiene ${totalDays} días (${part.workDays} trabajo + ${part.restDays} descanso)`;
+                      return `La parte ${partNum} tiene ${totalDays} días: ${part.workDays} de trabajo, luego ${part.restDays} de descanso`;
                     }
-                    return 'Día dentro de esa parte (empezando desde 1)';
+                    return 'Selecciona el día específico';
                   })()
-                : 'Día dentro de esa parte (empezando desde 1)'}
-            </p>
-          </div>
-
-          {/* Day type */}
-          <div>
-            <label
-              htmlFor="day-type"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Tipo de día
-            </label>
-            <select
-              id="day-type"
-              value={dayTypeInput}
-              onChange={handleDayTypeChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white
-                         focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value={CycleDayType.WORK}>Trabajo</option>
-              <option value={CycleDayType.REST}>Descanso</option>
-            </select>
-            <p className="mt-1 text-xs text-gray-500">
-              Si el 1 de enero era día de trabajo o descanso
+                : 'Primero selecciona una parte'}
             </p>
           </div>
 
