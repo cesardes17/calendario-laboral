@@ -10,3 +10,5 @@ export type { EmploymentStatusSelectorProps } from './employment-status-selector
 
 export { WorkCycleConfigurator } from './work-cycle-configurator';
 export type { WorkCycleConfiguratorProps } from './work-cycle-configurator';
+
+export { ThemeToggle } from './theme-toggle';

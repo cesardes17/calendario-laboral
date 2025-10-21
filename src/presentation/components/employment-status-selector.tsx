@@ -142,18 +142,31 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
   // Get cycle information for contextual help
   const cycleInfo = React.useMemo(() => cycleUseCase.getCycleInfo(workCycle), [workCycle, cycleUseCase]);
 
+  // Auto-validate for weekly mode when "worked before" is selected
+  React.useEffect(() => {
+    if (
+      state.status?.type === EmploymentStatusType.WORKED_BEFORE &&
+      cycleInfo.mode === 'weekly'
+    ) {
+      // For weekly mode, offset is automatic, so mark as valid immediately
+      const validation = validateConfiguration(year, true);
+      onConfigurationChange?.(validation.isValid);
+    }
+  }, [state.status, cycleInfo.mode, year, validateConfiguration, onConfigurationChange]);
+
   // Validate and notify parent on state changes
   React.useEffect(() => {
     if (state.status) {
-      const validation = validateConfiguration(year);
+      const isWeeklyCycle = cycleInfo.mode === 'weekly';
+      const validation = validateConfiguration(year, isWeeklyCycle);
       onConfigurationChange?.(validation.isValid);
     }
-  }, [state, year, validateConfiguration, onConfigurationChange]);
+  }, [state.status, state.contractStartDate, state.cycleOffset, cycleInfo.mode, year, validateConfiguration, onConfigurationChange]);
 
   return (
     <div className={`employment-status-selector ${className}`}>
       <fieldset className="mb-6">
-        <legend className="block text-sm font-medium text-gray-700 mb-3">
+        <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
           ¿Empezaste a trabajar este año ({year.value})?
         </legend>
 
@@ -166,13 +179,13 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
               value={EmploymentStatusType.STARTED_THIS_YEAR}
               checked={state.status?.type === EmploymentStatusType.STARTED_THIS_YEAR}
               onChange={handleStatusChange}
-              className="mt-1 mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500"
+              className="mt-1 mr-3 h-4 w-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
             />
             <div>
-              <span className="text-sm font-medium text-gray-900">
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 Sí, empecé este año
               </span>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Indica la fecha exacta en que comenzó tu contrato. Los días anteriores
                 aparecerán como &apos;No contratado&apos;
               </p>
@@ -189,13 +202,13 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
               value={EmploymentStatusType.WORKED_BEFORE}
               checked={state.status?.type === EmploymentStatusType.WORKED_BEFORE}
               onChange={handleStatusChange}
-              className="mt-1 mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500"
+              className="mt-1 mr-3 h-4 w-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
             />
             <div>
-              <span className="text-sm font-medium text-gray-900">
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 No, ya trabajaba antes
               </span>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Indica en qué punto de tu ciclo laboral te encontrabas el 1 de enero
                 para continuar correctamente
               </p>
@@ -209,7 +222,7 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
         <div className="mb-4 pl-7">
           <label
             htmlFor="contract-date"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
             Fecha de inicio del contrato
           </label>
@@ -222,8 +235,10 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
             max={`${year.value}-12-31`}
             className={`
               w-full px-4 py-2 border rounded-lg
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-              ${state.errors.length > 0 ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'}
+              focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
+              text-gray-900 dark:text-gray-100
+              transition-colors duration-200
+              ${state.errors.length > 0 ? 'border-red-500 dark:border-red-400 bg-red-50 dark:bg-red-950' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'}
             `}
             aria-describedby={state.errors.length > 0 ? 'contract-date-error' : undefined}
           />
@@ -233,26 +248,57 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
       {/* Conditional: Cycle offset inputs */}
       {state.status?.type === EmploymentStatusType.WORKED_BEFORE && (
         <div className="mb-4 pl-7 space-y-4">
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg mb-4">
-            <p className="text-sm text-blue-900 font-medium mb-1">
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg mb-4">
+            <p className="text-sm text-blue-900 dark:text-blue-300 font-medium mb-1">
               Tu ciclo configurado: {workCycle.getDisplayText()}
             </p>
-            <p className="text-xs text-blue-700">
+            <p className="text-xs text-blue-700 dark:text-blue-400">
               {cycleInfo.mode === 'parts' && cycleInfo.totalParts > 0
                 ? `Tu ciclo tiene ${cycleInfo.totalParts} parte${cycleInfo.totalParts > 1 ? 's' : ''}`
-                : 'Ciclo semanal (no usa partes)'}
+                : 'Ciclo semanal (repetición cada 7 días)'}
             </p>
           </div>
 
-          <p className="text-sm text-gray-600 mb-3">
-            Indica en qué punto del ciclo te encontrabas el 1 de enero:
-          </p>
+          {/* Weekly mode: Automatic offset calculation */}
+          {cycleInfo.mode === 'weekly' && (
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">
+                ℹ️ Continuidad del ciclo
+              </h4>
+              <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                El 1 de enero de {year.value} es{' '}
+                <strong className="text-blue-600 dark:text-blue-400">
+                  {new Date(year.value, 0, 1).toLocaleDateString('es-ES', { weekday: 'long' }).toUpperCase()}
+                </strong>
+              </p>
+              <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                Según tu patrón semanal, ese día será:{' '}
+                <strong className={
+                  workCycle.isWorkDayOnDate(new Date(year.value, 0, 1))
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-orange-600 dark:text-orange-400'
+                }>
+                  {workCycle.isWorkDayOnDate(new Date(year.value, 0, 1)) ? '✓ DÍA DE TRABAJO' : '✗ DÍA DE DESCANSO'}
+                </strong>
+              </p>
+              <p className="text-xs text-green-700 dark:text-green-400 mt-3 italic">
+                ✓ Tu calendario continuará correctamente desde el 1 de enero
+              </p>
+            </div>
+          )}
+
+          {/* Parts mode: Manual offset configuration */}
+          {cycleInfo.mode === 'parts' && (
+            <>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                Indica en qué punto del ciclo te encontrabas el 1 de enero:
+              </p>
 
           {/* Part number */}
           <div>
             <label
               htmlFor="part-number"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
             >
               Número de parte
             </label>
@@ -262,8 +308,10 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
               onChange={handlePartNumberChange}
               className={`
                 w-full px-4 py-2 border rounded-lg
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-                ${state.errors.length > 0 ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'}
+                focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
+                text-gray-900 dark:text-gray-100
+                transition-colors duration-200
+                ${state.errors.length > 0 ? 'border-red-500 dark:border-red-400 bg-red-50 dark:bg-red-950' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'}
               `}
             >
               <option value="">Selecciona una parte...</option>
@@ -278,7 +326,7 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
                   );
                 })}
             </select>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {cycleInfo.mode === 'parts' && cycleInfo.totalParts > 0
                 ? `Tu ciclo tiene ${cycleInfo.totalParts} parte${cycleInfo.totalParts > 1 ? 's' : ''}`
                 : 'Selecciona la parte del ciclo'}
@@ -289,7 +337,7 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
           <div>
             <label
               htmlFor="day-within-part"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
             >
               Día dentro de la parte
             </label>
@@ -300,9 +348,11 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
               disabled={!partNumberInput}
               className={`
                 w-full px-4 py-2 border rounded-lg
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-                ${!partNumberInput ? 'bg-gray-100 cursor-not-allowed' : ''}
-                ${state.errors.length > 0 ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'}
+                focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
+                text-gray-900 dark:text-gray-100
+                transition-colors duration-200
+                ${!partNumberInput ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : ''}
+                ${state.errors.length > 0 ? 'border-red-500 dark:border-red-400 bg-red-50 dark:bg-red-950' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'}
               `}
             >
               <option value="">
@@ -335,7 +385,7 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
                   return null;
                 })()}
             </select>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {partNumberInput && cycleInfo.parts
                 ? (() => {
                     const partNum = parseInt(partNumberInput, 10);
@@ -350,13 +400,15 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
             </p>
           </div>
 
-          {/* Example display */}
-          {state.cycleOffset && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-900">
-                <strong>Ejemplo:</strong> {state.cycleOffset.getDisplayText()}
-              </p>
-            </div>
+              {/* Example display */}
+              {state.cycleOffset && (
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg">
+                  <p className="text-sm text-blue-900 dark:text-blue-300">
+                    <strong>Ejemplo:</strong> {state.cycleOffset.getDisplayText()}
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
@@ -365,7 +417,7 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
       {state.errors.length > 0 && (
         <div className="mt-4" role="alert">
           {state.errors.map((error, index) => (
-            <p key={index} className="text-sm text-red-600 mb-1">
+            <p key={index} className="text-sm text-red-600 dark:text-red-400 mb-1">
               {error}
             </p>
           ))}
@@ -374,8 +426,8 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
 
       {/* Success indicator */}
       {state.isValid && state.status && (
-        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-sm text-green-900">
+        <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-lg">
+          <p className="text-sm text-green-900 dark:text-green-300">
             ✓ Configuración válida
           </p>
         </div>

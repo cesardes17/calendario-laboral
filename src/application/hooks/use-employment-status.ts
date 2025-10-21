@@ -136,9 +136,11 @@ export function useEmploymentStatus(): UseEmploymentStatusReturn {
 
   /**
    * Validates the complete configuration
+   * @param year - The year
+   * @param isWeeklyCycle - Whether the work cycle is weekly
    */
   const validateConfiguration = useCallback(
-    (year: Year): ValidationResult => {
+    (year: Year, isWeeklyCycle?: boolean): ValidationResult => {
       if (!state.status) {
         return {
           isValid: false,
@@ -159,18 +161,25 @@ export function useEmploymentStatus(): UseEmploymentStatusReturn {
         state.status.type,
         year,
         contractDate,
-        cycleOffset
+        cycleOffset,
+        isWeeklyCycle
       );
 
-      setState((prev) => ({
-        ...prev,
-        errors: validation.errors,
-        isValid: validation.isValid,
-      }));
+      // Solo actualizar el estado si realmente cambió
+      if (
+        validation.isValid !== state.isValid ||
+        JSON.stringify(validation.errors) !== JSON.stringify(state.errors)
+      ) {
+        setState((prev) => ({
+          ...prev,
+          errors: validation.errors,
+          isValid: validation.isValid,
+        }));
+      }
 
       return validation;
     },
-    [useCase, state.status, state.contractStartDate, state.cycleOffset]
+    [useCase, state.status, state.contractStartDate, state.cycleOffset, state.isValid, state.errors]
   );
 
   /**

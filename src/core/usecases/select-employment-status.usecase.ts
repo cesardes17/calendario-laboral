@@ -66,13 +66,15 @@ export class SelectEmploymentStatusUseCase {
    * @param year - The year
    * @param contractDate - Optional contract start date
    * @param cycleOffset - Optional cycle offset
+   * @param isWeeklyCycle - Whether the work cycle is weekly (automatic offset)
    * @returns Validation result with errors if any
    */
   public validateConfiguration(
     statusType: EmploymentStatusType,
     year: Year,
     contractDate?: Date,
-    cycleOffset?: CycleOffsetInput
+    cycleOffset?: CycleOffsetInput,
+    isWeeklyCycle?: boolean
   ): ValidationResult {
     const errors: string[] = [];
 
@@ -97,18 +99,24 @@ export class SelectEmploymentStatusUseCase {
       }
     }
 
-    // If worked before, require cycle offset
+    // If worked before, require cycle offset (unless weekly cycle)
     if (status.isWorkedBefore()) {
-      if (!cycleOffset) {
-        errors.push('Debe proporcionar el offset del ciclo');
+      if (isWeeklyCycle) {
+        // Weekly cycles have automatic offset based on day of week
+        // No manual offset needed - valid by default
       } else {
-        const offsetResult = this.setCycleOffset(
-          cycleOffset.partNumber,
-          cycleOffset.dayWithinPart,
-          cycleOffset.dayType
-        );
-        if (offsetResult.isFailure()) {
-          errors.push(offsetResult.errorValue());
+        // Parts mode requires manual offset
+        if (!cycleOffset) {
+          errors.push('Debe proporcionar el offset del ciclo');
+        } else {
+          const offsetResult = this.setCycleOffset(
+            cycleOffset.partNumber,
+            cycleOffset.dayWithinPart,
+            cycleOffset.dayType
+          );
+          if (offsetResult.isFailure()) {
+            errors.push(offsetResult.errorValue());
+          }
         }
       }
     }

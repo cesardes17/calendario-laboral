@@ -177,6 +177,27 @@ export class WorkCycle {
   }
 
   /**
+   * Checks if a given date is a work day according to the cycle
+   * For weekly mode, checks the day of the week against the mask
+   * For parts mode, this method is not applicable and returns false
+   * @param date - The date to check
+   * @returns true if it's a work day, false otherwise
+   */
+  public isWorkDayOnDate(date: Date): boolean {
+    if (this._mode !== CycleMode.WEEKLY || !this._weeklyMask) {
+      return false;
+    }
+
+    // Get day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    const dayOfWeek = date.getDay();
+
+    // Convert to our format (0 = Monday, ..., 6 = Sunday)
+    const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+    return this._weeklyMask[adjustedDay];
+  }
+
+  /**
    * Gets a human-readable display text
    */
   public getDisplayText(): string {
