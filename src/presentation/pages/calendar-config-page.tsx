@@ -15,6 +15,7 @@ import { WorkCycleConfigurator } from '../components/work-cycle-configurator';
 import { YearSelector } from '../components/year-selector';
 import { EmploymentStatusSelector } from '../components/employment-status-selector';
 import { WorkingHoursConfigurator } from '../components/working-hours-configurator';
+import { AnnualContractHoursConfigurator } from '../components/annual-contract-hours-configurator';
 import { ThemeToggle } from '../components/theme-toggle';
 import { Year } from '@/src/core/domain/year';
 import { WorkCycle } from '@/src/core/domain/work-cycle';
@@ -27,6 +28,7 @@ export const CalendarConfigPage: React.FC = () => {
   const [yearObject, setYearObject] = useState<Year | null>(null);
   const [employmentStatusValid, setEmploymentStatusValid] = useState(false);
   const [workingHoursConfig, setWorkingHoursConfig] = useState<WorkingHoursConfig | null>(null);
+  const [annualContractHours, setAnnualContractHours] = useState<number | null>(null);
 
   const handleWorkCycleConfigured = React.useCallback((cycle: WorkCycle) => {
     setWorkCycle(cycle);
@@ -55,6 +57,11 @@ export const CalendarConfigPage: React.FC = () => {
   const handleWorkingHoursChange = React.useCallback((config: WorkingHoursConfig) => {
     setWorkingHoursConfig(config);
     console.log('Working hours configured:', config);
+  }, []);
+
+  const handleAnnualContractHoursChange = React.useCallback((hours: number) => {
+    setAnnualContractHours(hours);
+    console.log('Annual contract hours configured:', hours);
   }, []);
 
   return (
@@ -148,6 +155,27 @@ export const CalendarConfigPage: React.FC = () => {
                 <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-lg">
                   <p className="text-sm text-green-800 dark:text-green-300">
                     ✓ <strong>Horas configuradas:</strong> L-V: {workingHoursConfig.weekday}h, Sáb: {workingHoursConfig.saturday}h, Dom: {workingHoursConfig.sunday}h, Festivo: {workingHoursConfig.holiday}h
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* HU-011: Annual Contract Hours Configuration */}
+          {workingHoursConfig && (
+            <div className="mb-8 border-t border-gray-200 dark:border-gray-700 pt-8">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                5. Horas de Convenio Anual
+              </h2>
+
+              <AnnualContractHoursConfigurator
+                onValidHours={handleAnnualContractHoursChange}
+              />
+
+              {annualContractHours && (
+                <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-lg">
+                  <p className="text-sm text-green-800 dark:text-green-300">
+                    ✓ <strong>Horas de convenio configuradas:</strong> {annualContractHours} horas/año
                   </p>
                 </div>
               )}

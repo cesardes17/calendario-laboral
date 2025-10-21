@@ -16,3 +16,6 @@ export type { UseWorkCycleReturn, WorkCycleState } from './use-work-cycle';
 
 export { useWorkingHours } from './use-working-hours';
 export type { UseWorkingHoursReturn } from './use-working-hours';
+
+export { useAnnualContractHours } from './use-annual-contract-hours';
+export type { UseAnnualContractHoursReturn } from './use-annual-contract-hours';

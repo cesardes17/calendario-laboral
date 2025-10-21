@@ -17,7 +17,9 @@ Esta herramienta permite a trabajadores con patrones laborales no convencionales
 
 - **Cálculo de horas**: configuración personalizada de horas por tipo de día (L-V, sábado, domingo, festivo)
 
-- **Excepciones**: gestión de vacaciones y festivos trabajados
+- **Horas de convenio**: configuración de horas anuales según convenio laboral, con calculadora auxiliar para conversión desde horas semanales
+
+- **Excepciones**: gestión de vacaciones y festivos trabajados (próximamente)
 
 - **Estadísticas completas**:
   - Días trabajados por tipo
