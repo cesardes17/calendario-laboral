@@ -13,3 +13,6 @@ export type {
 
 export { useWorkCycle } from './use-work-cycle';
 export type { UseWorkCycleReturn, WorkCycleState } from './use-work-cycle';
+
+export { useWorkingHours } from './use-working-hours';
+export type { UseWorkingHoursReturn } from './use-working-hours';

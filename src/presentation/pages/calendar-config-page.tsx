@@ -14,9 +14,11 @@ import React, { useState } from 'react';
 import { WorkCycleConfigurator } from '../components/work-cycle-configurator';
 import { YearSelector } from '../components/year-selector';
 import { EmploymentStatusSelector } from '../components/employment-status-selector';
+import { WorkingHoursConfigurator } from '../components/working-hours-configurator';
 import { ThemeToggle } from '../components/theme-toggle';
 import { Year } from '@/src/core/domain/year';
 import { WorkCycle } from '@/src/core/domain/work-cycle';
+import type { WorkingHoursConfig } from '@/src/core/domain';
 
 export const CalendarConfigPage: React.FC = () => {
   const [workCycle, setWorkCycle] = useState<WorkCycle | null>(null);
@@ -24,6 +26,7 @@ export const CalendarConfigPage: React.FC = () => {
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [yearObject, setYearObject] = useState<Year | null>(null);
   const [employmentStatusValid, setEmploymentStatusValid] = useState(false);
+  const [workingHoursConfig, setWorkingHoursConfig] = useState<WorkingHoursConfig | null>(null);
 
   const handleWorkCycleConfigured = React.useCallback((cycle: WorkCycle) => {
     setWorkCycle(cycle);
@@ -47,6 +50,11 @@ export const CalendarConfigPage: React.FC = () => {
   const handleEmploymentStatusChange = React.useCallback((isValid: boolean) => {
     setEmploymentStatusValid(isValid);
     console.log('Employment status valid:', isValid);
+  }, []);
+
+  const handleWorkingHoursChange = React.useCallback((config: WorkingHoursConfig) => {
+    setWorkingHoursConfig(config);
+    console.log('Working hours configured:', config);
   }, []);
 
   return (
@@ -124,10 +132,32 @@ export const CalendarConfigPage: React.FC = () => {
             </div>
           )}
 
+          {/* HU-010: Working Hours Configuration */}
+          {employmentStatusValid && (
+            <div className="mb-8 border-t border-gray-200 dark:border-gray-700 pt-8">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                4. Horas de Trabajo
+              </h2>
+
+              <WorkingHoursConfigurator
+                onChange={handleWorkingHoursChange}
+                showResetButton
+              />
+
+              {workingHoursConfig && (
+                <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-lg">
+                  <p className="text-sm text-green-800 dark:text-green-300">
+                    ✓ <strong>Horas configuradas:</strong> L-V: {workingHoursConfig.weekday}h, Sáb: {workingHoursConfig.saturday}h, Dom: {workingHoursConfig.sunday}h, Festivo: {workingHoursConfig.holiday}h
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Next Steps */}
           <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              <strong>Próximos pasos:</strong> vacaciones, festivos, configuración de horas...
+              <strong>Próximos pasos:</strong> vacaciones, festivos...
             </p>
           </div>
         </div>

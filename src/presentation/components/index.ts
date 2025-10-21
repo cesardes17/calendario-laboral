@@ -11,4 +11,7 @@ export type { EmploymentStatusSelectorProps } from './employment-status-selector
 export { WorkCycleConfigurator } from './work-cycle-configurator';
 export type { WorkCycleConfiguratorProps } from './work-cycle-configurator';
 
+export { WorkingHoursConfigurator } from './working-hours-configurator';
+export type { WorkingHoursConfiguratorProps } from './working-hours-configurator';
+
 export { ThemeToggle } from './theme-toggle';
