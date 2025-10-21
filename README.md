@@ -32,26 +32,114 @@ Para más detalles sobre los requisitos funcionales, casos de uso y especificaci
 
 Este proyecto está construido con:
 
-- [Next.js](https://nextjs.org) - Framework de React
-- TypeScript
-- TailwindCSS (por defecto en Next.js)
+- **Framework**: [Next.js 15.5.6](https://nextjs.org) con App Router y Turbopack
+- **Lenguaje**: TypeScript (modo estricto)
+- **Estilos**: Tailwind CSS v4
+- **Temas**: next-themes (soporte dark/light mode)
+- **Iconos**: lucide-react
+- **Arquitectura**: Clean Architecture adaptada para Next.js
+
+## Arquitectura
+
+El proyecto sigue **Clean Architecture** con capas bien definidas:
+
+```
+src/
+├── core/                    # Capa de dominio
+│   ├── domain/              # Entidades y value objects
+│   └── usecases/            # Lógica de negocio
+├── application/             # Capa de aplicación
+│   ├── hooks/               # React hooks (UI ↔ Use Cases)
+│   └── providers/           # Context providers
+├── infrastructure/          # Capa de infraestructura
+│   └── persistence/         # Adaptadores de almacenamiento
+└── presentation/            # Capa de presentación
+    ├── components/          # Componentes React
+    └── pages/               # Páginas de la aplicación
+```
+
+**Principios aplicados:**
+- Dependencias unidireccionales (presentation → application → core)
+- Domain sin dependencias externas
+- Separación de responsabilidades
+- Testabilidad prioritaria
 
 ## Desarrollo
 
-Ejecuta el servidor de desarrollo:
+### Requisitos previos
+- Node.js 18+
+- npm/yarn/pnpm
+
+### Instalación
 
 ```bash
+# Clonar el repositorio
+git clone <repo-url>
+cd calendario-laboral
+
+# Instalar dependencias
+npm install
+```
+
+### Comandos disponibles
+
+```bash
+# Servidor de desarrollo (con Turbopack)
 npm run dev
-# o
-yarn dev
-# o
-pnpm dev
-# o
-bun dev
+
+# Build de producción
+npm run build
+
+# Servidor de producción
+npm start
+
+# Linter
+npm run lint
 ```
 
 Abre [http://localhost:3000](http://localhost:3000) en tu navegador para ver la aplicación.
 
 ## Estado del proyecto
 
-En desarrollo - Versión 1
+**Versión actual:** 1.0.0-alpha
+**Estado:** En desarrollo activo
+
+### Funcionalidades implementadas (HUs completadas)
+
+#### ✅ Epic 1: Configuración Inicial
+- **HU-001**: Seleccionar año de referencia
+  - Selector de año con validación
+  - Rango: año actual -2 a +5
+  - Año actual seleccionado por defecto
+
+- **HU-002**: Indicar situación laboral al inicio del año
+  - Opciones: "Empecé este año" / "Ya trabajaba antes"
+  - Fecha de inicio de contrato (si empezó este año)
+  - Offset de ciclo (si ya trabajaba antes)
+  - Validación contra ciclo configurado
+
+#### ✅ Epic 2: Definición del Ciclo Laboral
+- **HU-003**: Seleccionar tipo de ciclo laboral
+  - Modo semanal: máscara L-D (7 días)
+  - Modo por partes: bloques trabajo/descanso personalizados
+  - Validación y feedback visual
+  - Soporte para ciclos complejos (ej: 6-3, 6-3, 6-3, 6-2)
+
+#### ✅ UX/UI Transversal
+- **HU-032**: Tema claro/oscuro
+  - Tres modos: claro, oscuro, sistema (por defecto)
+  - Toggle accesible con iconos
+  - Persistencia en localStorage
+  - Paleta de colores neutra y accesible
+  - Sin flash en carga (SSR compatible)
+
+### Próximas funcionalidades
+
+- Epic 4: Configuración de Jornada Laboral
+- Epic 5: Gestión de Excepciones (festivos, vacaciones)
+- Epic 7: Generación del Calendario
+- Epic 8: Cálculo de Estadísticas
+- Epic 9: Visualización del Calendario
+- Epic 10: Visualización de Estadísticas
+
+Ver [backlog completo en Jira](https://cesarjoseds.atlassian.net/jira/software/projects/SCRUM)
