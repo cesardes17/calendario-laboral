@@ -149,7 +149,7 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
       cycleInfo.mode === 'weekly'
     ) {
       // For weekly mode, offset is automatic, so mark as valid immediately
-      const validation = validateConfiguration(year);
+      const validation = validateConfiguration(year, true);
       onConfigurationChange?.(validation.isValid);
     }
   }, [state.status, cycleInfo.mode, year, validateConfiguration, onConfigurationChange]);
@@ -157,7 +157,8 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
   // Validate and notify parent on state changes
   React.useEffect(() => {
     if (state.status) {
-      const validation = validateConfiguration(year);
+      const isWeeklyCycle = cycleInfo.mode === 'weekly';
+      const validation = validateConfiguration(year, isWeeklyCycle);
       onConfigurationChange?.(validation.isValid);
     }
   }, [state.status, state.contractStartDate, state.cycleOffset, cycleInfo.mode, year, validateConfiguration, onConfigurationChange]);
