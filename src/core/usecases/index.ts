@@ -8,3 +8,5 @@ export { SelectEmploymentStatusUseCase } from './select-employment-status.usecas
 export type { CycleOffsetInput } from './select-employment-status.usecase';
 export { ConfigureWorkCycleUseCase } from './configure-work-cycle.usecase';
 export type { ValidationResult, CycleInfo } from './configure-work-cycle.usecase';
+export { ConfigureWorkingHoursUseCase } from './configure-working-hours.usecase';
+export type { ConfigureWorkingHoursInput } from './configure-working-hours.usecase';
