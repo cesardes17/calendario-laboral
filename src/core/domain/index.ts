@@ -11,3 +11,4 @@ export { WorkCycle, CycleMode, type WeeklyMask, type CyclePart } from './work-cy
 export { WorkingHours, WorkingHoursError, DEFAULT_WORKING_HOURS, WORKING_HOURS_CONSTRAINTS, type WorkingHoursConfig, type DayType } from './working-hours';
 export { AnnualContractHours, AnnualContractHoursError, ANNUAL_CONTRACT_HOURS_CONSTRAINTS, COMMON_ANNUAL_HOURS_EXAMPLES, WarningType, type ValidationWarning } from './annual-contract-hours';
 export { Holiday } from './holiday';
+export { VacationPeriod } from './vacation-period';

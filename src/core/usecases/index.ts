@@ -13,3 +13,4 @@ export type { ConfigureWorkingHoursInput } from './configure-working-hours.useca
 export { ConfigureAnnualContractHoursUseCase } from './configure-annual-contract-hours.usecase';
 export type { ConfigureAnnualContractHoursInput } from './configure-annual-contract-hours.usecase';
 export * from './manage-holidays.usecase';
+export * from './manage-vacations.usecase';

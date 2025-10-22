@@ -19,4 +19,6 @@ export type { AnnualContractHoursConfiguratorProps } from './annual-contract-hou
 
 export { HolidayManager } from './holiday-manager';
 
+export { VacationManager } from './vacation-manager';
+
 export { ThemeToggle } from './theme-toggle';

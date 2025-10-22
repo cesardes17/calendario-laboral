@@ -146,7 +146,8 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
   React.useEffect(() => {
     if (
       state.status?.type === EmploymentStatusType.WORKED_BEFORE &&
-      cycleInfo.mode === 'weekly'
+      cycleInfo.mode === 'weekly' &&
+      year
     ) {
       // For weekly mode, offset is automatic, so mark as valid immediately
       const validation = validateConfiguration(year, true);
@@ -156,7 +157,7 @@ export const EmploymentStatusSelector: React.FC<EmploymentStatusSelectorProps> =
 
   // Validate and notify parent on state changes
   React.useEffect(() => {
-    if (state.status) {
+    if (state.status && year) {
       const isWeeklyCycle = cycleInfo.mode === 'weekly';
       const validation = validateConfiguration(year, isWeeklyCycle);
       onConfigurationChange?.(validation.isValid);
