@@ -19,3 +19,5 @@ export type { UseWorkingHoursReturn } from './use-working-hours';
 
 export { useAnnualContractHours } from './use-annual-contract-hours';
 export type { UseAnnualContractHoursReturn } from './use-annual-contract-hours';
+
+export { useHolidays } from './use-holidays';

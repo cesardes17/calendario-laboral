@@ -17,4 +17,6 @@ export type { WorkingHoursConfiguratorProps } from './working-hours-configurator
 export { AnnualContractHoursConfigurator } from './annual-contract-hours-configurator';
 export type { AnnualContractHoursConfiguratorProps } from './annual-contract-hours-configurator';
 
+export { HolidayManager } from './holiday-manager';
+
 export { ThemeToggle } from './theme-toggle';

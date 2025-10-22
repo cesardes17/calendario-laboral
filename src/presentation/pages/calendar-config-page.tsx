@@ -16,6 +16,7 @@ import { YearSelector } from '../components/year-selector';
 import { EmploymentStatusSelector } from '../components/employment-status-selector';
 import { WorkingHoursConfigurator } from '../components/working-hours-configurator';
 import { AnnualContractHoursConfigurator } from '../components/annual-contract-hours-configurator';
+import { HolidayManager } from '../components/holiday-manager';
 import { ThemeToggle } from '../components/theme-toggle';
 import { Year } from '@/src/core/domain/year';
 import { WorkCycle } from '@/src/core/domain/work-cycle';
@@ -182,10 +183,21 @@ export const CalendarConfigPage: React.FC = () => {
             </div>
           )}
 
+          {/* HU-012: Holiday Management */}
+          {annualContractHours && (
+            <div className="mb-8 border-t border-gray-200 dark:border-gray-700 pt-8">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                6. Festivos del Año
+              </h2>
+
+              <HolidayManager year={yearObject} />
+            </div>
+          )}
+
           {/* Next Steps */}
           <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              <strong>Próximos pasos:</strong> vacaciones, festivos...
+              <strong>Próximos pasos:</strong> vacaciones, generación de calendario...
             </p>
           </div>
         </div>
