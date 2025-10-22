@@ -14,7 +14,13 @@ import { Result } from '../domain/result';
  * - Periods can overlap (system allows it, unification is optional)
  * - Vacation periods are automatically sorted by start date
  * - Vacations have priority 2 in the day state hierarchy
+ * - Maximum 30 vacation days per year (total across all periods)
  */
+
+/**
+ * Maximum vacation days allowed per year
+ */
+export const MAX_VACATION_DAYS = 30;
 
 /**
  * Information about overlapping vacation periods
@@ -45,6 +51,22 @@ export function addVacationPeriod(
   if (period.startDate < yearStart || period.endDate > yearEnd) {
     return Result.fail(
       `El período de vacaciones debe estar dentro del año ${year.value}`
+    );
+  }
+
+  // Validate maximum vacation days limit
+  const currentTotalDays = getTotalVacationDays(existingPeriods);
+  const newPeriodDays = period.getDayCount();
+  const potentialTotal = currentTotalDays + newPeriodDays;
+
+  // Calculate actual total considering overlaps
+  const tempUpdated = [...existingPeriods, period];
+  const actualTotal = getTotalVacationDays(tempUpdated);
+
+  if (actualTotal > MAX_VACATION_DAYS) {
+    const daysOver = actualTotal - MAX_VACATION_DAYS;
+    return Result.fail(
+      `No se pueden añadir ${newPeriodDays} días. Supera el límite de ${MAX_VACATION_DAYS} días/año por ${daysOver} ${daysOver === 1 ? 'día' : 'días'} (actualmente: ${currentTotalDays} días)`
     );
   }
 
@@ -99,6 +121,23 @@ export function updateVacationPeriod(
   if (updatedPeriod.startDate < yearStart || updatedPeriod.endDate > yearEnd) {
     return Result.fail(
       `El período de vacaciones debe estar dentro del año ${year.value}`
+    );
+  }
+
+  // Validate maximum vacation days limit
+  // Exclude the period being updated from the current total
+  const periodsWithoutCurrent = periods.filter((_, i) => i !== index);
+  const currentTotalDays = getTotalVacationDays(periodsWithoutCurrent);
+  const newPeriodDays = updatedPeriod.getDayCount();
+
+  // Calculate actual total considering overlaps
+  const tempUpdated = [...periodsWithoutCurrent, updatedPeriod];
+  const actualTotal = getTotalVacationDays(tempUpdated);
+
+  if (actualTotal > MAX_VACATION_DAYS) {
+    const daysOver = actualTotal - MAX_VACATION_DAYS;
+    return Result.fail(
+      `No se pueden actualizar a ${newPeriodDays} días. Supera el límite de ${MAX_VACATION_DAYS} días/año por ${daysOver} ${daysOver === 1 ? 'día' : 'días'} (actualmente sin este período: ${currentTotalDays} días)`
     );
   }
 

@@ -22,6 +22,7 @@ import React, { useState } from "react";
 import { VacationPeriod } from "@/src/core/domain/vacation-period";
 import { Year } from "@/src/core/domain/year";
 import { useVacations } from "@/src/application/hooks/use-vacations";
+import { MAX_VACATION_DAYS } from "@/src/core/usecases/manage-vacations.usecase";
 import { X, Plus, Edit2, Trash2, Calendar, AlertTriangle } from "lucide-react";
 
 interface VacationManagerProps {
@@ -203,25 +204,61 @@ export const VacationManager: React.FC<VacationManagerProps> = ({
   }
 
   const daysPreview = calculateDaysPreview();
+  const remainingDays = MAX_VACATION_DAYS - totalDays;
+  const usagePercentage = (totalDays / MAX_VACATION_DAYS) * 100;
 
   return (
     <div className={className}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <div>
+        <div className="flex-1">
           <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">
             Vacaciones del año {year.value}
           </h3>
-          {getCount() > 0 && (
+          <div className="flex items-center gap-4 mt-2">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Total: {totalDays} {totalDays === 1 ? "día" : "días"} en{" "}
-              {getCount()} {getCount() === 1 ? "período" : "períodos"}
+              {totalDays} / {MAX_VACATION_DAYS} días utilizados
+              {getCount() > 0 && (
+                <span className="ml-1">
+                  en {getCount()} {getCount() === 1 ? "período" : "períodos"}
+                </span>
+              )}
             </p>
-          )}
+            {remainingDays > 0 && (
+              <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded">
+                {remainingDays} {remainingDays === 1 ? "día" : "días"} disponibles
+              </span>
+            )}
+            {remainingDays === 0 && (
+              <span className="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded">
+                Límite alcanzado
+              </span>
+            )}
+          </div>
+          {/* Progress bar */}
+          <div className="mt-2 w-full max-w-md">
+            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div
+                className={`h-full transition-all ${
+                  usagePercentage >= 100
+                    ? "bg-red-500"
+                    : usagePercentage >= 80
+                    ? "bg-yellow-500"
+                    : "bg-blue-500"
+                }`}
+                style={{ width: `${Math.min(usagePercentage, 100)}%` }}
+              />
+            </div>
+          </div>
         </div>
         <button
           onClick={openAddModal}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          disabled={totalDays >= MAX_VACATION_DAYS}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+            totalDays >= MAX_VACATION_DAYS
+              ? "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-500 cursor-not-allowed"
+              : "bg-blue-600 text-white hover:bg-blue-700"
+          }`}
         >
           <Plus className="w-4 h-4" />
           Añadir vacaciones
@@ -378,14 +415,33 @@ export const VacationManager: React.FC<VacationManagerProps> = ({
                 />
               </div>
 
-              {/* Days preview */}
+              {/* Days preview and limit warning */}
               {daysPreview > 0 && (
-                <div className="p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
-                  <p className="text-sm text-blue-800 dark:text-blue-300">
-                    📊 Este período incluye {daysPreview}{" "}
-                    {daysPreview === 1 ? "día" : "días"}
-                  </p>
-                </div>
+                <>
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <p className="text-sm text-blue-800 dark:text-blue-300">
+                      📊 Este período incluye {daysPreview}{" "}
+                      {daysPreview === 1 ? "día" : "días"}
+                    </p>
+                    <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">
+                      Total tras añadir: {editingIndex !== null
+                        ? totalDays - (vacations[editingIndex]?.getDayCount() || 0) + daysPreview
+                        : totalDays + daysPreview} / {MAX_VACATION_DAYS} días
+                    </p>
+                  </div>
+                  {/* Limit warning */}
+                  {editingIndex !== null
+                    ? totalDays - (vacations[editingIndex]?.getDayCount() || 0) + daysPreview > MAX_VACATION_DAYS
+                    : totalDays + daysPreview > MAX_VACATION_DAYS && (
+                    <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2">
+                      <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-red-800 dark:text-red-300">
+                        ⚠️ Este período supera el límite de {MAX_VACATION_DAYS} días anuales.
+                        No podrás guardarlo hasta que ajustes las fechas.
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
 
               {/* Overlap warning */}
