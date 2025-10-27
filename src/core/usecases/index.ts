@@ -14,3 +14,4 @@ export { ConfigureAnnualContractHoursUseCase } from './configure-annual-contract
 export type { ConfigureAnnualContractHoursInput } from './configure-annual-contract-hours.usecase';
 export * from './manage-holidays.usecase';
 export * from './manage-vacations.usecase';
+export * from './validate-configuration.usecase';

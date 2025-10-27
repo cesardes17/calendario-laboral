@@ -23,3 +23,8 @@ export type { UseAnnualContractHoursReturn } from './use-annual-contract-hours';
 export { useHolidays } from './use-holidays';
 
 export { useVacations } from './use-vacations';
+
+export { useConfigurationValidation } from './use-configuration-validation';
+export type { UseConfigurationValidationParams } from './use-configuration-validation';
+
+export { usePersistence } from './use-persistence';
