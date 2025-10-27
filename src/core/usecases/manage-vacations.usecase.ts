@@ -57,7 +57,6 @@ export function addVacationPeriod(
   // Validate maximum vacation days limit
   const currentTotalDays = getTotalVacationDays(existingPeriods);
   const newPeriodDays = period.getDayCount();
-  const potentialTotal = currentTotalDays + newPeriodDays;
 
   // Calculate actual total considering overlaps
   const tempUpdated = [...existingPeriods, period];

@@ -18,9 +18,11 @@ import { WorkingHoursConfigurator } from '../components/working-hours-configurat
 import { AnnualContractHoursConfigurator } from '../components/annual-contract-hours-configurator';
 import { HolidayManager } from '../components/holiday-manager';
 import { VacationManager } from '../components/vacation-manager';
+import { ConfigurationSummary } from '../components/configuration-summary';
 import { ThemeToggle } from '../components/theme-toggle';
 import { Year } from '@/src/core/domain/year';
 import { WorkCycle } from '@/src/core/domain/work-cycle';
+import { useHolidays, useVacations, useConfigurationValidation } from '@/src/application/hooks';
 import type { WorkingHoursConfig } from '@/src/core/domain';
 
 export const CalendarConfigPage: React.FC = () => {
@@ -31,6 +33,23 @@ export const CalendarConfigPage: React.FC = () => {
   const [employmentStatusValid, setEmploymentStatusValid] = useState(false);
   const [workingHoursConfig, setWorkingHoursConfig] = useState<WorkingHoursConfig | null>(null);
   const [annualContractHours, setAnnualContractHours] = useState<number | null>(null);
+
+  // HU-012: Holidays management
+  const { holidays } = useHolidays(yearObject);
+
+  // HU-014: Vacations management
+  const { vacations } = useVacations(yearObject);
+
+  // HU-017: Configuration validation
+  const validation = useConfigurationValidation({
+    year: selectedYear,
+    workCycle: workCycle,
+    employmentStatus: employmentStatusValid ? {} : null,
+    workingHours: workingHoursConfig,
+    annualContractHours: annualContractHours,
+    holidays: holidays,
+    vacations: vacations,
+  });
 
   const handleWorkCycleConfigured = React.useCallback((cycle: WorkCycle) => {
     setWorkCycle(cycle);
@@ -64,6 +83,27 @@ export const CalendarConfigPage: React.FC = () => {
   const handleAnnualContractHoursChange = React.useCallback((hours: number) => {
     setAnnualContractHours(hours);
     console.log('Annual contract hours configured:', hours);
+  }, []);
+
+  const handleGenerateCalendar = React.useCallback(() => {
+    if (!validation.canGenerate) {
+      return;
+    }
+    // TODO: Implement calendar generation (next sprint)
+    console.log('Generating calendar with configuration:', {
+      year: selectedYear,
+      workCycle: workCycle?.getDisplayText(),
+      workingHours: workingHoursConfig,
+      annualContractHours,
+      holidays: holidays.length,
+      vacations: vacations.length,
+    });
+    alert('Funcionalidad de generación de calendario próximamente...');
+  }, [validation.canGenerate, selectedYear, workCycle, workingHoursConfig, annualContractHours, holidays, vacations]);
+
+  const handleNavigateToSection = React.useCallback((sectionId: string) => {
+    // TODO: Implement smooth scroll to section
+    console.log('Navigate to section:', sectionId);
   }, []);
 
   return (
@@ -206,12 +246,29 @@ export const CalendarConfigPage: React.FC = () => {
             </div>
           )}
 
-          {/* Next Steps */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              <strong>Próximos pasos:</strong> generación de calendario, estadísticas...
-            </p>
-          </div>
+          {/* HU-016 & HU-017: Configuration Summary and Validation */}
+          {annualContractHours && (
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                8. Resumen y Validación
+              </h2>
+
+              <ConfigurationSummary
+                config={{
+                  year: selectedYear,
+                  workCycle: workCycle,
+                  employmentStatus: employmentStatusValid ? {} : null,
+                  workingHours: workingHoursConfig,
+                  annualContractHours: annualContractHours,
+                  holidays: holidays,
+                  vacations: vacations,
+                }}
+                validation={validation}
+                onNavigateToSection={handleNavigateToSection}
+                onGenerateCalendar={handleGenerateCalendar}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
