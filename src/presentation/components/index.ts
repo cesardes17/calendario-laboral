@@ -21,4 +21,6 @@ export { HolidayManager } from './holiday-manager';
 
 export { VacationManager } from './vacation-manager';
 
+export { ConfigurationSummary } from './configuration-summary';
+
 export { ThemeToggle } from './theme-toggle';
