@@ -22,7 +22,7 @@ import {
   CardDescription,
   CardContent,
   Button,
-} from "./ui";
+} from "../ui";
 
 interface WorkCycleTemplateSelectorProps {
   selectedTemplate: string;

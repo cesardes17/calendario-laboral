@@ -25,7 +25,7 @@ import {
   CardContent,
   Button,
   Badge,
-} from "./ui";
+} from "../ui";
 
 interface WorkCycleWeeklyConfigProps {
   weeklyMask: WeeklyMask;

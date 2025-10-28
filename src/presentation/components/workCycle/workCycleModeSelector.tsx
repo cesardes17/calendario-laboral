@@ -16,7 +16,7 @@
 import { motion } from "framer-motion";
 import { Calendar, Clock } from "lucide-react";
 import { CycleMode } from "@/src/core/domain/workCycle";
-import { Card, CardHeader, CardTitle, CardDescription } from "./ui";
+import { Card, CardHeader, CardTitle, CardDescription } from "../ui";
 
 interface WorkCycleModeSelectorProps {
   selectedMode: CycleMode | null;

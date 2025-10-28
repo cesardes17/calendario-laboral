@@ -15,7 +15,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, AlertCircle } from "lucide-react";
 import type { WorkCycle } from "@/src/core/domain/workCycle";
-import { Alert, AlertDescription } from "./ui";
+import { Alert, AlertDescription } from "../ui";
 
 interface WorkCycleStatusAlertsProps {
   isValid: boolean;

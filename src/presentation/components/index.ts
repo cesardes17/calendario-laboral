@@ -8,8 +8,8 @@ export type { YearSelectorProps } from './yearSelector';
 export { EmploymentStatusSelector } from './employmentStatusSelector';
 export type { EmploymentStatusSelectorProps } from './employmentStatusSelector';
 
-export { WorkCycleConfigurator } from './workCycleConfigurator';
-export type { WorkCycleConfiguratorProps } from './workCycleConfigurator';
+export { WorkCycleConfigurator } from './workCycle/workCycleConfigurator';
+export type { WorkCycleConfiguratorProps } from './workCycle/workCycleConfigurator';
 
 export { WorkingHoursConfigurator } from './workingHoursConfigurator';
 export type { WorkingHoursConfiguratorProps } from './workingHoursConfigurator';

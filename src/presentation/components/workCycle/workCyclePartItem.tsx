@@ -17,7 +17,7 @@
 
 import { X } from "lucide-react";
 import type { CyclePart } from "@/src/core/domain/workCycle";
-import { Card, CardContent, Badge, Button } from "./ui";
+import { Card, CardContent, Badge, Button } from "../ui";
 
 interface WorkCyclePartItemProps {
   part: CyclePart;

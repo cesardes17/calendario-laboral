@@ -27,7 +27,7 @@ import {
   Button,
   Alert,
   AlertDescription,
-} from "./ui";
+} from "../ui";
 
 interface WorkCyclePartsListProps {
   parts: CyclePart[];
