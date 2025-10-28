@@ -1,5 +1,9 @@
-import { CalendarConfigPage } from '@/src/presentation/pages/calendar-config-page';
+import { CalendarWizard } from "@/src/presentation/pages/calendarConfig";
 
 export default function Home() {
-  return <CalendarConfigPage />;
+  return (
+    <div className="container mx-auto max-w-screen-xl px-4 py-8">
+      <CalendarWizard />
+    </div>
+  );
 }

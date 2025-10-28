@@ -2,25 +2,25 @@
  * Presentation components exports
  */
 
-export { YearSelector } from './year-selector';
-export type { YearSelectorProps } from './year-selector';
+export { YearSelector } from './yearSelector';
+export type { YearSelectorProps } from './yearSelector';
 
-export { EmploymentStatusSelector } from './employment-status-selector';
-export type { EmploymentStatusSelectorProps } from './employment-status-selector';
+export { EmploymentStatusSelector } from './employmentStatusSelector';
+export type { EmploymentStatusSelectorProps } from './employmentStatusSelector';
 
-export { WorkCycleConfigurator } from './work-cycle-configurator';
-export type { WorkCycleConfiguratorProps } from './work-cycle-configurator';
+export { WorkCycleConfigurator } from './workCycleConfigurator';
+export type { WorkCycleConfiguratorProps } from './workCycleConfigurator';
 
-export { WorkingHoursConfigurator } from './working-hours-configurator';
-export type { WorkingHoursConfiguratorProps } from './working-hours-configurator';
+export { WorkingHoursConfigurator } from './workingHoursConfigurator';
+export type { WorkingHoursConfiguratorProps } from './workingHoursConfigurator';
 
-export { AnnualContractHoursConfigurator } from './annual-contract-hours-configurator';
-export type { AnnualContractHoursConfiguratorProps } from './annual-contract-hours-configurator';
+export { AnnualContractHoursConfigurator } from './annualContractHoursConfigurator';
+export type { AnnualContractHoursConfiguratorProps } from './annualContractHoursConfigurator';
 
-export { HolidayManager } from './holiday-manager';
+export { HolidayManager } from './holidayManager';
 
-export { VacationManager } from './vacation-manager';
+export { VacationManager } from './vacationManager';
 
-export { ConfigurationSummary } from './configuration-summary';
+export { ConfigurationSummary } from './configurationSummary';
 
-export { ThemeToggle } from './theme-toggle';
+export { ThemeToggle } from './ThemeToggle';
