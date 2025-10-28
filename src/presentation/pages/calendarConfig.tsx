@@ -92,7 +92,7 @@ function ConfigurationSummary() {
 
 export function CalendarWizard() {
   const [wizardData, setWizardData] = useState({});
-  const [showSummary, setShowSummary] = useState({});
+  const [showSummary, setShowSummary] = useState(false);
 
   const steps: WizardStep[] = [
     {
