@@ -1,16 +1,3 @@
-/**
- * WorkCycleWeeklyConfig Component
- *
- * Displays weekly mode configuration:
- * - 7-day grid (Mon-Sun) with toggle buttons
- * - Visual feedback for selected days
- * - Badge showing count of selected days
- *
- * Fixed spacing issues:
- * - Added pb-6 to CardContent for better bottom spacing
- * - Improved button sizing and grid spacing
- */
-
 "use client";
 
 import { motion } from "framer-motion";
@@ -36,6 +23,8 @@ export function WorkCycleWeeklyConfig({
   weeklyMask,
   onDayToggle,
 }: WorkCycleWeeklyConfigProps) {
+  const selectedCount = weeklyMask.filter(Boolean).length;
+
   return (
     <Card>
       <CardHeader>
@@ -46,35 +35,48 @@ export function WorkCycleWeeklyConfig({
           Marca los días de la semana en los que trabajas habitualmente
         </CardDescription>
       </CardHeader>
+
+      {/* Espacio extra abajo para que no “choque” con la nav del wizard */}
       <CardContent className="space-y-4 pb-6">
-        <div className="grid grid-cols-7 gap-2">
-          {DAY_NAMES_SHORT.map((dayShort, index) => (
-            <motion.div
-              key={index}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex flex-col items-center gap-2"
-            >
-              <span className="text-xs font-medium text-muted-foreground">
-                {dayShort}
-              </span>
-              <Button
-                type="button"
-                variant={weeklyMask[index] ? "default" : "outline"}
-                size="icon"
-                className="h-12 w-12 rounded-lg"
-                onClick={() => onDayToggle(index)}
-                title={DAY_NAMES[index]}
+        {/* Rejilla responsive:
+            - base: 2 columnas (móvil) → 2-2-2-1
+            - md:   7 columnas (escritorio)
+        */}
+        <div className="grid grid-cols-2 md:grid-cols-7 gap-3 md:gap-2 justify-items-center">
+          {DAY_NAMES_SHORT.map((dayShort, index) => {
+            const active = weeklyMask[index];
+            return (
+              <motion.div
+                key={index}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex flex-col items-center gap-2"
               >
-                {weeklyMask[index] && <CheckCircle2 className="h-5 w-5" />}
-              </Button>
-            </motion.div>
-          ))}
+                {/* Etiqueta más compacta en móvil */}
+                <span className="text-[10px] sm:text-xs font-medium text-muted-foreground">
+                  {dayShort}
+                </span>
+
+                <Button
+                  type="button"
+                  variant={active ? "default" : "outline"}
+                  size="icon"
+                  // Botón más pequeño en móvil, normal en >= sm
+                  className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg"
+                  onClick={() => onDayToggle(index)}
+                  title={DAY_NAMES[index]}
+                  aria-pressed={active}
+                >
+                  {active && <CheckCircle2 className="h-5 w-5" />}
+                </Button>
+              </motion.div>
+            );
+          })}
         </div>
 
         <div className="flex items-center justify-center gap-2 pt-2">
           <Badge variant="secondary" className="text-xs">
-            {weeklyMask.filter((d) => d).length} de 7 días seleccionados
+            {selectedCount} de 7 días seleccionados
           </Badge>
         </div>
       </CardContent>

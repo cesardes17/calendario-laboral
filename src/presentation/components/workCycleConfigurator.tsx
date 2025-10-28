@@ -19,19 +19,14 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useWorkCycle } from "@/src/application/hooks/useWorkCycle";
-import {
-  CycleMode,
-  type WeeklyMask,
-  type CyclePart,
-  type WorkCycle,
-} from "@/src/core/domain/workCycle";
-import { CYCLE_TEMPLATES, type TemplateKey } from "./workCycleConstants";
-import { WorkCycleModeSelector } from "./workCycleModeSelector";
-import { WorkCycleWeeklyConfig } from "./workCycleWeeklyConfig";
-import { WorkCycleTemplateSelector } from "./workCycleTemplateSelector";
-import { WorkCyclePartsList } from "./workCyclePartsList";
-import { WorkCycleStatusAlerts } from "./workCycleStatusAlerts";
+import { CycleMode, CyclePart, WeeklyMask, WorkCycle } from "@/src/core/domain";
+import { useWorkCycle } from "@/src/application/hooks";
+import { CYCLE_TEMPLATES, TemplateKey } from "./workCycle/workCycleConstants";
+import { WorkCycleModeSelector } from "./workCycle/workCycleModeSelector";
+import { WorkCycleWeeklyConfig } from "./workCycle/workCycleWeeklyConfig";
+import { WorkCycleTemplateSelector } from "./workCycle/workCycleTemplateSelector";
+import { WorkCyclePartsList } from "./workCycle/workCyclePartsList";
+import { WorkCycleStatusAlerts } from "./workCycle/workCycleStatusAlerts";
 
 export interface WorkCycleConfiguratorProps {
   /**

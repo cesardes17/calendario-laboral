@@ -25,7 +25,7 @@ export function WizardStepContent({
   currentStep,
 }: WizardStepContentProps) {
   return (
-    <div className="flex-1 relative overflow-hidden">
+    <div className="flex-1 relative overflow-hidden ">
       <AnimatePresence initial={false} custom={direction} mode="wait">
         <motion.div
           key={`content-${currentStep}`}
@@ -37,7 +37,7 @@ export function WizardStepContent({
           transition={springTransition}
           className="absolute inset-0"
         >
-          <div className="h-full overflow-y-auto pr-2">{step.component}</div>
+          <div className="h-full overflow-y-auto px-3">{step.component}</div>
         </motion.div>
       </AnimatePresence>
     </div>
