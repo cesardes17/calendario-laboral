@@ -144,6 +144,7 @@ export function CalendarWizard() {
   const [showSummary, setShowSummary] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [hasStoredConfig, setHasStoredConfig] = useState(false);
+  const [wizardKey, setWizardKey] = useState(0); // Key to force wizard re-mount
 
   // Store work cycle for dependent steps
   const [workCycle, setWorkCycle] = useState<WorkCycle | null>(null);
@@ -324,6 +325,9 @@ export function CalendarWizard() {
 
       setShowLoadDialog(false);
       console.log('Configuration loaded from localStorage');
+
+      // Force wizard re-mount with loaded data
+      setWizardKey(prev => prev + 1);
     } catch (error) {
       console.error('Error loading configuration:', error);
       setShowLoadDialog(false);
@@ -502,7 +506,7 @@ export function CalendarWizard() {
               </p>
             </div>
 
-            <WizardStepper steps={steps} onComplete={handleComplete} />
+            <WizardStepper key={wizardKey} steps={steps} onComplete={handleComplete} />
           </>
         ) : (
           <ConfigurationSummaryContent />
