@@ -8,12 +8,26 @@
  * - Valid range: current - 2 to current + 5
  * - Error display for validation
  * - Clear visual feedback
+ *
+ * Redesigned with visual grid layout (v0.dev style)
  */
 
-'use client';
+"use client";
 
-import React from 'react';
-import { useYearSelection } from '@/src/application/hooks/useYearSelection';
+import React from "react";
+import { motion } from "framer-motion";
+import { Calendar, CheckCircle2, Sparkles } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
+import { Alert, AlertDescription } from "./ui/alert";
+import { useYearSelection } from "@/src/application/hooks/useYearSelection";
 
 export interface YearSelectorProps {
   /**
@@ -35,17 +49,15 @@ export interface YearSelectorProps {
 export const YearSelector: React.FC<YearSelectorProps> = ({
   initialYear,
   onYearChange,
-  className = '',
+  className = "",
 }) => {
-  const {
-    selectedYear,
-    error,
-    isValid,
-    yearRange,
-    selectYear,
-  } = useYearSelection(initialYear);
+  const { selectedYear, isValid, yearRange, selectYear } =
+    useYearSelection(initialYear);
 
-  // Generate year options for the select dropdown
+  // Calculate current year locally
+  const currentYear = React.useMemo(() => new Date().getFullYear(), []);
+
+  // Generate year options for the grid
   const yearOptions = React.useMemo(() => {
     const options = [];
     for (let year = yearRange.min; year <= yearRange.max; year++) {
@@ -54,63 +66,137 @@ export const YearSelector: React.FC<YearSelectorProps> = ({
     return options;
   }, [yearRange]);
 
-  // Notify parent of initial year when component mounts or when year is valid
+  // Leap year checker
+  const isLeapYear = React.useCallback((year: number): boolean => {
+    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+  }, []);
+
+  // Notify parent when year changes
   React.useEffect(() => {
     if (isValid && onYearChange) {
       onYearChange(selectedYear);
     }
   }, [selectedYear, isValid, onYearChange]);
 
-  const handleYearChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const year = parseInt(event.target.value, 10);
-    selectYear(year);
-  };
-
   return (
-    <div className={`yearSelector ${className}`}>
-      <label
-        htmlFor="year-select"
-        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-      >
-        Año de referencia
-      </label>
+    <Card className={className}>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Calendar className="h-5 w-5" />
+          Selecciona el Año de Referencia
+        </CardTitle>
+        <CardDescription>
+          Este año determinará tu calendario laboral completo
+        </CardDescription>
+      </CardHeader>
 
-      <select
-        id="year-select"
-        value={selectedYear}
-        onChange={handleYearChange}
-        className={`
-          w-full px-4 py-2 border rounded-lg
-          focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
-          ${!isValid ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'}
-          ${!isValid ? 'bg-red-50 dark:bg-red-950' : 'bg-white dark:bg-gray-800'}
-          text-gray-900 dark:text-gray-100
-          transition-colors duration-200
-        `}
-        aria-label="Seleccionar año"
-        aria-invalid={!isValid}
-        aria-describedby={error ? 'year-error' : undefined}
-      >
-        {yearOptions.map((year) => (
-          <option key={year} value={year}>
-            {year}
-          </option>
-        ))}
-      </select>
+      <CardContent className="space-y-6 pb-6">
+        {/* Grid de años */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {yearOptions.map((year) => {
+            const isSelected = selectedYear === year;
+            const isCurrent = year === currentYear;
+            const isLeap = isLeapYear(year);
 
-      {error && (
-        <p
-          id="year-error"
-          className="mt-2 text-sm text-red-600 dark:text-red-400"
-          role="alert"
-        >
-          {error}
-        </p>
-      )}
+            return (
+              <motion.div
+                key={year}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{
+                  duration: 0.2,
+                  delay: (year - yearRange.min) * 0.05,
+                }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button
+                  variant={isSelected ? "default" : "outline"}
+                  className={`
+                    relative h-auto w-full flex flex-col items-center gap-2 p-4
+                    transition-all duration-200
+                    ${isSelected ? "ring-2 ring-primary/20 shadow-lg" : ""}
+                    ${isCurrent && !isSelected ? "border-primary/50" : ""}
+                  `}
+                  onClick={() => selectYear(year)}
+                  aria-pressed={isSelected}
+                  aria-label={`Seleccionar año ${year}${
+                    isCurrent ? " (año actual)" : ""
+                  }${isLeap ? " (año bisiesto)" : ""}`}
+                >
+                  {/* Badge "Actual" para el año corriente */}
+                  {isCurrent && (
+                    <Badge
+                      variant="secondary"
+                      className="absolute -top-2 -right-2 flex items-center gap-1 text-xs"
+                    >
+                      <Sparkles className="h-3 w-3" />
+                      Actual
+                    </Badge>
+                  )}
 
-      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-        Rango válido: {yearRange.min} - {yearRange.max}
-      </p>
-    </div>
+                  {/* Icono de calendario */}
+                  <Calendar
+                    className={`h-5 w-5 ${
+                      isSelected
+                        ? "text-primary-foreground"
+                        : "text-muted-foreground"
+                    }`}
+                  />
+
+                  {/* Número del año (grande y prominente) */}
+                  <span className="text-2xl md:text-3xl font-bold">{year}</span>
+
+                  {/* Info días (bisiesto o no) */}
+                  <span
+                    className={`text-xs ${
+                      isSelected
+                        ? "text-primary-foreground/80"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {isLeap ? "366 días" : "365 días"}
+                  </span>
+
+                  {/* Badge bisiesto */}
+                  {isLeap && (
+                    <Badge
+                      variant={isSelected ? "secondary" : "outline"}
+                      className="text-xs"
+                    >
+                      Bisiesto
+                    </Badge>
+                  )}
+                </Button>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Info adicional del rango */}
+        <div className="text-center text-sm text-muted-foreground">
+          <p>
+            Rango disponible: {yearRange.min} - {yearRange.max}
+          </p>
+        </div>
+
+        {/* Alert de éxito cuando hay selección válida */}
+        {isValid && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Alert className="border-green-500/50 bg-green-500/10">
+              <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <AlertDescription className="text-green-700 dark:text-green-300">
+                Año seleccionado: <strong>{selectedYear}</strong>
+                {isLeapYear(selectedYear) && " (año bisiesto con 366 días)"}
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </CardContent>
+    </Card>
   );
 };

@@ -5,8 +5,8 @@
 export { YearSelector } from './yearSelector';
 export type { YearSelectorProps } from './yearSelector';
 
-export { EmploymentStatusSelector } from './employmentStatusSelector';
-export type { EmploymentStatusSelectorProps } from './employmentStatusSelector';
+export { ContractStartConfigurator } from './contractStart/contractStartConfigurator';
+export type { ContractStartConfiguratorProps } from './contractStart/contractStartConfigurator';
 
 export { WorkCycleConfigurator } from './workCycleConfigurator';
 export type { WorkCycleConfiguratorProps } from './workCycleConfigurator';
@@ -16,6 +16,15 @@ export type { WorkingHoursConfiguratorProps } from './workingHoursConfigurator';
 
 export { AnnualContractHoursConfigurator } from './annualContractHoursConfigurator';
 export type { AnnualContractHoursConfiguratorProps } from './annualContractHoursConfigurator';
+
+export { HolidayManagerConfigurator } from './holidayManagerConfigurator';
+export type { HolidayManagerConfiguratorProps } from './holidayManagerConfigurator';
+
+export { VacationManagerConfigurator } from './vacationManagerConfigurator';
+export type { VacationManagerConfiguratorProps } from './vacationManagerConfigurator';
+
+export { ConfigurationReviewConfigurator } from './configurationReviewConfigurator';
+export type { ConfigurationReviewConfiguratorProps } from './configurationReviewConfigurator';
 
 export { HolidayManager } from './holidayManager';
 

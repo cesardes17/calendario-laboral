@@ -102,9 +102,18 @@ export class VacationPeriod {
    * Get the number of days in this vacation period (inclusive)
    */
   getDayCount(): number {
+    // Create copies to avoid mutating original dates
+    const start = new Date(this._startDate);
+    const end = new Date(this._endDate);
+
+    // Normalize to noon to avoid timezone/DST issues
+    start.setHours(12, 0, 0, 0);
+    end.setHours(12, 0, 0, 0);
+
     const millisecondsPerDay = 1000 * 60 * 60 * 24;
-    const timeDiff = this._endDate.getTime() - this._startDate.getTime();
-    return Math.floor(timeDiff / millisecondsPerDay) + 1; // +1 because both dates are inclusive
+    const timeDiff = end.getTime() - start.getTime();
+    const daysDiff = Math.round(timeDiff / millisecondsPerDay);
+    return daysDiff + 1; // +1 because both dates are inclusive
   }
 
   /**
@@ -141,9 +150,14 @@ export class VacationPeriod {
       Math.min(this._endDate.getTime(), other._endDate.getTime())
     );
 
+    // Normalize to noon to avoid timezone/DST issues
+    overlapStart.setHours(12, 0, 0, 0);
+    overlapEnd.setHours(12, 0, 0, 0);
+
     const millisecondsPerDay = 1000 * 60 * 60 * 24;
     const timeDiff = overlapEnd.getTime() - overlapStart.getTime();
-    return Math.floor(timeDiff / millisecondsPerDay) + 1;
+    const daysDiff = Math.round(timeDiff / millisecondsPerDay);
+    return daysDiff + 1;
   }
 
   /**

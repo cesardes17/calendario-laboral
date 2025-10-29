@@ -1,143 +1,58 @@
 /**
- * @file workingHoursconfigurator.tsx
- * @description Componente para configurar horas de trabajo por tipo de día
- * Implementa HU-010: Definir horas por tipo de día
+ * WorkingHoursConfigurator Component
+ *
+ * UI component for working hours configuration (HU-010)
+ * Implements:
+ * - Hours configuration for 4 day types (weekday, saturday, sunday, holiday)
+ * - Visual card-based layout
+ * - Real-time validation
+ * - Clear visual feedback
+ *
+ * Redesigned to match WorkCycleConfigurator and YearSelector patterns
  */
 
-'use client';
+"use client";
 
-import React from 'react';
-import { useWorkingHours, type UseWorkingHoursReturn } from '@/src/application/hooks';
-import type { WorkingHoursConfig } from '@/src/core/domain';
+import React, { useEffect } from "react";
+import { motion } from "framer-motion";
+import { Clock, Calendar, Sun, PartyPopper } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { useWorkingHours } from "@/src/application/hooks/useWorkingHours";
+import type { WorkingHoursConfig } from "@/src/core/domain/workingHours";
+import { HoursInputCard } from "./workingHours/hoursInputCard";
+import { WorkingHoursStatusAlerts } from "./workingHours/workingHoursStatusAlerts";
 
-/**
- * Props del componente de campo de horas
- */
-interface HoursInputFieldProps {
-  label: string;
-  emoji: string;
-  tooltip: string;
-  value: string;
-  onChange: (value: string) => void;
-  isValid: boolean;
-  error?: string;
-}
-
-/**
- * Campo individual para configurar horas
- */
-function HoursInputField({
-  label,
-  emoji,
-  tooltip,
-  value,
-  onChange,
-  isValid,
-  error,
-}: HoursInputFieldProps) {
-  return (
-    <div className="mb-6">
-      <label className="block mb-2">
-        <span className="text-base font-medium text-gray-700 dark:text-gray-200">
-          {emoji} {label}
-        </span>
-      </label>
-
-      <div className="flex items-center gap-2">
-        <input
-          type="text"
-          inputMode="decimal"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className={`
-            w-24 px-3 py-2
-            text-lg font-medium text-center
-            border rounded-lg
-            focus:outline-none focus:ring-2 focus:ring-offset-1
-            transition-colors
-            ${
-              isValid
-                ? 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400'
-                : 'border-red-500 dark:border-red-400 focus:ring-red-500 dark:focus:ring-red-400'
-            }
-            bg-white dark:bg-gray-800
-            text-gray-900 dark:text-gray-100
-          `}
-          placeholder="0.00"
-          aria-label={label}
-          aria-invalid={!isValid}
-          aria-describedby={`${label}-tooltip ${!isValid ? `${label}-error` : ''}`}
-        />
-        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-          horas/día
-        </span>
-      </div>
-
-      <p
-        id={`${label}-tooltip`}
-        className="mt-1 text-sm text-gray-500 dark:text-gray-400"
-      >
-        {tooltip}
-      </p>
-
-      {!isValid && error && (
-        <p
-          id={`${label}-error`}
-          className="mt-1 text-sm text-red-600 dark:text-red-400"
-          role="alert"
-        >
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
-
-/**
- * Props del componente principal
- */
 export interface WorkingHoursConfiguratorProps {
   /**
-   * Configuración inicial (opcional)
+   * Initial configuration (optional)
    */
   initialConfig?: Partial<WorkingHoursConfig>;
 
   /**
-   * Callback cuando la configuración es válida y cambia
+   * Callback when configuration validity changes
+   */
+  onConfigurationChange?: (isValid: boolean) => void;
+
+  /**
+   * Callback when valid configuration changes
    */
   onChange?: (config: WorkingHoursConfig) => void;
 
   /**
-   * Mostrar botón de reset
+   * Additional CSS classes
    */
-  showResetButton?: boolean;
+  className?: string;
 }
 
-/**
- * Componente para configurar horas de trabajo por tipo de día
- *
- * Características:
- * - 4 campos para diferentes tipos de día (L-V, Sábado, Domingo, Festivo)
- * - Validación en tiempo real (0-24 horas, decimales permitidos)
- * - Tooltips explicativos
- * - Formato automático a 2 decimales
- * - Accesibilidad (ARIA labels, roles, etc.)
- * - Tema claro/oscuro
- *
- * @example
- * ```tsx
- * <WorkingHoursConfigurator
- *   initialConfig={{ weekday: 7.5, saturday: 6 }}
- *   onChange={(config) => console.log(config)}
- *   showResetButton
- * />
- * ```
- */
-export function WorkingHoursConfigurator({
-  initialConfig,
-  onChange,
-  showResetButton = false,
-}: WorkingHoursConfiguratorProps) {
+export const WorkingHoursConfigurator: React.FC<
+  WorkingHoursConfiguratorProps
+> = ({ initialConfig, onConfigurationChange, onChange, className = "" }) => {
   const {
     workingHours,
     weekdayInput,
@@ -153,106 +68,127 @@ export function WorkingHoursConfigurator({
     updateSaturdayHours,
     updateSundayHours,
     updateHolidayHours,
-    reset,
   } = useWorkingHours(initialConfig);
 
-  // Notificar cambios al padre cuando la configuración es válida
-  React.useEffect(() => {
+  // Check if there are any errors
+  const hasErrors =
+    !weekdayValidation.isValid ||
+    !saturdayValidation.isValid ||
+    !sundayValidation.isValid ||
+    !holidayValidation.isValid;
+
+  // Notify parent when validity changes
+  useEffect(() => {
+    onConfigurationChange?.(isValid);
+  }, [isValid, onConfigurationChange]);
+
+  // Notify parent when valid configuration changes
+  useEffect(() => {
     if (isValid && onChange) {
       onChange(workingHours.toJSON());
     }
   }, [workingHours, isValid, onChange]);
 
   return (
-    <div className="w-full">
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Define tus horas de trabajo por tipo de día
-        </h3>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          Especifica cuántas horas trabajas según el tipo de día para calcular
-          correctamente tu balance anual
-        </p>
-      </div>
+    <Card className={className}>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Clock className="h-5 w-5" />
+          Horas de Trabajo
+        </CardTitle>
+        <CardDescription>
+          Define cuántas horas trabajas según el tipo de día
+        </CardDescription>
+      </CardHeader>
 
-      <div className="space-y-2">
-        <HoursInputField
-          label="Lunes a Viernes"
-          emoji="📅"
-          tooltip="Horas que trabajas en días laborables normales"
-          value={weekdayInput}
-          onChange={updateWeekdayHours}
-          isValid={weekdayValidation.isValid}
-          error={weekdayValidation.error}
-        />
-
-        <HoursInputField
-          label="Sábado"
-          emoji="📅"
-          tooltip="Horas cuando trabajas en sábado (si aplica según tu ciclo)"
-          value={saturdayInput}
-          onChange={updateSaturdayHours}
-          isValid={saturdayValidation.isValid}
-          error={saturdayValidation.error}
-        />
-
-        <HoursInputField
-          label="Domingo"
-          emoji="📅"
-          tooltip="Horas cuando trabajas en domingo (si aplica según tu ciclo)"
-          value={sundayInput}
-          onChange={updateSundayHours}
-          isValid={sundayValidation.isValid}
-          error={sundayValidation.error}
-        />
-
-        <HoursInputField
-          label="Festivo trabajado"
-          emoji="🎉"
-          tooltip="Horas cuando trabajas un día festivo oficial"
-          value={holidayInput}
-          onChange={updateHolidayHours}
-          isValid={holidayValidation.isValid}
-          error={holidayValidation.error}
-        />
-      </div>
-
-      {showResetButton && (
-        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <button
-            type="button"
-            onClick={reset}
-            className="
-              px-4 py-2
-              text-sm font-medium
-              text-gray-700 dark:text-gray-200
-              bg-white dark:bg-gray-800
-              border border-gray-300 dark:border-gray-600
-              rounded-lg
-              hover:bg-gray-50 dark:hover:bg-gray-700
-              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-              transition-colors
-            "
+      <CardContent className="space-y-8 pb-6">
+        {/* Hours Input Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Weekday Hours */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0 }}
           >
-            Restaurar valores por defecto
-          </button>
-        </div>
-      )}
+            <HoursInputCard
+              label="Lunes a Viernes"
+              icon={Calendar}
+              description="Días laborables normales"
+              value={weekdayInput}
+              onChange={updateWeekdayHours}
+              isValid={weekdayValidation.isValid}
+              error={weekdayValidation.error}
+            />
+          </motion.div>
 
-      {!isValid && (
-        <div
-          className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
-          role="alert"
-        >
-          <p className="text-sm text-red-800 dark:text-red-200">
-            Por favor, corrige los errores antes de continuar
+          {/* Saturday Hours */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.05 }}
+          >
+            <HoursInputCard
+              label="Sábado"
+              icon={Calendar}
+              description="Si trabajas en sábado"
+              value={saturdayInput}
+              onChange={updateSaturdayHours}
+              isValid={saturdayValidation.isValid}
+              error={saturdayValidation.error}
+            />
+          </motion.div>
+
+          {/* Sunday Hours */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
+            <HoursInputCard
+              label="Domingo"
+              icon={Sun}
+              description="Si trabajas en domingo"
+              value={sundayInput}
+              onChange={updateSundayHours}
+              isValid={sundayValidation.isValid}
+              error={sundayValidation.error}
+            />
+          </motion.div>
+
+          {/* Holiday Hours */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.15 }}
+          >
+            <HoursInputCard
+              label="Festivo Trabajado"
+              icon={PartyPopper}
+              description="Cuando trabajas un festivo"
+              value={holidayInput}
+              onChange={updateHolidayHours}
+              isValid={holidayValidation.isValid}
+              error={holidayValidation.error}
+            />
+          </motion.div>
+        </div>
+
+        {/* Info Box */}
+        <div className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-lg">
+          <p>
+            <strong>Nota:</strong> Estas horas se usarán para calcular tu
+            balance anual de horas trabajadas vs. horas de convenio. Puedes
+            usar decimales (ej: 7.5 horas).
           </p>
         </div>
-      )}
-    </div>
-  );
-}
 
-// Export para facilitar testing
-export { useWorkingHours };
-export type { UseWorkingHoursReturn };
+        {/* Status Alerts */}
+        <WorkingHoursStatusAlerts
+          isValid={isValid}
+          hasErrors={hasErrors}
+          workingHours={workingHours}
+        />
+      </CardContent>
+    </Card>
+  );
+};

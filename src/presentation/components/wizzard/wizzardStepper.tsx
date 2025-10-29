@@ -64,7 +64,7 @@ export function WizardStepper({
       />
 
       {/* Main Content Card */}
-      <Card className="min-h-[500px] flex flex-col">
+      <Card>
         {/* Step Header */}
         <WizardStepHeader
           step={navigation.currentStepData}
@@ -73,7 +73,7 @@ export function WizardStepper({
         />
 
         {/* Step Content and Navigation */}
-        <CardContent className="flex-1 flex flex-col">
+        <CardContent className="flex flex-col">
           <WizardStepContent
             step={navigation.currentStepData}
             direction={navigation.direction}

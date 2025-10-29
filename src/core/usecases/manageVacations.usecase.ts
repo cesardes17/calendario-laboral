@@ -169,10 +169,19 @@ export function getTotalVacationDays(periods: VacationPeriod[]): number {
 
   periods.forEach((period) => {
     const currentDate = new Date(period.startDate);
-    const endDate = period.endDate;
+    const endDate = new Date(period.endDate);
+
+    // Normalize to noon to avoid timezone issues
+    currentDate.setHours(12, 0, 0, 0);
+    endDate.setHours(12, 0, 0, 0);
 
     while (currentDate <= endDate) {
-      dateSet.add(currentDate.toISOString().split('T')[0]);
+      // Use YYYY-MM-DD format in local timezone
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const day = String(currentDate.getDate()).padStart(2, '0');
+      dateSet.add(`${year}-${month}-${day}`);
+
       currentDate.setDate(currentDate.getDate() + 1);
     }
   });
