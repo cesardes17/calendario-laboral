@@ -361,7 +361,7 @@ export function CalendarWizard() {
       id: "year",
       title: "Año de Referencia",
       description: "Selecciona el año para tu calendario",
-      component: <YearSelector onYearChange={handleYearChange} />,
+      component: <YearSelector initialYear={selectedYear} onYearChange={handleYearChange} />,
       isValid: stepsValidation.year,
     },
     {
@@ -370,6 +370,7 @@ export function CalendarWizard() {
       description: "Indica cuándo comenzaste a trabajar",
       component: (
         <ContractStartConfigurator
+          initialYear={selectedYear}
           workCycle={workCycle}
           onConfigurationChange={handleContractStartValidation}
           onContractStartChange={handleContractStartChange}
@@ -383,6 +384,7 @@ export function CalendarWizard() {
       description: "Configura tu jornada laboral diaria",
       component: (
         <WorkingHoursConfigurator
+          initialConfig={workingHoursConfig ?? undefined}
           onConfigurationChange={handleWorkingHoursValidation}
           onChange={handleWorkingHoursChange}
         />
@@ -395,6 +397,7 @@ export function CalendarWizard() {
       description: "Define las horas según tu convenio",
       component: (
         <AnnualContractHoursConfigurator
+          initialHours={annualHours ?? undefined}
           onConfigurationChange={handleAnnualHoursValidation}
           onValidHours={handleAnnualHoursChange}
         />
@@ -407,6 +410,8 @@ export function CalendarWizard() {
       description: "Marca los días festivos aplicables",
       component: (
         <HolidayManagerConfigurator
+          initialYear={selectedYear}
+          initialHolidays={holidays}
           onConfigurationChange={handleHolidaysValidation}
           onHolidaysChange={handleHolidaysChange}
         />
@@ -419,6 +424,8 @@ export function CalendarWizard() {
       description: "Planifica tus períodos de vacaciones",
       component: (
         <VacationManagerConfigurator
+          initialYear={selectedYear}
+          initialVacations={vacations}
           onConfigurationChange={handleVacationsValidation}
           onVacationsChange={handleVacationsChange}
         />

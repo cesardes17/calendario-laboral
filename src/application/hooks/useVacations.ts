@@ -193,6 +193,7 @@ export function useVacations(year: Year | null) {
   return {
     // State
     vacations,
+    setVacations,
     error,
     totalDays,
 

@@ -41,6 +41,11 @@ export interface VacationManagerConfiguratorProps {
   initialYear?: number;
 
   /**
+   * Initial vacations to load (optional)
+   */
+  initialVacations?: VacationPeriod[];
+
+  /**
    * Callback when configuration validity changes
    */
   onConfigurationChange?: (isValid: boolean) => void;
@@ -60,6 +65,7 @@ export const VacationManagerConfigurator: React.FC<
   VacationManagerConfiguratorProps
 > = ({
   initialYear,
+  initialVacations,
   onConfigurationChange,
   onVacationsChange,
   className = "",
@@ -80,7 +86,15 @@ export const VacationManagerConfigurator: React.FC<
     clearError,
     totalDays,
     getCount,
+    setVacations,
   } = useVacations(yearObj);
+
+  // Load initial vacations if provided
+  React.useEffect(() => {
+    if (initialVacations && initialVacations.length > 0) {
+      setVacations(initialVacations);
+    }
+  }, [initialVacations, setVacations]);
 
   // Handle adding a vacation period
   const handleAddVacation = useCallback(

@@ -39,6 +39,11 @@ export interface HolidayManagerConfiguratorProps {
   initialYear?: number;
 
   /**
+   * Initial holidays to load (optional)
+   */
+  initialHolidays?: Holiday[];
+
+  /**
    * Callback when configuration validity changes
    */
   onConfigurationChange?: (isValid: boolean) => void;
@@ -58,6 +63,7 @@ export const HolidayManagerConfigurator: React.FC<
   HolidayManagerConfiguratorProps
 > = ({
   initialYear,
+  initialHolidays,
   onConfigurationChange,
   onHolidaysChange,
   className = "",
@@ -77,7 +83,15 @@ export const HolidayManagerConfigurator: React.FC<
     error,
     clearError,
     getCount,
+    setHolidays,
   } = useHolidays(yearObj);
+
+  // Load initial holidays if provided
+  React.useEffect(() => {
+    if (initialHolidays && initialHolidays.length > 0) {
+      setHolidays(initialHolidays);
+    }
+  }, [initialHolidays, setHolidays]);
 
   // Handle adding a holiday
   const handleAddHoliday = useCallback(

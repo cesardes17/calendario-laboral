@@ -149,6 +149,7 @@ export function useHolidays(year: Year | null) {
 
   return {
     holidays,
+    setHolidays,
     addHoliday,
     removeHoliday,
     updateHoliday,
