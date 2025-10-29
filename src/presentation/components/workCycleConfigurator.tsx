@@ -30,6 +30,21 @@ import { WorkCycleStatusAlerts } from "./workCycle/workCycleStatusAlerts";
 
 export interface WorkCycleConfiguratorProps {
   /**
+   * Initial mode to load (optional)
+   */
+  initialMode?: CycleMode;
+
+  /**
+   * Initial weekly mask for WEEKLY mode (optional)
+   */
+  initialWeeklyMask?: WeeklyMask;
+
+  /**
+   * Initial parts for PARTS mode (optional)
+   */
+  initialParts?: CyclePart[];
+
+  /**
    * Callback when configuration is complete and valid
    */
   onConfigurationChange?: (isValid: boolean) => void;
@@ -46,6 +61,9 @@ export interface WorkCycleConfiguratorProps {
 }
 
 export const WorkCycleConfigurator: React.FC<WorkCycleConfiguratorProps> = ({
+  initialMode,
+  initialWeeklyMask,
+  initialParts,
   onConfigurationChange,
   onCycleConfigured,
   className = "",
@@ -53,24 +71,27 @@ export const WorkCycleConfigurator: React.FC<WorkCycleConfiguratorProps> = ({
   const { state, configureWeekly, configureParts } = useWorkCycle();
 
   // Local state for mode selection
-  const [selectedMode, setSelectedMode] = useState<CycleMode | null>(null);
+  const [selectedMode, setSelectedMode] = useState<CycleMode | null>(initialMode ?? null);
 
   // Local state for weekly mode
-  const [weeklyMask, setWeeklyMask] = useState<WeeklyMask>([
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-  ]);
+  const [weeklyMask, setWeeklyMask] = useState<WeeklyMask>(
+    initialWeeklyMask ?? [true, true, true, true, true, false, false]
+  );
 
   // Local state for parts mode
-  const [parts, setParts] = useState<CyclePart[]>([
-    { workDays: 4, restDays: 2 },
-  ]);
+  const [parts, setParts] = useState<CyclePart[]>(
+    initialParts ?? [{ workDays: 4, restDays: 2 }]
+  );
   const [selectedTemplate, setSelectedTemplate] = useState<string>("custom");
+
+  // Load initial configuration on mount
+  useEffect(() => {
+    if (initialMode === CycleMode.WEEKLY && initialWeeklyMask) {
+      configureWeekly(initialWeeklyMask);
+    } else if (initialMode === CycleMode.PARTS && initialParts) {
+      configureParts(initialParts);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle mode change
   const handleModeChange = (mode: CycleMode) => {

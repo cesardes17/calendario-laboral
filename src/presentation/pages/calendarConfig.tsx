@@ -351,6 +351,9 @@ export function CalendarWizard() {
       description: "Define tu patrón de trabajo semanal",
       component: (
         <WorkCycleConfigurator
+          initialMode={workCycle?.mode}
+          initialWeeklyMask={workCycle?.getWeeklyMask() ?? undefined}
+          initialParts={workCycle?.getParts() ?? undefined}
           onConfigurationChange={handleWorkCycleValidation}
           onCycleConfigured={handleWorkCycleConfigured}
         />
@@ -371,6 +374,7 @@ export function CalendarWizard() {
       component: (
         <ContractStartConfigurator
           initialYear={selectedYear}
+          initialConfig={contractStartConfig ?? undefined}
           workCycle={workCycle}
           onConfigurationChange={handleContractStartValidation}
           onContractStartChange={handleContractStartChange}

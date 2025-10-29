@@ -52,6 +52,11 @@ export interface ContractStartConfiguratorProps {
   initialYear?: number;
 
   /**
+   * Initial contract start configuration to load (optional)
+   */
+  initialConfig?: ContractStartConfig;
+
+  /**
    * Work cycle configuration (needed to determine if offset is required)
    */
   workCycle?: WorkCycle | null;
@@ -74,7 +79,7 @@ export interface ContractStartConfiguratorProps {
 
 export const ContractStartConfigurator: React.FC<
   ContractStartConfiguratorProps
-> = ({ initialYear, workCycle, onConfigurationChange, onContractStartChange, className = "" }) => {
+> = ({ initialYear, initialConfig, workCycle, onConfigurationChange, onContractStartChange, className = "" }) => {
   const { selectedYear } = useYearSelection(initialYear);
   const {
     state,
@@ -85,12 +90,37 @@ export const ContractStartConfigurator: React.FC<
   } = useEmploymentStatus();
 
   // Local state for form inputs
-  const [contractDate, setContractDate] = useState<Date | null>(null);
-  const [offsetPartNumber, setOffsetPartNumber] = useState<number>(1);
-  const [offsetDayWithinPart, setOffsetDayWithinPart] = useState<number>(1);
+  const [contractDate, setContractDate] = useState<Date | null>(initialConfig?.contractStartDate ?? null);
+  const [offsetPartNumber, setOffsetPartNumber] = useState<number>(initialConfig?.cycleOffset?.partNumber ?? 1);
+  const [offsetDayWithinPart, setOffsetDayWithinPart] = useState<number>(initialConfig?.cycleOffset?.dayWithinPart ?? 1);
   const [offsetDayType, setOffsetDayType] = useState<CycleDayType>(
-    CycleDayType.WORK
+    initialConfig?.cycleOffset?.dayType ?? CycleDayType.WORK
   );
+
+  // Load initial configuration on mount
+  useEffect(() => {
+    if (initialConfig) {
+      // Select status
+      selectStatus(initialConfig.statusType);
+
+      // Set contract start date if present
+      if (initialConfig.contractStartDate && selectedYear) {
+        const yearObj = Year.create(selectedYear);
+        if (yearObj.isSuccess()) {
+          setContractStartDate(initialConfig.contractStartDate, yearObj.getValue());
+        }
+      }
+
+      // Set cycle offset if present
+      if (initialConfig.cycleOffset) {
+        setCycleOffset(
+          initialConfig.cycleOffset.partNumber,
+          initialConfig.cycleOffset.dayWithinPart,
+          initialConfig.cycleOffset.dayType
+        );
+      }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Determine if cycle is weekly (offset not required for "worked before")
   const isWeeklyCycle = workCycle?.isWeekly() ?? false;
