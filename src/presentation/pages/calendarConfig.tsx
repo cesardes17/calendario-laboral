@@ -25,6 +25,7 @@ import { motion } from "framer-motion";
 import { CheckCircle2, Calendar, ArrowLeft, AlertCircle, Upload, Trash2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
+import Link from "next/link";
 
 // Configuration Summary
 function ConfigurationSummaryContent() {
@@ -92,10 +93,12 @@ function ConfigurationSummaryContent() {
         transition={{ duration: 0.5, delay: 0.6 }}
         className="flex flex-col sm:flex-row gap-4 justify-center"
       >
-        <button className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 font-medium transition-colors">
-          <Calendar className="h-5 w-5" />
-          Ver Calendario
-        </button>
+        <Link href="/calendar">
+          <button className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 font-medium transition-colors">
+            <Calendar className="h-5 w-5" />
+            Ver Calendario
+          </button>
+        </Link>
         <button className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md border border-input bg-background hover:bg-muted font-medium transition-colors">
           <ArrowLeft className="h-5 w-5" />
           Editar Configuración

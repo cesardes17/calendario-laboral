@@ -28,3 +28,6 @@ export { useConfigurationValidation } from './useConfigurationValidation';
 export type { UseConfigurationValidationParams } from './useConfigurationValidation';
 
 export { usePersistence } from './usePersistence';
+
+export { useCalendar } from './useCalendar';
+export type { UseCalendarReturn, UseCalendarOptions } from './useCalendar';

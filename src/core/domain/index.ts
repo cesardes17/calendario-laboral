@@ -12,3 +12,5 @@ export { WorkingHours, WorkingHoursError, DEFAULT_WORKING_HOURS, WORKING_HOURS_C
 export { AnnualContractHours, AnnualContractHoursError, ANNUAL_CONTRACT_HOURS_CONSTRAINTS, COMMON_ANNUAL_HOURS_EXAMPLES, WarningType, type ValidationWarning } from './annualContractHours';
 export { Holiday } from './holiday';
 export { VacationPeriod } from './vacationPeriod';
+export type { CalendarDay, EstadoDia, DayMetadata } from './calendarDay';
+export { WEEKDAY_NAMES, MONTH_NAMES } from './calendarDay';
