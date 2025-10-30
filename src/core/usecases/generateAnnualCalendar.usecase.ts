@@ -1,11 +1,13 @@
 /**
- * Generate Annual Calendar Use Case (HU-019)
+ * Generate Annual Calendar Use Case (HU-019, HU-020)
  *
  * Generates a complete annual calendar with all days of the selected year.
  * Each day contains complete information needed for subsequent business logic.
+ *
+ * HU-020: Marks days as "NoContratado" before contract start date if applicable.
  */
 
-import { Year, CalendarDay, WEEKDAY_NAMES, MONTH_NAMES, Result } from '../domain';
+import { Year, CalendarDay, WEEKDAY_NAMES, MONTH_NAMES, Result, EmploymentStatus, ContractStartDate } from '../domain';
 import { getISOWeekNumber, getDaysInMonth, createDate } from '../../infrastructure/utils/dateUtils';
 
 /**
@@ -14,6 +16,12 @@ import { getISOWeekNumber, getDaysInMonth, createDate } from '../../infrastructu
 export interface GenerateAnnualCalendarInput {
   /** The year for which to generate the calendar */
   year: Year;
+
+  /** Employment status (optional) - determines if "NoContratado" days apply */
+  employmentStatus?: EmploymentStatus;
+
+  /** Contract start date (optional) - required if employmentStatus is STARTED_THIS_YEAR */
+  contractStartDate?: ContractStartDate;
 }
 
 /**
@@ -71,9 +79,16 @@ export class GenerateAnnualCalendarUseCase {
    */
   public execute(input: GenerateAnnualCalendarInput): Result<GenerateAnnualCalendarOutput> {
     try {
-      const { year } = input;
+      const { year, employmentStatus, contractStartDate } = input;
       const yearValue = year.value;
       const days: CalendarDay[] = [];
+
+      // Validate contract start configuration (HU-020)
+      if (employmentStatus?.isStartedThisYear() && !contractStartDate) {
+        return Result.fail<GenerateAnnualCalendarOutput>(
+          'Debe proporcionar una fecha de inicio de contrato si empezó este año'
+        );
+      }
 
       // Generate all days for the year
       for (let month = 1; month <= 12; month++) {
@@ -84,6 +99,11 @@ export class GenerateAnnualCalendarUseCase {
           const calendarDay = this.createCalendarDay(fecha, month, day);
           days.push(calendarDay);
         }
+      }
+
+      // Apply "NoContratado" status to days before contract start (HU-020)
+      if (employmentStatus?.isStartedThisYear() && contractStartDate) {
+        this.markNotContractedDays(days, contractStartDate);
       }
 
       // Validate that we generated the correct number of days
@@ -133,5 +153,32 @@ export class GenerateAnnualCalendarUseCase {
       descripcion: undefined,
       metadata: undefined,
     };
+  }
+
+  /**
+   * Marks days before the contract start date as "NoContratado" (HU-020)
+   *
+   * Business Rules:
+   * - Only days before the contract start date are marked
+   * - The contract start date itself is NOT marked as NoContratado
+   * - NoContratado days have estado: 'NoContratado' and horasTrabajadas: 0
+   * - These days have maximum priority and cannot be overwritten
+   *
+   * @param days - Array of calendar days to process (mutated in place)
+   * @param contractStartDate - The contract start date
+   */
+  private markNotContractedDays(days: CalendarDay[], contractStartDate: ContractStartDate): void {
+    const startDate = contractStartDate.value;
+    const startTime = startDate.getTime();
+
+    for (const day of days) {
+      const dayTime = day.fecha.getTime();
+
+      // Mark as NoContratado if the day is before the contract start date
+      if (dayTime < startTime) {
+        day.estado = 'NoContratado';
+        day.horasTrabajadas = 0;
+      }
+    }
   }
 }

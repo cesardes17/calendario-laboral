@@ -5,7 +5,7 @@
 
 import { describe, it, expect } from '@jest/globals';
 import { renderHook, act } from '@testing-library/react';
-import { useWorkingHours } from '../use-workingHours';
+import { useWorkingHours } from '../useWorkingHours';
 import { DEFAULT_WORKING_HOURS } from '@/src/core/domain';
 
 describe('useWorkingHours', () => {

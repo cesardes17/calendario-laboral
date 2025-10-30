@@ -2,10 +2,11 @@
  * useCalendar Hook
  *
  * Manages calendar generation and month navigation
+ * Supports NoContratado days (HU-020) based on contract start configuration
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { Year, CalendarDay } from '@/src/core/domain';
+import { Year, CalendarDay, EmploymentStatus, ContractStartDate, EmploymentStatusType } from '@/src/core/domain';
 import { GenerateAnnualCalendarUseCase } from '@/src/core/usecases';
 
 export interface UseCalendarOptions {
@@ -102,9 +103,47 @@ export function useCalendar(options: UseCalendarOptions = {}): UseCalendarReturn
           return;
         }
 
-        // Generate calendar
+        const year = yearResult.getValue();
+
+        // Load contract start configuration from localStorage (HU-020)
+        let employmentStatus: EmploymentStatus | undefined;
+        let contractStartDate: ContractStartDate | undefined;
+
+        try {
+          const savedConfig = localStorage.getItem('calendarWizardData');
+          if (savedConfig) {
+            const wizardData = JSON.parse(savedConfig);
+            const contractStart = wizardData.contractStart;
+
+            if (contractStart?.statusType === EmploymentStatusType.STARTED_THIS_YEAR) {
+              // Create EmploymentStatus value object
+              const statusResult = EmploymentStatus.create(EmploymentStatusType.STARTED_THIS_YEAR);
+              if (statusResult.isSuccess()) {
+                employmentStatus = statusResult.getValue();
+
+                // Create ContractStartDate value object if date is provided
+                if (contractStart.contractStartDate) {
+                  const startDate = new Date(contractStart.contractStartDate);
+                  const dateResult = ContractStartDate.create(startDate, year);
+                  if (dateResult.isSuccess()) {
+                    contractStartDate = dateResult.getValue();
+                  }
+                }
+              }
+            }
+          }
+        } catch (storageError) {
+          // Continue without contract start config if there's an error reading from localStorage
+          console.warn('Failed to load contract start configuration:', storageError);
+        }
+
+        // Generate calendar with optional contract start configuration
         const useCase = new GenerateAnnualCalendarUseCase();
-        const result = useCase.execute({ year: yearResult.getValue() });
+        const result = useCase.execute({
+          year,
+          employmentStatus,
+          contractStartDate,
+        });
 
         if (!result.isSuccess()) {
           setError(result.errorValue());

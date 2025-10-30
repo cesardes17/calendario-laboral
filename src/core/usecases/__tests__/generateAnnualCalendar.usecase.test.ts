@@ -1,11 +1,11 @@
 /**
- * Generate Annual Calendar Use Case Tests (HU-019)
+ * Generate Annual Calendar Use Case Tests (HU-019, HU-020)
  *
  * Tests for the calendar generation use case.
  */
 
 import { GenerateAnnualCalendarUseCase } from '../generateAnnualCalendar.usecase';
-import { Year } from '../../domain';
+import { Year, EmploymentStatus, EmploymentStatusType, ContractStartDate } from '../../domain';
 
 describe('GenerateAnnualCalendarUseCase', () => {
   let useCase: GenerateAnnualCalendarUseCase;
@@ -225,6 +225,172 @@ describe('GenerateAnnualCalendarUseCase', () => {
       expect(uniqueMonths).toContain('Febrero');
       expect(uniqueMonths).toContain('Marzo');
       expect(uniqueMonths).toContain('Diciembre');
+    });
+  });
+
+  describe('NoContratado days (HU-020)', () => {
+    it('should mark days before contract start as NoContratado when started this year', () => {
+      const yearResult = Year.create(2025);
+      const year = yearResult.getValue();
+
+      const employmentStatusResult = EmploymentStatus.create(EmploymentStatusType.STARTED_THIS_YEAR);
+      const employmentStatus = employmentStatusResult.getValue();
+
+      // Contract started on June 6, 2025
+      const contractStartDateResult = ContractStartDate.create(new Date(2025, 5, 6), year); // Month is 0-indexed
+      const contractStartDate = contractStartDateResult.getValue();
+
+      const result = useCase.execute({ year, employmentStatus, contractStartDate });
+
+      expect(result.isSuccess()).toBe(true);
+
+      const calendar = result.getValue();
+      const notContractedDays = calendar.days.filter(day => day.estado === 'NoContratado');
+
+      // From Jan 1 to June 5 = 156 days
+      expect(notContractedDays).toHaveLength(156);
+
+      // Verify all NoContratado days are before June 6
+      notContractedDays.forEach(day => {
+        expect(day.fecha.getTime()).toBeLessThan(new Date(2025, 5, 6).getTime());
+        expect(day.horasTrabajadas).toBe(0);
+      });
+    });
+
+    it('should NOT mark the contract start date itself as NoContratado', () => {
+      const yearResult = Year.create(2025);
+      const year = yearResult.getValue();
+
+      const employmentStatusResult = EmploymentStatus.create(EmploymentStatusType.STARTED_THIS_YEAR);
+      const employmentStatus = employmentStatusResult.getValue();
+
+      const contractStartDateResult = ContractStartDate.create(new Date(2025, 5, 6), year);
+      const contractStartDate = contractStartDateResult.getValue();
+
+      const result = useCase.execute({ year, employmentStatus, contractStartDate });
+
+      expect(result.isSuccess()).toBe(true);
+
+      const calendar = result.getValue();
+
+      // Find June 6
+      const june6 = calendar.days.find(day => day.mes === 6 && day.diaNumero === 6);
+
+      expect(june6).toBeDefined();
+      expect(june6!.estado).not.toBe('NoContratado');
+      expect(june6!.estado).toBeNull(); // Should remain null (not yet assigned)
+    });
+
+    it('should have 0 NoContratado days if contract started on January 1', () => {
+      const yearResult = Year.create(2025);
+      const year = yearResult.getValue();
+
+      const employmentStatusResult = EmploymentStatus.create(EmploymentStatusType.STARTED_THIS_YEAR);
+      const employmentStatus = employmentStatusResult.getValue();
+
+      const contractStartDateResult = ContractStartDate.create(new Date(2025, 0, 1), year);
+      const contractStartDate = contractStartDateResult.getValue();
+
+      const result = useCase.execute({ year, employmentStatus, contractStartDate });
+
+      expect(result.isSuccess()).toBe(true);
+
+      const calendar = result.getValue();
+      const notContractedDays = calendar.days.filter(day => day.estado === 'NoContratado');
+
+      expect(notContractedDays).toHaveLength(0);
+    });
+
+    it('should NOT mark any days as NoContratado if employmentStatus is WORKED_BEFORE', () => {
+      const yearResult = Year.create(2025);
+      const year = yearResult.getValue();
+
+      const employmentStatusResult = EmploymentStatus.create(EmploymentStatusType.WORKED_BEFORE);
+      const employmentStatus = employmentStatusResult.getValue();
+
+      const result = useCase.execute({ year, employmentStatus });
+
+      expect(result.isSuccess()).toBe(true);
+
+      const calendar = result.getValue();
+      const notContractedDays = calendar.days.filter(day => day.estado === 'NoContratado');
+
+      expect(notContractedDays).toHaveLength(0);
+    });
+
+    it('should NOT mark any days as NoContratado if no employmentStatus provided', () => {
+      const yearResult = Year.create(2025);
+      const year = yearResult.getValue();
+
+      const result = useCase.execute({ year });
+
+      expect(result.isSuccess()).toBe(true);
+
+      const calendar = result.getValue();
+      const notContractedDays = calendar.days.filter(day => day.estado === 'NoContratado');
+
+      expect(notContractedDays).toHaveLength(0);
+    });
+
+    it('should fail if employmentStatus is STARTED_THIS_YEAR but no contractStartDate provided', () => {
+      const yearResult = Year.create(2025);
+      const year = yearResult.getValue();
+
+      const employmentStatusResult = EmploymentStatus.create(EmploymentStatusType.STARTED_THIS_YEAR);
+      const employmentStatus = employmentStatusResult.getValue();
+
+      const result = useCase.execute({ year, employmentStatus });
+
+      expect(result.isSuccess()).toBe(false);
+      expect(result.errorValue()).toContain('fecha de inicio de contrato');
+    });
+
+    it('should correctly count NoContratado days for mid-year start', () => {
+      const yearResult = Year.create(2025);
+      const year = yearResult.getValue();
+
+      const employmentStatusResult = EmploymentStatus.create(EmploymentStatusType.STARTED_THIS_YEAR);
+      const employmentStatus = employmentStatusResult.getValue();
+
+      // Contract started on July 1, 2025
+      const contractStartDateResult = ContractStartDate.create(new Date(2025, 6, 1), year);
+      const contractStartDate = contractStartDateResult.getValue();
+
+      const result = useCase.execute({ year, employmentStatus, contractStartDate });
+
+      expect(result.isSuccess()).toBe(true);
+
+      const calendar = result.getValue();
+      const notContractedDays = calendar.days.filter(day => day.estado === 'NoContratado');
+
+      // From Jan 1 to June 30 = 181 days
+      expect(notContractedDays).toHaveLength(181);
+    });
+
+    it('should mark all days as NoContratado if contract starts on December 31', () => {
+      const yearResult = Year.create(2025);
+      const year = yearResult.getValue();
+
+      const employmentStatusResult = EmploymentStatus.create(EmploymentStatusType.STARTED_THIS_YEAR);
+      const employmentStatus = employmentStatusResult.getValue();
+
+      // Contract started on December 31, 2025
+      const contractStartDateResult = ContractStartDate.create(new Date(2025, 11, 31), year);
+      const contractStartDate = contractStartDateResult.getValue();
+
+      const result = useCase.execute({ year, employmentStatus, contractStartDate });
+
+      expect(result.isSuccess()).toBe(true);
+
+      const calendar = result.getValue();
+      const notContractedDays = calendar.days.filter(day => day.estado === 'NoContratado');
+
+      // All days except Dec 31 = 364 days
+      expect(notContractedDays).toHaveLength(364);
+
+      // Verify Dec 31 is NOT marked as NoContratado
+      const dec31 = calendar.days.find(day => day.mes === 12 && day.diaNumero === 31);
+      expect(dec31!.estado).not.toBe('NoContratado');
     });
   });
 });
