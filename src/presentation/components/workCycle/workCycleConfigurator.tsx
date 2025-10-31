@@ -21,12 +21,12 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CycleMode, CyclePart, WeeklyMask, WorkCycle } from "@/src/core/domain";
 import { useWorkCycle } from "@/src/application/hooks";
-import { CYCLE_TEMPLATES, TemplateKey } from "./workCycle/workCycleConstants";
-import { WorkCycleModeSelector } from "./workCycle/workCycleModeSelector";
-import { WorkCycleWeeklyConfig } from "./workCycle/workCycleWeeklyConfig";
-import { WorkCycleTemplateSelector } from "./workCycle/workCycleTemplateSelector";
-import { WorkCyclePartsList } from "./workCycle/workCyclePartsList";
-import { WorkCycleStatusAlerts } from "./workCycle/workCycleStatusAlerts";
+import { CYCLE_TEMPLATES, TemplateKey } from "./workCycleConstants";
+import { WorkCycleModeSelector } from "./workCycleModeSelector";
+import { WorkCycleWeeklyConfig } from "./workCycleWeeklyConfig";
+import { WorkCycleTemplateSelector } from "./workCycleTemplateSelector";
+import { WorkCyclePartsList } from "./workCyclePartsList";
+import { WorkCycleStatusAlerts } from "./workCycleStatusAlerts";
 
 export interface WorkCycleConfiguratorProps {
   /**
