@@ -101,6 +101,33 @@ npm run lint
 
 Abre [http://localhost:3000](http://localhost:3000) en tu navegador para ver la aplicación.
 
+### Agente de Implementación de Jira
+
+Este proyecto incluye un **agente autónomo** de Claude Code para implementar historias de usuario desde Jira de forma automática.
+
+**Uso:**
+```bash
+# En Claude Code, ejecuta:
+/implement-jira-story SCRUM-35
+```
+
+**El agente realizará automáticamente:**
+1. ✅ Descarga y análisis de la historia desde Jira
+2. ✅ Planificación detallada siguiendo Clean Architecture
+3. ✅ Implementación de código en las capas necesarias
+4. ✅ Creación de tests comprehensivos (mínimo 80% cobertura)
+5. ✅ Validación con build y testing
+6. ✅ Commit con mensaje descriptivo y trazabilidad
+
+**Ventajas:**
+- Implementación consistente con las convenciones del proyecto
+- Cobertura de tests garantizada
+- Documentación automática en commits
+- Validación de arquitectura limpia
+- Integración completa con Jira
+
+Ver documentación completa en [`.claude/commands/README.md`](./.claude/commands/README.md)
+
 ## Estado del proyecto
 
 **Versión actual:** 1.0.0-alpha
