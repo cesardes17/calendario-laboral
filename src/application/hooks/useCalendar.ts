@@ -3,11 +3,13 @@
  *
  * Manages calendar generation and month navigation
  * Supports NoContratado days (HU-020) based on contract start configuration
+ * Applies weekly work cycle pattern (HU-021) if configured
+ * Applies parts-based work cycle pattern (HU-022) if configured
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { Year, CalendarDay, EmploymentStatus, ContractStartDate, EmploymentStatusType } from '@/src/core/domain';
-import { GenerateAnnualCalendarUseCase } from '@/src/core/usecases';
+import { Year, CalendarDay, EmploymentStatus, ContractStartDate, EmploymentStatusType, WorkCycle, CycleMode, CycleOffset, CycleDayType } from '@/src/core/domain';
+import { GenerateAnnualCalendarUseCase, ApplyWeeklyCycleToDaysUseCase, ApplyPartsCycleToDaysUseCase } from '@/src/core/usecases';
 
 export interface UseCalendarOptions {
   /** Initial year to display */
@@ -152,7 +154,93 @@ export function useCalendar(options: UseCalendarOptions = {}): UseCalendarReturn
         }
 
         const calendar = result.getValue();
-        setDays(calendar.days);
+        const finalDays = calendar.days;
+
+        // Apply work cycle pattern if configured (HU-021, HU-022)
+        try {
+          const savedConfig = localStorage.getItem('calendarWizardData');
+          if (savedConfig) {
+            const wizardData = JSON.parse(savedConfig);
+            const workCycleData = wizardData.workCycle;
+
+            if (workCycleData) {
+              // Apply WEEKLY mode cycle (HU-021)
+              if (workCycleData.mode === CycleMode.WEEKLY) {
+                const weeklyMask = workCycleData.data?.weeklyMask;
+
+                if (weeklyMask && Array.isArray(weeklyMask) && weeklyMask.length === 7) {
+                  const workCycleResult = WorkCycle.createWeekly(weeklyMask as [boolean, boolean, boolean, boolean, boolean, boolean, boolean]);
+                  if (workCycleResult.isSuccess()) {
+                    const workCycle = workCycleResult.getValue();
+                    const applyCycleUseCase = new ApplyWeeklyCycleToDaysUseCase();
+                    const applyCycleResult = applyCycleUseCase.execute({
+                      days: finalDays,
+                      workCycle,
+                    });
+
+                    if (!applyCycleResult.isSuccess()) {
+                      console.warn('Failed to apply weekly cycle:', applyCycleResult.errorValue());
+                    }
+                    // Note: finalDays is mutated in place by the use case
+                  }
+                }
+              }
+              // Apply PARTS mode cycle (HU-022)
+              else if (workCycleData.mode === CycleMode.PARTS) {
+                const parts = workCycleData.data?.parts;
+
+                if (parts && Array.isArray(parts) && parts.length > 0) {
+                  const workCycleResult = WorkCycle.createParts(parts);
+                  if (workCycleResult.isSuccess()) {
+                    const workCycle = workCycleResult.getValue();
+
+                    // Get cycle offset if user was already working
+                    let cycleOffset: CycleOffset | undefined;
+                    const contractStartConfig = wizardData.contractStart;
+
+                    if (contractStartConfig?.statusType === EmploymentStatusType.WORKED_BEFORE) {
+                      const offsetData = contractStartConfig.cycleOffset;
+                      if (offsetData) {
+                        // Convert string dayType to enum
+                        const dayType = offsetData.dayType === 'WORK' || offsetData.dayType === 'Trabajo'
+                          ? CycleDayType.WORK
+                          : CycleDayType.REST;
+
+                        const offsetResult = CycleOffset.create(
+                          offsetData.partNumber,
+                          offsetData.dayWithinPart,
+                          dayType
+                        );
+
+                        if (offsetResult.isSuccess()) {
+                          cycleOffset = offsetResult.getValue();
+                        }
+                      }
+                    }
+
+                    const applyCycleUseCase = new ApplyPartsCycleToDaysUseCase();
+                    const applyCycleResult = applyCycleUseCase.execute({
+                      days: finalDays,
+                      workCycle,
+                      cycleOffset,
+                      contractStartDate: contractStartDate?.value,
+                    });
+
+                    if (!applyCycleResult.isSuccess()) {
+                      console.warn('Failed to apply parts cycle:', applyCycleResult.errorValue());
+                    }
+                    // Note: finalDays is mutated in place by the use case
+                  }
+                }
+              }
+            }
+          }
+        } catch (cycleError) {
+          // Continue without cycle application if there's an error
+          console.warn('Failed to apply work cycle:', cycleError);
+        }
+
+        setDays(finalDays);
         setIsLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido');

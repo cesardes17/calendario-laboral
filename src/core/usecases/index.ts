@@ -17,3 +17,7 @@ export * from './manageVacations.usecase';
 export * from './validateConfiguration.usecase';
 export { GenerateAnnualCalendarUseCase } from './generateAnnualCalendar.usecase';
 export type { GenerateAnnualCalendarInput, GenerateAnnualCalendarOutput } from './generateAnnualCalendar.usecase';
+export { ApplyWeeklyCycleToDaysUseCase } from './applyWeeklyCycleToDays.usecase';
+export type { ApplyWeeklyCycleToDaysInput, ApplyWeeklyCycleToDaysOutput } from './applyWeeklyCycleToDays.usecase';
+export { ApplyPartsCycleToDaysUseCase } from './applyPartsCycleToDays.usecase';
+export type { ApplyPartsCycleToDaysInput, ApplyPartsCycleToDaysOutput } from './applyPartsCycleToDays.usecase';

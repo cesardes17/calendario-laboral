@@ -125,12 +125,22 @@ export const ContractStartConfigurator: React.FC<
   // Determine if cycle is weekly (offset not required for "worked before")
   const isWeeklyCycle = workCycle?.isWeekly() ?? false;
 
-  // Calculate max parts if in parts mode
-  const maxParts = React.useMemo(() => {
-    if (!workCycle || workCycle.isWeekly()) return undefined;
-    const parts = workCycle.getParts();
-    return parts ? parts.length : undefined;
-  }, [workCycle]);
+  // Initialize cycle offset with default values when showing the config for the first time
+  useEffect(() => {
+    // Only initialize if:
+    // 1. Status is WORKED_BEFORE
+    // 2. Cycle is PARTS mode (not weekly)
+    // 3. No initial config was provided (first time showing)
+    if (
+      state.status?.type === EmploymentStatusType.WORKED_BEFORE &&
+      !isWeeklyCycle &&
+      !initialConfig?.cycleOffset &&
+      workCycle?.isParts()
+    ) {
+      // Initialize with default values (Parte 1, Día 1 de trabajo)
+      setCycleOffset(offsetPartNumber, offsetDayWithinPart, offsetDayType);
+    }
+  }, [state.status?.type, isWeeklyCycle, workCycle, initialConfig, offsetPartNumber, offsetDayWithinPart, offsetDayType, setCycleOffset]);
 
   // Handle employment status change
   const handleStatusChange = useCallback(
@@ -304,7 +314,7 @@ export const ContractStartConfigurator: React.FC<
               onPartNumberChange={handleOffsetPartNumberChange}
               onDayWithinPartChange={handleOffsetDayWithinPartChange}
               onDayTypeChange={handleOffsetDayTypeChange}
-              maxParts={maxParts}
+              workCycle={workCycle}
             />
           </motion.div>
         )}
