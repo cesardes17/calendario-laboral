@@ -25,3 +25,7 @@ export { ApplyVacationsToDaysUseCase } from './applyVacationsToDays.usecase';
 export type { ApplyVacationsToDaysInput, ApplyVacationsToDaysOutput } from './applyVacationsToDays.usecase';
 export { ApplyHolidaysToDaysUseCase } from './applyHolidaysToDays.usecase';
 export type { ApplyHolidaysToDaysInput, ApplyHolidaysToDaysOutput } from './applyHolidaysToDays.usecase';
+export { CalculateDayHoursUseCase } from './calculateDayHours.usecase';
+export type { CalculateDayHoursInput, CalculateDayHoursOutput } from './calculateDayHours.usecase';
+export { ApplyHoursToCalendarUseCase } from './applyHoursToCalendar.usecase';
+export type { ApplyHoursToCalendarInput, ApplyHoursToCalendarOutput } from './applyHoursToCalendar.usecase';
