@@ -68,6 +68,44 @@ describe('Holiday Value Object', () => {
 
       expect(result.isSuccess()).toBe(true);
     });
+
+    it('should create a holiday with worked flag set to true', () => {
+      const result = Holiday.create({
+        date: new Date(2025, 0, 1),
+        name: 'Año Nuevo',
+        worked: true,
+      });
+
+      expect(result.isSuccess()).toBe(true);
+      const holiday = result.getValue();
+      expect(holiday.worked).toBe(true);
+      expect(holiday.isWorked()).toBe(true);
+    });
+
+    it('should create a holiday with worked flag set to false by default', () => {
+      const result = Holiday.create({
+        date: new Date(2025, 0, 1),
+        name: 'Año Nuevo',
+      });
+
+      expect(result.isSuccess()).toBe(true);
+      const holiday = result.getValue();
+      expect(holiday.worked).toBe(false);
+      expect(holiday.isWorked()).toBe(false);
+    });
+
+    it('should create a holiday with explicit worked flag set to false', () => {
+      const result = Holiday.create({
+        date: new Date(2025, 0, 1),
+        name: 'Año Nuevo',
+        worked: false,
+      });
+
+      expect(result.isSuccess()).toBe(true);
+      const holiday = result.getValue();
+      expect(holiday.worked).toBe(false);
+      expect(holiday.isWorked()).toBe(false);
+    });
   });
 
   describe('date methods', () => {
@@ -281,6 +319,24 @@ describe('Holiday Value Object', () => {
       expect(copy.getDayOfMonth()).toBe(1);
     });
 
+    it('should create a copy with updated worked flag', () => {
+      const original = Holiday.create({
+        date: new Date(2025, 0, 1),
+        name: 'Año Nuevo',
+        worked: false,
+      }).getValue();
+
+      const result = original.copyWith({
+        worked: true,
+      });
+
+      expect(result.isSuccess()).toBe(true);
+      const copy = result.getValue();
+      expect(copy.worked).toBe(true);
+      expect(copy.name).toBe('Año Nuevo');
+      expect(copy.getDayOfMonth()).toBe(1);
+    });
+
     it('should validate the new values', () => {
       const original = Holiday.create({
         date: new Date(2025, 0, 1),
@@ -299,6 +355,7 @@ describe('Holiday Value Object', () => {
       const holiday = Holiday.create({
         date: new Date(2025, 0, 1, 12, 30, 0),
         name: 'Año Nuevo',
+        worked: true,
       }).getValue();
 
       const obj = holiday.toObject();
@@ -306,6 +363,7 @@ describe('Holiday Value Object', () => {
       expect(obj).toEqual({
         date: expect.any(String),
         name: 'Año Nuevo',
+        worked: true,
       });
       expect(new Date(obj.date).getFullYear()).toBe(2025);
     });
@@ -340,15 +398,31 @@ describe('Holiday Value Object', () => {
       const original = Holiday.create({
         date: new Date(2025, 0, 1),
         name: 'Año Nuevo',
+        worked: true,
       }).getValue();
 
       const obj = original.toObject();
       const restored = Holiday.fromObject(obj).getValue();
 
       expect(restored.name).toBe(original.name);
+      expect(restored.worked).toBe(original.worked);
       expect(restored.getYear()).toBe(original.getYear());
       expect(restored.getMonth()).toBe(original.getMonth());
       expect(restored.getDayOfMonth()).toBe(original.getDayOfMonth());
+    });
+
+    it('should handle missing worked field in deserialization (defaults to false)', () => {
+      const obj = {
+        date: '2025-01-01T00:00:00.000Z',
+        name: 'Año Nuevo',
+        // worked field is missing
+      };
+
+      const result = Holiday.fromObject(obj);
+
+      expect(result.isSuccess()).toBe(true);
+      const holiday = result.getValue();
+      expect(holiday.worked).toBe(false);
     });
   });
 });

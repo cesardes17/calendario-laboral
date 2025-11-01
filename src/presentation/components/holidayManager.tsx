@@ -47,10 +47,11 @@ export const HolidayManager: React.FC<HolidayManagerProps> = ({
   const [formData, setFormData] = useState({
     date: "",
     name: "",
+    worked: false,
   });
 
   const resetForm = () => {
-    setFormData({ date: "", name: "" });
+    setFormData({ date: "", name: "", worked: false });
     setEditingDate(null);
   };
 
@@ -67,6 +68,7 @@ export const HolidayManager: React.FC<HolidayManagerProps> = ({
     setFormData({
       date: dateStr,
       name: holiday.name,
+      worked: holiday.worked,
     });
     setEditingDate(holiday.date);
     setIsModalOpen(true);
@@ -91,6 +93,7 @@ export const HolidayManager: React.FC<HolidayManagerProps> = ({
     const holidayResult = Holiday.create({
       date: dateObj,
       name: formData.name,
+      worked: formData.worked,
     });
 
     if (holidayResult.isFailure()) {
@@ -196,7 +199,7 @@ export const HolidayManager: React.FC<HolidayManagerProps> = ({
                       )}
                     </div>
                     <div className="text-sm mt-1 text-gray-500 dark:text-gray-400">
-                      Festivo oficial
+                      {holiday.isWorked() ? '✓ Trabajado' : 'No trabajado'}
                     </div>
                   </div>
                 </div>
@@ -277,11 +280,32 @@ export const HolidayManager: React.FC<HolidayManagerProps> = ({
                 </p>
               </div>
 
+              {/* Worked checkbox */}
+              <div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.worked}
+                    onChange={(e) =>
+                      setFormData({ ...formData, worked: e.target.checked })
+                    }
+                    className="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700"
+                  />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Este festivo fue trabajado
+                  </span>
+                </label>
+                <p className="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
+                  Si marcas esta casilla, se aplicarán las horas de festivo configuradas
+                </p>
+              </div>
+
               {/* Info message */}
               <div className="p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg">
                 <p className="text-sm text-blue-800 dark:text-blue-300">
-                  ℹ️ Si este festivo coincide con un día de trabajo según tu
-                  ciclo, se aplicarán las horas de festivo configuradas.
+                  ℹ️ Los festivos tienen prioridad sobre el ciclo de trabajo. Si un festivo
+                  no fue trabajado, ese día tendrá 0 horas. Si fue trabajado, se aplicarán
+                  las horas de festivo configuradas.
                 </p>
               </div>
 

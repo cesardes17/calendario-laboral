@@ -9,8 +9,8 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { Year, CalendarDay, EmploymentStatus, ContractStartDate, EmploymentStatusType, WorkCycle, CycleMode, CycleOffset, CycleDayType, VacationPeriod } from '@/src/core/domain';
-import { GenerateAnnualCalendarUseCase, ApplyWeeklyCycleToDaysUseCase, ApplyPartsCycleToDaysUseCase, ApplyVacationsToDaysUseCase } from '@/src/core/usecases';
+import { Year, CalendarDay, EmploymentStatus, ContractStartDate, EmploymentStatusType, WorkCycle, CycleMode, CycleOffset, CycleDayType, VacationPeriod, Holiday, WorkingHours } from '@/src/core/domain';
+import { GenerateAnnualCalendarUseCase, ApplyWeeklyCycleToDaysUseCase, ApplyPartsCycleToDaysUseCase, ApplyVacationsToDaysUseCase, ApplyHolidaysToDaysUseCase } from '@/src/core/usecases';
 
 export interface UseCalendarOptions {
   /** Initial year to display */
@@ -283,6 +283,63 @@ export function useCalendar(options: UseCalendarOptions = {}): UseCalendarReturn
         } catch (vacationError) {
           // Continue without vacation application if there's an error
           console.warn('Failed to apply vacations:', vacationError);
+        }
+
+        // Apply holidays if configured (HU-024 / SCRUM-36)
+        // Holidays have priority 3 (after NoContratado and Vacaciones, before everything else)
+        try {
+          const savedConfig = localStorage.getItem('calendarWizardData');
+          if (savedConfig) {
+            const wizardData = JSON.parse(savedConfig);
+            const holidaysData = wizardData.holidays;
+            const workingHoursData = wizardData.workingHours;
+
+            if (holidaysData && Array.isArray(holidaysData) && holidaysData.length > 0) {
+              // Restore Holiday value objects from stored data
+              const holidays: Holiday[] = [];
+
+              for (const holidayData of holidaysData) {
+                const holidayResult = Holiday.fromObject({
+                  date: holidayData.date,
+                  name: holidayData.name,
+                  worked: holidayData.worked,
+                });
+
+                if (holidayResult.isSuccess()) {
+                  holidays.push(holidayResult.getValue());
+                }
+              }
+
+              // Get working hours configuration (needed for worked holidays)
+              let workingHours = WorkingHours.default();
+              if (workingHoursData) {
+                workingHours = WorkingHours.create({
+                  weekday: workingHoursData.weekday,
+                  saturday: workingHoursData.saturday,
+                  sunday: workingHoursData.sunday,
+                  holiday: workingHoursData.holiday,
+                });
+              }
+
+              // Apply holidays to days
+              if (holidays.length > 0) {
+                const applyHolidaysUseCase = new ApplyHolidaysToDaysUseCase();
+                const applyHolidaysResult = applyHolidaysUseCase.execute({
+                  days: finalDays,
+                  holidays,
+                  workingHours,
+                });
+
+                if (!applyHolidaysResult.isSuccess()) {
+                  console.warn('Failed to apply holidays:', applyHolidaysResult.errorValue());
+                }
+                // Note: finalDays is mutated in place by the use case
+              }
+            }
+          }
+        } catch (holidayError) {
+          // Continue without holiday application if there's an error
+          console.warn('Failed to apply holidays:', holidayError);
         }
 
         setDays(finalDays);

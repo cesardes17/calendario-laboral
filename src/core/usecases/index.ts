@@ -23,3 +23,5 @@ export { ApplyPartsCycleToDaysUseCase } from './applyPartsCycleToDays.usecase';
 export type { ApplyPartsCycleToDaysInput, ApplyPartsCycleToDaysOutput } from './applyPartsCycleToDays.usecase';
 export { ApplyVacationsToDaysUseCase } from './applyVacationsToDays.usecase';
 export type { ApplyVacationsToDaysInput, ApplyVacationsToDaysOutput } from './applyVacationsToDays.usecase';
+export { ApplyHolidaysToDaysUseCase } from './applyHolidaysToDays.usecase';
+export type { ApplyHolidaysToDaysInput, ApplyHolidaysToDaysOutput } from './applyHolidaysToDays.usecase';

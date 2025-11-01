@@ -3,26 +3,29 @@ import { Result } from './result';
 /**
  * Holiday Value Object
  *
- * Represents a holiday (festivo) with its date and optional name.
+ * Represents a holiday (festivo) with its date, optional name, and worked status.
  *
  * Business Rules:
  * - Date must be valid
  * - Name is optional but has a maximum length of 100 characters
- * - Whether the holiday is worked or not is determined by the user's work cycle,
- *   NOT stored in the holiday itself
+ * - Worked flag indicates if the user worked on this holiday (default: false)
+ * - If worked = true, holiday becomes "FestivoTrabajado" with hours calculated
+ * - If worked = false, holiday becomes "Festivo" with 0 hours
  *
  * @example
  * ```typescript
  * const holiday = Holiday.create({
  *   date: new Date(2025, 0, 1),
- *   name: 'Año Nuevo'
+ *   name: 'Año Nuevo',
+ *   worked: false
  * });
  * ```
  */
 export class Holiday {
   private constructor(
     private readonly _date: Date,
-    private readonly _name: string
+    private readonly _name: string,
+    private readonly _worked: boolean
   ) {}
 
   /**
@@ -31,8 +34,9 @@ export class Holiday {
   static create(props: {
     date: Date;
     name?: string;
+    worked?: boolean;
   }): Result<Holiday> {
-    const { date, name = '' } = props;
+    const { date, name = '', worked = false } = props;
 
     // Validate date
     if (!(date instanceof Date) || isNaN(date.getTime())) {
@@ -45,7 +49,7 @@ export class Holiday {
       return Result.fail('El nombre del festivo no puede superar 100 caracteres');
     }
 
-    return Result.ok(new Holiday(new Date(date), trimmedName));
+    return Result.ok(new Holiday(new Date(date), trimmedName, worked));
   }
 
   /**
@@ -63,10 +67,24 @@ export class Holiday {
   }
 
   /**
+   * Get whether this holiday was worked
+   */
+  get worked(): boolean {
+    return this._worked;
+  }
+
+  /**
    * Check if this holiday has a name
    */
   hasName(): boolean {
     return this._name.length > 0;
+  }
+
+  /**
+   * Check if this holiday was worked
+   */
+  isWorked(): boolean {
+    return this._worked;
   }
 
   /**
@@ -149,10 +167,12 @@ export class Holiday {
   copyWith(updates: {
     date?: Date;
     name?: string;
+    worked?: boolean;
   }): Result<Holiday> {
     return Holiday.create({
       date: updates.date ?? this._date,
       name: updates.name ?? this._name,
+      worked: updates.worked ?? this._worked,
     });
   }
 
@@ -162,10 +182,12 @@ export class Holiday {
   toObject(): {
     date: string; // ISO string
     name: string;
+    worked: boolean;
   } {
     return {
       date: this._date.toISOString(),
       name: this._name,
+      worked: this._worked,
     };
   }
 
@@ -175,12 +197,14 @@ export class Holiday {
   static fromObject(obj: {
     date: string | Date;
     name?: string;
+    worked?: boolean;
   }): Result<Holiday> {
     const date = typeof obj.date === 'string' ? new Date(obj.date) : obj.date;
 
     return Holiday.create({
       date,
       name: obj.name,
+      worked: obj.worked,
     });
   }
 }
