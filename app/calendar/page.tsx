@@ -6,23 +6,40 @@
 
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useCalendar } from "@/src/application/hooks";
 import {
   MonthGrid,
   CalendarLegend,
+  DayDetailsModal,
 } from "@/src/presentation/components/calendar";
 import type { CalendarDay } from "@/src/core/domain";
-import { Calendar as CalendarIcon, Home, ArrowLeft } from "lucide-react";
+import type { WizardData } from "@/src/presentation/utils/dayJustification";
+import { Calendar as CalendarIcon, Home } from "lucide-react";
 import { Button } from "@/src/presentation/components/ui/button";
-import { Card, CardContent } from "@/src/presentation/components/ui/card";
 import Link from "next/link";
 
 export default function CalendarPage() {
   const { days, year, isLeapYear, isLoading, error } = useCalendar();
 
   const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
+  const [wizardData, setWizardData] = useState<WizardData | undefined>(
+    undefined
+  );
+
+  // Load wizard data from localStorage
+  useEffect(() => {
+    try {
+      const savedConfig = localStorage.getItem("calendarWizardData");
+      if (savedConfig) {
+        const data = JSON.parse(savedConfig);
+        setWizardData(data);
+      }
+    } catch (error) {
+      console.warn("Failed to load wizard data:", error);
+    }
+  }, []);
 
   // Group days by month
   const monthsData = useMemo(() => {
@@ -35,8 +52,6 @@ export default function CalendarPage() {
 
   const handleDayClick = (day: CalendarDay) => {
     setSelectedDay(day);
-    // TODO: Show day details in a modal or side panel (HU-032)
-    console.log("Day clicked:", day);
   };
 
   if (isLoading) {
@@ -113,46 +128,12 @@ export default function CalendarPage() {
         ))}
       </motion.div>
 
-      {/* Información del día seleccionado */}
-      {selectedDay && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mt-8"
-        >
-          <Card className="border-primary/30 bg-primary/5">
-            <CardContent className="p-6">
-              <h3 className="text-lg font-bold mb-2">
-                {selectedDay.nombreDia} {selectedDay.diaNumero} de{" "}
-                {selectedDay.nombreMes} de {year}
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Semana:</span>{" "}
-                  <span className="font-semibold">
-                    #{selectedDay.numeroSemana}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Estado:</span>{" "}
-                  <span className="font-semibold">
-                    {selectedDay.estado || "Sin estado"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">
-                    Horas trabajadas:
-                  </span>{" "}
-                  <span className="font-semibold">
-                    {selectedDay.horasTrabajadas}h
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+      {/* Day details modal (HU-032 / SCRUM-44) */}
+      <DayDetailsModal
+        day={selectedDay}
+        onClose={() => setSelectedDay(null)}
+        wizardData={wizardData}
+      />
     </div>
   );
 }
