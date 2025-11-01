@@ -284,21 +284,28 @@ function DayDetailsContent({
 
 /**
  * Gets Tailwind classes for estado badge color
+ * Colors match HU specification with full dark mode support
  */
 function getEstadoColor(estado: CalendarDay['estado']): string {
   switch (estado) {
     case 'Trabajo':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      // #3B82F6 (light) / #60A5FA (dark)
+      return 'bg-blue-500 dark:bg-blue-400 text-white';
     case 'Descanso':
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+      // #10B981 (light) / #34D399 (dark)
+      return 'bg-green-500 dark:bg-green-400 text-white';
     case 'Vacaciones':
-      return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      // #F59E0B (light) / #FBBF24 (dark)
+      return 'bg-amber-500 dark:bg-amber-400 text-white';
     case 'Festivo':
-      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      // #FB923C (light) / #FDBA74 (dark)
+      return 'bg-orange-400 dark:bg-orange-300 text-white';
     case 'FestivoTrabajado':
-      return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      // #EF4444 (light) / #F87171 (dark)
+      return 'bg-red-500 dark:bg-red-400 text-white';
     case 'NoContratado':
-      return 'bg-gray-300 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
+      // #E5E7EB (light) / #374151 (dark)
+      return 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
     default:
       return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
   }
@@ -379,8 +386,8 @@ function renderHolidayInfo(
         <Badge
           className={
             matchingHoliday.worked
-              ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
-              : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+              ? 'bg-red-500 dark:bg-red-400 text-white'
+              : 'bg-orange-400 dark:bg-orange-300 text-white'
           }
         >
           {matchingHoliday.worked ? 'Sí' : 'No'}

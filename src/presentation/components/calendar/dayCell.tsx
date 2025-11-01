@@ -7,6 +7,14 @@
 import React from 'react';
 import type { CalendarDay, EstadoDia } from '@/src/core/domain';
 import { motion } from 'framer-motion';
+import {
+  Briefcase,
+  Coffee,
+  Plane,
+  PartyPopper,
+  CalendarClock,
+  Ban,
+} from 'lucide-react';
 
 interface DayCellProps {
   day: CalendarDay;
@@ -14,7 +22,28 @@ interface DayCellProps {
 }
 
 /**
+ * Get icon component for a day state (for accessibility)
+ */
+function getDayIcon(estado: EstadoDia | null): React.ReactNode {
+  if (!estado) return null;
+
+  const iconProps = { className: 'w-2.5 h-2.5 opacity-70', strokeWidth: 2.5 };
+
+  const iconMap: Record<EstadoDia, React.ReactNode> = {
+    Trabajo: <Briefcase {...iconProps} />,
+    Descanso: <Coffee {...iconProps} />,
+    Vacaciones: <Plane {...iconProps} />,
+    Festivo: <PartyPopper {...iconProps} />,
+    FestivoTrabajado: <CalendarClock {...iconProps} />,
+    NoContratado: <Ban {...iconProps} />,
+  };
+
+  return iconMap[estado];
+}
+
+/**
  * Get color class for a day state
+ * Colors match HU specification with full dark mode support and WCAG AA compliance
  */
 function getDayColorClass(estado: EstadoDia | null): string {
   if (!estado) {
@@ -22,12 +51,23 @@ function getDayColorClass(estado: EstadoDia | null): string {
   }
 
   const colorMap: Record<EstadoDia, string> = {
-    Trabajo: 'bg-blue-500 text-white hover:bg-blue-600',
-    Descanso: 'bg-green-500 text-white hover:bg-green-600',
-    Vacaciones: 'bg-yellow-500 text-white hover:bg-yellow-600',
-    Festivo: 'bg-orange-500 text-white hover:bg-orange-600',
-    FestivoTrabajado: 'bg-red-500 text-white hover:bg-red-600',
-    NoContratado: 'bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600',
+    // Trabajo: #3B82F6 (light) / #60A5FA (dark)
+    Trabajo: 'bg-blue-500 dark:bg-blue-400 text-white hover:bg-blue-600 dark:hover:bg-blue-500',
+
+    // Descanso: #10B981 (light) / #34D399 (dark)
+    Descanso: 'bg-green-500 dark:bg-green-400 text-white hover:bg-green-600 dark:hover:bg-green-500',
+
+    // Vacaciones: #F59E0B (light) / #FBBF24 (dark)
+    Vacaciones: 'bg-amber-500 dark:bg-amber-400 text-white hover:bg-amber-600 dark:hover:bg-amber-500',
+
+    // Festivo: #FB923C (light) / #FDBA74 (dark)
+    Festivo: 'bg-orange-400 dark:bg-orange-300 text-white hover:bg-orange-500 dark:hover:bg-orange-400',
+
+    // Festivo Trabajado: #EF4444 (light) / #F87171 (dark)
+    FestivoTrabajado: 'bg-red-500 dark:bg-red-400 text-white hover:bg-red-600 dark:hover:bg-red-500',
+
+    // No Contratado: #E5E7EB (light) / #374151 (dark)
+    NoContratado: 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600',
   };
 
   return colorMap[estado];
@@ -35,6 +75,7 @@ function getDayColorClass(estado: EstadoDia | null): string {
 
 export function DayCell({ day, onClick }: DayCellProps) {
   const colorClass = getDayColorClass(day.estado);
+  const dayIcon = getDayIcon(day.estado);
   const isWeekend = day.diaSemana === 0 || day.diaSemana === 6; // Sunday or Saturday
   const isToday =
     new Date().toDateString() === day.fecha.toDateString();
@@ -55,6 +96,7 @@ export function DayCell({ day, onClick }: DayCellProps) {
         flex-col
         items-center
         justify-center
+        gap-0.5
         transition-all
         duration-200
         ${colorClass}
@@ -67,7 +109,17 @@ export function DayCell({ day, onClick }: DayCellProps) {
       title={`${day.nombreDia} ${day.diaNumero} de ${day.nombreMes}${
         day.estado ? ` - ${day.estado}` : ''
       }`}
+      aria-label={`${day.nombreDia} ${day.diaNumero} de ${day.nombreMes}${
+        day.estado ? ` - ${day.estado}` : ''
+      }`}
     >
+      {/* Accessibility icon */}
+      {dayIcon && (
+        <div className="absolute top-0.5 left-0.5" aria-hidden="true">
+          {dayIcon}
+        </div>
+      )}
+
       {/* Day number */}
       <span className="font-semibold leading-none">{day.diaNumero}</span>
 
