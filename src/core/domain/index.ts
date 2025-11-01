@@ -16,3 +16,5 @@ export type { CalendarDay, EstadoDia, DayMetadata } from './calendarDay';
 export { WEEKDAY_NAMES, MONTH_NAMES } from './calendarDay';
 export type { ResultadoValidacion } from './calendarValidation';
 export { createEmptyValidationResult, createValidationResultWithErrors, createValidationResultWithWarnings, mergeValidationResults } from './calendarValidation';
+export type { EstadisticasDias } from './dayStatistics';
+export { createEmptyStatistics } from './dayStatistics';

@@ -31,3 +31,5 @@ export { ApplyHoursToCalendarUseCase } from './applyHoursToCalendar.usecase';
 export type { ApplyHoursToCalendarInput, ApplyHoursToCalendarOutput } from './applyHoursToCalendar.usecase';
 export { ValidateCalendarUseCase } from './validateCalendar.usecase';
 export type { ValidateCalendarInput } from './validateCalendar.usecase';
+export { CalculateDayStatisticsUseCase } from './calculateDayStatistics.usecase';
+export type { CalculateDayStatisticsInput } from './calculateDayStatistics.usecase';
