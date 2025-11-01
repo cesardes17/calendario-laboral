@@ -19,6 +19,7 @@ import type { WizardData } from "@/src/presentation/utils/dayJustification";
 import { Calendar as CalendarIcon, Home } from "lucide-react";
 import { Button } from "@/src/presentation/components/ui/button";
 import Link from "next/link";
+import { CalculateDayStatisticsUseCase } from "@/src/core/usecases";
 
 export default function CalendarPage() {
   const { days, year, isLeapYear, isLoading, error } = useCalendar();
@@ -48,6 +49,21 @@ export default function CalendarPage() {
       month,
       days: days.filter((day) => day.mes === month),
     }));
+  }, [days]);
+
+  // Calculate day statistics for legend
+  const dayStatistics = useMemo(() => {
+    if (days.length === 0) return null;
+
+    const useCase = new CalculateDayStatisticsUseCase();
+    const result = useCase.execute({ days });
+
+    if (!result.isSuccess()) {
+      console.warn("Failed to calculate day statistics:", result.errorValue());
+      return null;
+    }
+
+    return result.getValue();
   }, [days]);
 
   const handleDayClick = (day: CalendarDay) => {
@@ -99,7 +115,7 @@ export default function CalendarPage() {
       </div>
       {/* Leyenda */}
       <div className="mb-8">
-        <CalendarLegend />
+        <CalendarLegend statistics={dayStatistics} />
       </div>
 
       {/* Grid de meses */}
