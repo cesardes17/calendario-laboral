@@ -33,3 +33,5 @@ export { ValidateCalendarUseCase } from './validateCalendar.usecase';
 export type { ValidateCalendarInput } from './validateCalendar.usecase';
 export { CalculateDayStatisticsUseCase } from './calculateDayStatistics.usecase';
 export type { CalculateDayStatisticsInput } from './calculateDayStatistics.usecase';
+export { CalculateWeeklyDistributionUseCase } from './calculateWeeklyDistribution.usecase';
+export type { CalculateWeeklyDistributionInput } from './calculateWeeklyDistribution.usecase';

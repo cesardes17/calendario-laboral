@@ -18,3 +18,5 @@ export type { ResultadoValidacion } from './calendarValidation';
 export { createEmptyValidationResult, createValidationResultWithErrors, createValidationResultWithWarnings, mergeValidationResults } from './calendarValidation';
 export type { EstadisticasDias } from './dayStatistics';
 export { createEmptyStatistics } from './dayStatistics';
+export type { DistribucionSemanal, DiasPorSemana, PorcentajesPorSemana, WeekdayName } from './weeklyDistribution';
+export { createEmptyWeeklyDistribution, WEEKDAY_NAMES_MAP } from './weeklyDistribution';
