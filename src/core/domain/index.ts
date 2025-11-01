@@ -14,3 +14,5 @@ export { Holiday } from './holiday';
 export { VacationPeriod } from './vacationPeriod';
 export type { CalendarDay, EstadoDia, DayMetadata } from './calendarDay';
 export { WEEKDAY_NAMES, MONTH_NAMES } from './calendarDay';
+export type { ResultadoValidacion } from './calendarValidation';
+export { createEmptyValidationResult, createValidationResultWithErrors, createValidationResultWithWarnings, mergeValidationResults } from './calendarValidation';

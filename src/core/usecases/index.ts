@@ -29,3 +29,5 @@ export { CalculateDayHoursUseCase } from './calculateDayHours.usecase';
 export type { CalculateDayHoursInput, CalculateDayHoursOutput } from './calculateDayHours.usecase';
 export { ApplyHoursToCalendarUseCase } from './applyHoursToCalendar.usecase';
 export type { ApplyHoursToCalendarInput, ApplyHoursToCalendarOutput } from './applyHoursToCalendar.usecase';
+export { ValidateCalendarUseCase } from './validateCalendar.usecase';
+export type { ValidateCalendarInput } from './validateCalendar.usecase';
