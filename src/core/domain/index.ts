@@ -20,3 +20,5 @@ export type { EstadisticasDias } from './dayStatistics';
 export { createEmptyStatistics } from './dayStatistics';
 export type { DistribucionSemanal, DiasPorSemana, PorcentajesPorSemana, WeekdayName } from './weeklyDistribution';
 export { createEmptyWeeklyDistribution, WEEKDAY_NAMES_MAP } from './weeklyDistribution';
+export type { SaldoHoras, BalanceType, BalanceState } from './hoursBalance';
+export { createEmptyHoursBalance, DEFAULT_HOURS_PER_DAY, BALANCE_STATE_THRESHOLDS } from './hoursBalance';

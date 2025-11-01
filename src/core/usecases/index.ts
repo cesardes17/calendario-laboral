@@ -35,3 +35,5 @@ export { CalculateDayStatisticsUseCase } from './calculateDayStatistics.usecase'
 export type { CalculateDayStatisticsInput } from './calculateDayStatistics.usecase';
 export { CalculateWeeklyDistributionUseCase } from './calculateWeeklyDistribution.usecase';
 export type { CalculateWeeklyDistributionInput } from './calculateWeeklyDistribution.usecase';
+export { CalculateHoursBalanceUseCase } from './calculateHoursBalance.usecase';
+export type { CalculateHoursBalanceInput } from './calculateHoursBalance.usecase';
