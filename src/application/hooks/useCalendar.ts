@@ -5,11 +5,12 @@
  * Supports NoContratado days (HU-020) based on contract start configuration
  * Applies weekly work cycle pattern (HU-021) if configured
  * Applies parts-based work cycle pattern (HU-022) if configured
+ * Applies vacation periods with priority (HU-023)
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { Year, CalendarDay, EmploymentStatus, ContractStartDate, EmploymentStatusType, WorkCycle, CycleMode, CycleOffset, CycleDayType } from '@/src/core/domain';
-import { GenerateAnnualCalendarUseCase, ApplyWeeklyCycleToDaysUseCase, ApplyPartsCycleToDaysUseCase } from '@/src/core/usecases';
+import { Year, CalendarDay, EmploymentStatus, ContractStartDate, EmploymentStatusType, WorkCycle, CycleMode, CycleOffset, CycleDayType, VacationPeriod } from '@/src/core/domain';
+import { GenerateAnnualCalendarUseCase, ApplyWeeklyCycleToDaysUseCase, ApplyPartsCycleToDaysUseCase, ApplyVacationsToDaysUseCase } from '@/src/core/usecases';
 
 export interface UseCalendarOptions {
   /** Initial year to display */
@@ -238,6 +239,50 @@ export function useCalendar(options: UseCalendarOptions = {}): UseCalendarReturn
         } catch (cycleError) {
           // Continue without cycle application if there's an error
           console.warn('Failed to apply work cycle:', cycleError);
+        }
+
+        // Apply vacation periods if configured (HU-023)
+        // Vacations have priority 2 (after NoContratado, before everything else)
+        try {
+          const savedConfig = localStorage.getItem('calendarWizardData');
+          if (savedConfig) {
+            const wizardData = JSON.parse(savedConfig);
+            const vacationsData = wizardData.vacations;
+
+            if (vacationsData && Array.isArray(vacationsData) && vacationsData.length > 0) {
+              // Restore VacationPeriod value objects from stored data
+              const vacationPeriods: VacationPeriod[] = [];
+
+              for (const vacationData of vacationsData) {
+                const vacationResult = VacationPeriod.create({
+                  startDate: new Date(vacationData.startDate),
+                  endDate: new Date(vacationData.endDate),
+                  description: vacationData.description,
+                });
+
+                if (vacationResult.isSuccess()) {
+                  vacationPeriods.push(vacationResult.getValue());
+                }
+              }
+
+              // Apply vacations to days
+              if (vacationPeriods.length > 0) {
+                const applyVacationsUseCase = new ApplyVacationsToDaysUseCase();
+                const applyVacationsResult = applyVacationsUseCase.execute({
+                  days: finalDays,
+                  vacationPeriods,
+                });
+
+                if (!applyVacationsResult.isSuccess()) {
+                  console.warn('Failed to apply vacations:', applyVacationsResult.errorValue());
+                }
+                // Note: finalDays is mutated in place by the use case
+              }
+            }
+          }
+        } catch (vacationError) {
+          // Continue without vacation application if there's an error
+          console.warn('Failed to apply vacations:', vacationError);
         }
 
         setDays(finalDays);
