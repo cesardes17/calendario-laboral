@@ -34,6 +34,7 @@ export interface CalendarStatisticsProps {
 interface StatItem {
   icon: React.ReactNode;
   label: string;
+  description: string;
   count: number;
   percentage: number;
   color: string;
@@ -59,6 +60,7 @@ export function CalendarStatistics({
     {
       icon: <Briefcase className="w-4 h-4" />,
       label: "Trabajo",
+      description: "Días laborables según tu ciclo de trabajo",
       count: statistics.diasTrabajados,
       percentage: statistics.porcentajeTrabajo,
       color: "bg-blue-500 dark:bg-blue-400",
@@ -67,6 +69,7 @@ export function CalendarStatistics({
     {
       icon: <Coffee className="w-4 h-4" />,
       label: "Descanso",
+      description: "Días de descanso según tu ciclo laboral",
       count: statistics.diasDescanso,
       percentage: statistics.porcentajeDescanso,
       color: "bg-green-500 dark:bg-green-400",
@@ -75,6 +78,7 @@ export function CalendarStatistics({
     {
       icon: <Plane className="w-4 h-4" />,
       label: "Vacaciones",
+      description: "Períodos de vacaciones configurados",
       count: statistics.diasVacaciones,
       percentage: statistics.porcentajeVacaciones,
       color: "bg-amber-500 dark:bg-amber-400",
@@ -83,6 +87,7 @@ export function CalendarStatistics({
     {
       icon: <CalendarClock className="w-4 h-4" />,
       label: "Festivos trabajados",
+      description: "Festivos oficiales que se trabajan",
       count: statistics.diasFestivosTrabajados,
       percentage:
         statistics.diasEfectivos > 0
@@ -94,6 +99,7 @@ export function CalendarStatistics({
     {
       icon: <PartyPopper className="w-4 h-4" />,
       label: "Festivos",
+      description: "Festivos oficiales no trabajados",
       count: statistics.diasFestivos,
       percentage:
         statistics.diasEfectivos > 0
@@ -105,6 +111,7 @@ export function CalendarStatistics({
     {
       icon: <Ban className="w-4 h-4" />,
       label: "No contratado",
+      description: "Días anteriores a tu fecha de inicio de contrato",
       count: statistics.diasNoContratados,
       percentage: 0, // Not included in effective days
       color: "bg-gray-200 dark:bg-gray-700",
@@ -170,16 +177,21 @@ export function CalendarStatistics({
           <div className="space-y-4">
             {itemsToShow.map((item) => (
               <div key={item.label} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-2 flex-1">
                     <div
-                      className={`w-6 h-6 rounded flex items-center justify-center text-white ${item.color}`}
+                      className={`w-6 h-6 rounded flex items-center justify-center text-white flex-shrink-0 ${item.color}`}
                     >
                       {item.icon}
                     </div>
-                    <span className="text-sm font-medium">{item.label}:</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">{item.label}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.description}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right flex-shrink-0 ml-4">
                     <span className="text-sm font-semibold">
                       {item.count} días
                     </span>

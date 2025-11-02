@@ -11,7 +11,6 @@ import { motion } from "framer-motion";
 import { useCalendar } from "@/src/application/hooks";
 import {
   MonthGrid,
-  CalendarLegend,
   DayDetailsModal,
   CalendarStatistics,
 } from "@/src/presentation/components/calendar";
@@ -114,11 +113,6 @@ export default function CalendarPage() {
       <div className="text-2xl mb-2 text-center">
         <h3>Calendario {year}</h3>
       </div>
-      {/* Leyenda */}
-      <div className="mb-8">
-        <CalendarLegend statistics={dayStatistics} />
-      </div>
-
       {/* Estadísticas */}
       {dayStatistics && (
         <div className="mb-8">
