@@ -1,5 +1,6 @@
-import { Home } from "lucide-react";
+import { Home, HelpCircle } from "lucide-react";
 import { ThemeToggle } from "../ThemeToggle";
+import { Button } from "../ui/button";
 import Link from "next/link";
 
 export function SiteHeader() {
@@ -19,7 +20,14 @@ export function SiteHeader() {
           </div>
         </div>
 
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          <Link href="/help">
+            <Button variant="ghost" size="icon" aria-label="Ayuda">
+              <HelpCircle className="h-5 w-5" />
+            </Button>
+          </Link>
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );
