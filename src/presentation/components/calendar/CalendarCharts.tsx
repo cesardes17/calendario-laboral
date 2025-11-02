@@ -70,11 +70,50 @@ export function CalendarCharts({ statistics, year }: CalendarChartsProps) {
 
     setIsExporting(true);
 
+    // Suppress html2canvas color parsing warnings
+    const originalWarn = console.warn;
+    console.warn = (...args) => {
+      const message = args[0]?.toString() || '';
+      if (message.includes('Attempting to parse an unsupported color function')) {
+        return; // Suppress this specific warning
+      }
+      originalWarn.apply(console, args);
+    };
+
     try {
       const canvas = await html2canvas(chartRef.current, {
         scale: 2, // Higher quality
         backgroundColor: "#ffffff",
         logging: false,
+        useCORS: true,
+        allowTaint: true,
+        onclone: (clonedDoc) => {
+          // Convert computed colors to inline styles to avoid parsing issues
+          const elements = clonedDoc.querySelectorAll('*');
+          elements.forEach((el) => {
+            const htmlEl = el as HTMLElement;
+            try {
+              const computedStyle = window.getComputedStyle(htmlEl);
+
+              // Force backgroundColor to RGB if needed
+              if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+                htmlEl.style.backgroundColor = computedStyle.backgroundColor;
+              }
+
+              // Force color to RGB if needed
+              if (computedStyle.color) {
+                htmlEl.style.color = computedStyle.color;
+              }
+
+              // Force borderColor to RGB if needed
+              if (computedStyle.borderColor) {
+                htmlEl.style.borderColor = computedStyle.borderColor;
+              }
+            } catch {
+              // Ignore errors for individual elements
+            }
+          });
+        },
       });
 
       // Convert to blob and download
@@ -92,6 +131,8 @@ export function CalendarCharts({ statistics, year }: CalendarChartsProps) {
     } catch (error) {
       console.error("Error exporting chart:", error);
     } finally {
+      // Restore original console.warn
+      console.warn = originalWarn;
       setIsExporting(false);
     }
   };
