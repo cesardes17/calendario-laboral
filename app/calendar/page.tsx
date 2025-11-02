@@ -13,6 +13,7 @@ import {
   MonthGrid,
   DayDetailsModal,
   CalendarStatistics,
+  CalendarCharts,
 } from "@/src/presentation/components/calendar";
 import type { CalendarDay } from "@/src/core/domain";
 import type { WizardData } from "@/src/presentation/utils/dayJustification";
@@ -122,8 +123,9 @@ export default function CalendarPage() {
       </div>
       {/* Estadísticas */}
       {dayStatistics && (
-        <div className="mb-8">
+        <div className="mb-8 space-y-6">
           <CalendarStatistics statistics={dayStatistics} year={year} />
+          <CalendarCharts statistics={dayStatistics} year={year} />
         </div>
       )}
 

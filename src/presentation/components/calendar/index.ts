@@ -10,3 +10,4 @@ export { DayDetailsModal } from './DayDetailsModal';
 export type { DayDetailsModalProps } from './DayDetailsModal';
 export { CalendarStatistics } from './CalendarStatistics';
 export type { CalendarStatisticsProps } from './CalendarStatistics';
+export { CalendarCharts } from './CalendarCharts';

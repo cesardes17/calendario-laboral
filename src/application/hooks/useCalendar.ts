@@ -10,7 +10,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Year, CalendarDay, EmploymentStatus, ContractStartDate, EmploymentStatusType, WorkCycle, CycleMode, CycleOffset, CycleDayType, VacationPeriod, Holiday, WorkingHours } from '@/src/core/domain';
-import { GenerateAnnualCalendarUseCase, ApplyWeeklyCycleToDaysUseCase, ApplyPartsCycleToDaysUseCase, ApplyVacationsToDaysUseCase, ApplyHolidaysToDaysUseCase } from '@/src/core/usecases';
+import { GenerateAnnualCalendarUseCase, ApplyWeeklyCycleToDaysUseCase, ApplyPartsCycleToDaysUseCase, ApplyVacationsToDaysUseCase, ApplyHolidaysToDaysUseCase, ApplyHoursToCalendarUseCase } from '@/src/core/usecases';
 
 export interface UseCalendarOptions {
   /** Initial year to display */
@@ -340,6 +340,41 @@ export function useCalendar(options: UseCalendarOptions = {}): UseCalendarReturn
         } catch (holidayError) {
           // Continue without holiday application if there's an error
           console.warn('Failed to apply holidays:', holidayError);
+        }
+
+        // Apply hours to all worked days (HU-025 / SCRUM-37)
+        // This should be done after all states have been assigned
+        try {
+          const savedConfig = localStorage.getItem('calendarWizardData');
+          let workingHours = WorkingHours.default();
+
+          if (savedConfig) {
+            const wizardData = JSON.parse(savedConfig);
+            const workingHoursData = wizardData.workingHours;
+
+            if (workingHoursData) {
+              workingHours = WorkingHours.create({
+                weekday: workingHoursData.weekday,
+                saturday: workingHoursData.saturday,
+                sunday: workingHoursData.sunday,
+                holiday: workingHoursData.holiday,
+              });
+            }
+          }
+
+          const applyHoursUseCase = new ApplyHoursToCalendarUseCase();
+          const applyHoursResult = applyHoursUseCase.execute({
+            days: finalDays,
+            workingHours,
+          });
+
+          if (!applyHoursResult.isSuccess()) {
+            console.warn('Failed to apply hours to calendar:', applyHoursResult.errorValue());
+          }
+          // Note: finalDays is mutated in place by the use case
+        } catch (hoursError) {
+          // Continue without hours application if there's an error
+          console.warn('Failed to apply hours to calendar:', hoursError);
         }
 
         setDays(finalDays);

@@ -5,6 +5,37 @@
  * Used to provide statistical summaries of the calendar (HU-027 / SCRUM-39).
  */
 
+import type { DistribucionSemanal } from './weeklyDistribution';
+import { createEmptyWeeklyDistribution } from './weeklyDistribution';
+import type { SaldoHoras } from './hoursBalance';
+import { createEmptyHoursBalance } from './hoursBalance';
+
+/**
+ * Breakdown of worked hours by day type
+ */
+export interface DesgloseHorasPorTipo {
+  /** Hours worked Monday-Friday */
+  lunesViernes: number;
+  /** Hours worked on Saturdays */
+  sabados: number;
+  /** Hours worked on Sundays */
+  domingos: number;
+  /** Hours worked on holidays */
+  festivosTrabajados: number;
+}
+
+/**
+ * Monthly statistics for charts (HU-Statistics / SCRUM-50)
+ */
+export interface EstadisticasMensuales {
+  /** Hours worked per month (array of 12 numbers, Jan=0, Dec=11) */
+  horasPorMes: number[];
+  /** Worked days per month (array of 12 numbers) */
+  diasTrabajadosPorMes: number[];
+  /** Month names for display */
+  nombresMeses: string[];
+}
+
 /**
  * Statistics about the distribution of days in a calendar
  *
@@ -30,7 +61,16 @@
  *   diasEfectivos: 209,
  *   porcentajeTrabajo: 61.24,
  *   porcentajeDescanso: 25.84,
- *   porcentajeVacaciones: 10.53
+ *   porcentajeVacaciones: 10.53,
+ *   distribucionSemanal: {
+ *     domingo: 0,
+ *     lunes: 26,
+ *     martes: 26,
+ *     miercoles: 26,
+ *     jueves: 26,
+ *     viernes: 26,
+ *     sabado: 0
+ *   }
  * };
  * ```
  */
@@ -76,6 +116,25 @@ export interface EstadisticasDias {
 
   /** Percentage of vacation days over effective days */
   porcentajeVacaciones: number;
+
+  /** Distribution of worked days by weekday (HU-Statistics / SCRUM-50) */
+  distribucionSemanal: DistribucionSemanal;
+
+  // Hours balance and breakdown (HU-Statistics / SCRUM-50)
+  /** Balance between worked hours and contract hours */
+  balanceHoras: SaldoHoras;
+
+  /** Breakdown of hours by day type */
+  desgloseHorasPorTipo: DesgloseHorasPorTipo;
+
+  /** Average hours per worked day */
+  promedioHorasPorDiaTrabajado: number;
+
+  /** Average hours per week */
+  promedioHorasPorSemana: number;
+
+  /** Monthly statistics for charts (HU-Statistics / SCRUM-50) */
+  estadisticasMensuales: EstadisticasMensuales;
 }
 
 /**
@@ -96,5 +155,33 @@ export function createEmptyStatistics(): EstadisticasDias {
     porcentajeTrabajo: 0,
     porcentajeDescanso: 0,
     porcentajeVacaciones: 0,
+    distribucionSemanal: createEmptyWeeklyDistribution(),
+    balanceHoras: createEmptyHoursBalance(),
+    desgloseHorasPorTipo: {
+      lunesViernes: 0,
+      sabados: 0,
+      domingos: 0,
+      festivosTrabajados: 0,
+    },
+    promedioHorasPorDiaTrabajado: 0,
+    promedioHorasPorSemana: 0,
+    estadisticasMensuales: {
+      horasPorMes: Array(12).fill(0),
+      diasTrabajadosPorMes: Array(12).fill(0),
+      nombresMeses: [
+        'Enero',
+        'Febrero',
+        'Marzo',
+        'Abril',
+        'Mayo',
+        'Junio',
+        'Julio',
+        'Agosto',
+        'Septiembre',
+        'Octubre',
+        'Noviembre',
+        'Diciembre',
+      ],
+    },
   };
 }

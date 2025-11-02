@@ -12,7 +12,10 @@ import {
   EstadisticasDias,
   createEmptyStatistics,
   Result,
+  WEEKDAY_NAMES_MAP,
+  type WeekdayName,
 } from '../domain';
+import { CalculateHoursBalanceUseCase } from './calculateHoursBalance.usecase';
 
 /**
  * Input for calculating day statistics
@@ -20,6 +23,9 @@ import {
 export interface CalculateDayStatisticsInput {
   /** The calendar days to analyze */
   days: CalendarDay[];
+
+  /** Optional annual contract hours for balance calculation */
+  horasConvenio?: number;
 }
 
 /**
@@ -61,7 +67,7 @@ export class CalculateDayStatisticsUseCase {
    */
   public execute(input: CalculateDayStatisticsInput): Result<EstadisticasDias> {
     try {
-      const { days } = input;
+      const { days, horasConvenio } = input;
 
       // Validate input
       if (!days || days.length === 0) {
@@ -72,12 +78,24 @@ export class CalculateDayStatisticsUseCase {
 
       // Initialize statistics
       const stats = createEmptyStatistics();
+      let totalHorasTrabajadas = 0;
 
-      // Single-pass counting of days by state
+      // Arrays for monthly statistics (12 months)
+      const horasPorMes = Array(12).fill(0);
+      const diasTrabajadosPorMes = Array(12).fill(0);
+
+      // Single-pass counting of days by state, weekday distribution, hours, and monthly stats
       for (const day of days) {
+        // Count by state
         switch (day.estado) {
           case 'Trabajo':
             stats.diasTrabajados++;
+            this.incrementWeekdayDistribution(stats, day.diaSemana);
+            totalHorasTrabajadas += day.horasTrabajadas;
+            this.incrementHoursByDayType(stats, day);
+            // Monthly statistics (mes is 1-indexed, array is 0-indexed)
+            horasPorMes[day.mes - 1] += day.horasTrabajadas;
+            diasTrabajadosPorMes[day.mes - 1]++;
             break;
           case 'Descanso':
             stats.diasDescanso++;
@@ -90,6 +108,12 @@ export class CalculateDayStatisticsUseCase {
             break;
           case 'FestivoTrabajado':
             stats.diasFestivosTrabajados++;
+            this.incrementWeekdayDistribution(stats, day.diaSemana);
+            totalHorasTrabajadas += day.horasTrabajadas;
+            this.incrementHoursByDayType(stats, day);
+            // Monthly statistics (mes is 1-indexed, array is 0-indexed)
+            horasPorMes[day.mes - 1] += day.horasTrabajadas;
+            diasTrabajadosPorMes[day.mes - 1]++;
             break;
           case 'NoContratado':
             stats.diasNoContratados++;
@@ -151,6 +175,37 @@ export class CalculateDayStatisticsUseCase {
         stats.porcentajeVacaciones = 0;
       }
 
+      // Calculate weekly distribution percentages and analysis
+      this.finalizeWeeklyDistribution(stats);
+
+      // Calculate hours balance if contract hours provided
+      if (horasConvenio !== undefined && horasConvenio > 0) {
+        const balanceUseCase = new CalculateHoursBalanceUseCase();
+        const balanceResult = balanceUseCase.execute({
+          horasTrabajadas: totalHorasTrabajadas,
+          horasConvenio,
+        });
+
+        if (balanceResult.isSuccess()) {
+          stats.balanceHoras = balanceResult.getValue();
+        }
+      }
+
+      // Calculate averages
+      if (stats.totalDiasLaborables > 0) {
+        stats.promedioHorasPorDiaTrabajado =
+          Math.round((totalHorasTrabajadas / stats.totalDiasLaborables) * 100) / 100;
+      }
+
+      // Calculate average hours per week (52 weeks in a year)
+      const totalWeeksInYear = 52;
+      stats.promedioHorasPorSemana =
+        Math.round((totalHorasTrabajadas / totalWeeksInYear) * 100) / 100;
+
+      // Assign monthly statistics
+      stats.estadisticasMensuales.horasPorMes = horasPorMes;
+      stats.estadisticasMensuales.diasTrabajadosPorMes = diasTrabajadosPorMes;
+
       return Result.ok<EstadisticasDias>(stats);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
@@ -172,5 +227,87 @@ export class CalculateDayStatisticsUseCase {
       return 0;
     }
     return Math.round((part / total) * 10000) / 100; // Round to 2 decimals
+  }
+
+  /**
+   * Increments the weekday distribution count for worked days
+   *
+   * @param stats - The statistics object to update
+   * @param diaSemana - Day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
+   */
+  private incrementWeekdayDistribution(stats: EstadisticasDias, diaSemana: number): void {
+    const weekdayName = WEEKDAY_NAMES_MAP[diaSemana] as WeekdayName;
+    if (weekdayName) {
+      stats.distribucionSemanal.diasPorSemana[weekdayName]++;
+      stats.distribucionSemanal.totalDiasTrabajados++;
+    }
+  }
+
+  /**
+   * Increments hours by day type (Mon-Fri, Sat, Sun, Holidays)
+   *
+   * @param stats - The statistics object to update
+   * @param day - The calendar day
+   */
+  private incrementHoursByDayType(stats: EstadisticasDias, day: CalendarDay): void {
+    const { diaSemana, horasTrabajadas, estado } = day;
+
+    if (estado === 'FestivoTrabajado') {
+      stats.desgloseHorasPorTipo.festivosTrabajados += horasTrabajadas;
+    } else if (diaSemana === 0) {
+      // Sunday
+      stats.desgloseHorasPorTipo.domingos += horasTrabajadas;
+    } else if (diaSemana === 6) {
+      // Saturday
+      stats.desgloseHorasPorTipo.sabados += horasTrabajadas;
+    } else {
+      // Monday-Friday (1-5)
+      stats.desgloseHorasPorTipo.lunesViernes += horasTrabajadas;
+    }
+  }
+
+  /**
+   * Finalizes weekly distribution by calculating percentages and analyzing most/least worked days
+   *
+   * @param stats - The statistics object to update
+   */
+  private finalizeWeeklyDistribution(stats: EstadisticasDias): void {
+    const dist = stats.distribucionSemanal;
+    const totalWorked = dist.totalDiasTrabajados;
+
+    // Calculate percentages
+    if (totalWorked > 0) {
+      dist.porcentajes.lunes = this.calculatePercentage(dist.diasPorSemana.lunes, totalWorked);
+      dist.porcentajes.martes = this.calculatePercentage(dist.diasPorSemana.martes, totalWorked);
+      dist.porcentajes.miercoles = this.calculatePercentage(dist.diasPorSemana.miercoles, totalWorked);
+      dist.porcentajes.jueves = this.calculatePercentage(dist.diasPorSemana.jueves, totalWorked);
+      dist.porcentajes.viernes = this.calculatePercentage(dist.diasPorSemana.viernes, totalWorked);
+      dist.porcentajes.sabado = this.calculatePercentage(dist.diasPorSemana.sabado, totalWorked);
+      dist.porcentajes.domingo = this.calculatePercentage(dist.diasPorSemana.domingo, totalWorked);
+    }
+
+    // Find most and least worked days
+    const weekdays = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'] as const;
+    let maxCount = -1;
+    let minCount = Infinity;
+    let mostWorkedDay = '';
+    let leastWorkedDay = '';
+
+    for (const day of weekdays) {
+      const count = dist.diasPorSemana[day];
+
+      if (count > maxCount) {
+        maxCount = count;
+        mostWorkedDay = day;
+      }
+
+      if (count < minCount) {
+        minCount = count;
+        leastWorkedDay = day;
+      }
+    }
+
+    dist.diaMasTrabajado = mostWorkedDay;
+    dist.diaMenosTrabajado = leastWorkedDay;
   }
 }
