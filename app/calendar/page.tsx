@@ -56,7 +56,14 @@ export default function CalendarPage() {
     if (days.length === 0) return null;
 
     const useCase = new CalculateDayStatisticsUseCase();
-    const result = useCase.execute({ days });
+
+    // Extract annual hours from wizard data if available
+    const horasConvenio = wizardData?.annualHours ?? undefined;
+
+    const result = useCase.execute({
+      days,
+      horasConvenio,
+    });
 
     if (!result.isSuccess()) {
       console.warn("Failed to calculate day statistics:", result.errorValue());
@@ -64,7 +71,7 @@ export default function CalendarPage() {
     }
 
     return result.getValue();
-  }, [days]);
+  }, [days, wizardData]);
 
   const handleDayClick = (day: CalendarDay) => {
     setSelectedDay(day);
