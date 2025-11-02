@@ -70,16 +70,6 @@ export function CalendarCharts({ statistics, year }: CalendarChartsProps) {
 
     setIsExporting(true);
 
-    // Suppress html2canvas color parsing warnings
-    const originalWarn = console.warn;
-    console.warn = (...args) => {
-      const message = args[0]?.toString() || '';
-      if (message.includes('Attempting to parse an unsupported color function')) {
-        return; // Suppress this specific warning
-      }
-      originalWarn.apply(console, args);
-    };
-
     try {
       const canvas = await html2canvas(chartRef.current, {
         scale: 2, // Higher quality
@@ -131,8 +121,6 @@ export function CalendarCharts({ statistics, year }: CalendarChartsProps) {
     } catch (error) {
       console.error("Error exporting chart:", error);
     } finally {
-      // Restore original console.warn
-      console.warn = originalWarn;
       setIsExporting(false);
     }
   };

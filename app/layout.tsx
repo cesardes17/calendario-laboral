@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/src/application/providers/themeProvider";
 import { SiteHeader } from "@/src/presentation/components/header/siteHeader";
+import { ColorWarningSupressor } from "@/src/presentation/components/ColorWarningSupressor";
 
 export const metadata: Metadata = {
   title: "Calendario Laboral",
@@ -18,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
+        <ColorWarningSupressor />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
