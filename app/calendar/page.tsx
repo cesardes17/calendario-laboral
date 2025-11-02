@@ -125,7 +125,7 @@ export default function CalendarPage() {
       {dayStatistics && (
         <div className="mb-8 space-y-6">
           <CalendarStatistics statistics={dayStatistics} year={year} />
-          <CalendarCharts statistics={dayStatistics} year={year} />
+          <CalendarCharts statistics={dayStatistics} />
         </div>
       )}
 

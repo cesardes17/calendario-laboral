@@ -6,24 +6,21 @@
  * - Day distribution pie chart
  * - Weekly work pattern bar chart
  * - Monthly hours line/bar chart
- * - Export functionality
  */
 
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
-import { ChevronDown, Download, PieChart as PieChartIcon, BarChart3, TrendingUp } from "lucide-react";
+import { ChevronDown, PieChart as PieChartIcon, BarChart3, TrendingUp } from "lucide-react";
 import type { EstadisticasDias } from "@/src/core/domain";
 import { DayDistributionPieChart } from "./charts/DayDistributionPieChart";
 import { WeeklyWorkBarChart } from "./charts/WeeklyWorkBarChart";
 import { MonthlyHoursChart } from "./charts/MonthlyHoursChart";
-import html2canvas from "html2canvas";
 
 interface CalendarChartsProps {
   statistics: EstadisticasDias;
-  year: number;
 }
 
 type ChartType = "pie" | "weekly" | "monthly";
@@ -56,74 +53,9 @@ const CHART_OPTIONS: ChartOption[] = [
   },
 ];
 
-export function CalendarCharts({ statistics, year }: CalendarChartsProps) {
+export function CalendarCharts({ statistics }: CalendarChartsProps) {
   const [showCharts, setShowCharts] = useState(false);
   const [selectedChart, setSelectedChart] = useState<ChartType>("pie");
-  const [isExporting, setIsExporting] = useState(false);
-  const chartRef = useRef<HTMLDivElement>(null);
-
-  /**
-   * Exports the current chart as a PNG image
-   */
-  const handleExportChart = async () => {
-    if (!chartRef.current) return;
-
-    setIsExporting(true);
-
-    try {
-      const canvas = await html2canvas(chartRef.current, {
-        scale: 2, // Higher quality
-        backgroundColor: "#ffffff",
-        logging: false,
-        useCORS: true,
-        allowTaint: true,
-        onclone: (clonedDoc) => {
-          // Convert computed colors to inline styles to avoid parsing issues
-          const elements = clonedDoc.querySelectorAll('*');
-          elements.forEach((el) => {
-            const htmlEl = el as HTMLElement;
-            try {
-              const computedStyle = window.getComputedStyle(htmlEl);
-
-              // Force backgroundColor to RGB if needed
-              if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
-                htmlEl.style.backgroundColor = computedStyle.backgroundColor;
-              }
-
-              // Force color to RGB if needed
-              if (computedStyle.color) {
-                htmlEl.style.color = computedStyle.color;
-              }
-
-              // Force borderColor to RGB if needed
-              if (computedStyle.borderColor) {
-                htmlEl.style.borderColor = computedStyle.borderColor;
-              }
-            } catch {
-              // Ignore errors for individual elements
-            }
-          });
-        },
-      });
-
-      // Convert to blob and download
-      canvas.toBlob((blob) => {
-        if (!blob) return;
-
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        const chartName = CHART_OPTIONS.find((opt) => opt.type === selectedChart)?.label || "grafico";
-        link.download = `calendario-${year}-${chartName.toLowerCase().replace(/ /g, "-")}.png`;
-        link.href = url;
-        link.click();
-        URL.revokeObjectURL(url);
-      });
-    } catch (error) {
-      console.error("Error exporting chart:", error);
-    } finally {
-      setIsExporting(false);
-    }
-  };
 
   const currentChartOption = CHART_OPTIONS.find((opt) => opt.type === selectedChart);
 
@@ -173,22 +105,8 @@ export function CalendarCharts({ statistics, year }: CalendarChartsProps) {
             ))}
           </div>
 
-          {/* Export button */}
-          <div className="flex justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportChart}
-              disabled={isExporting}
-              className="gap-2"
-            >
-              <Download className="w-4 h-4" />
-              {isExporting ? "Exportando..." : "Exportar como imagen"}
-            </Button>
-          </div>
-
           {/* Chart display area */}
-          <div ref={chartRef} className="bg-white dark:bg-gray-900 rounded-lg p-6 border">
+          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 border">
             {/* Chart title */}
             <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
               {currentChartOption?.icon}
