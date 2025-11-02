@@ -13,6 +13,7 @@ import {
   MonthGrid,
   CalendarLegend,
   DayDetailsModal,
+  CalendarStatistics,
 } from "@/src/presentation/components/calendar";
 import type { CalendarDay } from "@/src/core/domain";
 import type { WizardData } from "@/src/presentation/utils/dayJustification";
@@ -117,6 +118,13 @@ export default function CalendarPage() {
       <div className="mb-8">
         <CalendarLegend statistics={dayStatistics} />
       </div>
+
+      {/* Estadísticas */}
+      {dayStatistics && (
+        <div className="mb-8">
+          <CalendarStatistics statistics={dayStatistics} year={year} />
+        </div>
+      )}
 
       {/* Grid de meses */}
       <motion.div
