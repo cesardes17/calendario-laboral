@@ -107,7 +107,9 @@ export const ContractStartConfigurator: React.FC<
       if (initialConfig.contractStartDate && selectedYear) {
         const yearObj = Year.create(selectedYear);
         if (yearObj.isSuccess()) {
-          setContractStartDate(initialConfig.contractStartDate, yearObj.getValue());
+          // Convert string to Date (comes from localStorage as string)
+          const dateObj = new Date(initialConfig.contractStartDate);
+          setContractStartDate(dateObj, yearObj.getValue());
         }
       }
 
