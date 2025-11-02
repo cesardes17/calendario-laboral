@@ -8,7 +8,7 @@
  * - Work/rest ratios
  */
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import type { EstadisticasDias } from "@/src/core/domain";
 import { Progress } from "../ui/progress";
@@ -19,9 +19,11 @@ import {
   PartyPopper,
   CalendarClock,
   Ban,
-  TrendingUp,
   Calendar,
+  ChevronDown,
+  ChartNoAxesColumnIncreasing,
 } from "lucide-react";
+import { Button } from "../ui";
 
 export interface CalendarStatisticsProps {
   /** Day statistics to display */
@@ -55,6 +57,8 @@ export function CalendarStatistics({
   statistics,
   year,
 }: CalendarStatisticsProps) {
+  const [showContent, setShowContent] = useState(false);
+
   // Prepare stat items with colors matching the calendar
   const statItems: StatItem[] = [
     {
@@ -135,141 +139,133 @@ export function CalendarStatistics({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl flex items-center gap-2">
-          📊 Resumen del Año {year}
+        <CardTitle className="text-xl flex justify-between items-center">
+          <span className="flex gap-2">
+            <ChartNoAxesColumnIncreasing /> Resumen del Año {year}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowContent((prev) => !prev)}
+            className="h-8 w-8 p-0"
+          >
+            <ChevronDown
+              className={`w-5 h-5 transition-transform duration-200 ${
+                showContent ? "rotate-180" : ""
+              }`}
+            />
+          </Button>
         </CardTitle>
       </CardHeader>
+      {showContent && (
+        <CardContent className="space-y-6">
+          {/* Distribution Section */}
+          <div>
+            <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              Distribución de días
+            </h3>
 
-      <CardContent className="space-y-6">
-        {/* Executive Summary */}
-        <div className="p-4 bg-primary/5 dark:bg-primary/10 rounded-lg border border-primary/20">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-primary/10 dark:bg-primary/20 rounded-lg">
-              <TrendingUp className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex-1">
-              <p className="text-lg font-semibold text-foreground">
-                En {year} trabajaste {statistics.totalDiasLaborables} días de{" "}
-                {statistics.diasEfectivos} días efectivos
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Cumplimiento:{" "}
-                {statistics.diasEfectivos > 0
-                  ? (
-                      (statistics.totalDiasLaborables /
-                        statistics.diasEfectivos) *
-                      100
-                    ).toFixed(2)
-                  : 0}
-                %
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Distribution Section */}
-        <div>
-          <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
-            Distribución de días
-          </h3>
-
-          <div className="space-y-4">
-            {itemsToShow.map((item) => (
-              <div key={item.label} className="space-y-2">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-2 flex-1">
-                    <div
-                      className={`w-6 h-6 rounded flex items-center justify-center text-white flex-shrink-0 ${item.color}`}
-                    >
-                      {item.icon}
+            <div className="space-y-4">
+              {itemsToShow.map((item) => (
+                <div key={item.label} className="space-y-2">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-2 flex-1">
+                      <div
+                        className={`w-6 h-6 rounded flex items-center justify-center text-white flex-shrink-0 ${item.color}`}
+                      >
+                        {item.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">{item.label}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {item.description}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">{item.label}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {item.description}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right flex-shrink-0 ml-4">
-                    <span className="text-sm font-semibold">
-                      {item.count} días
-                    </span>
-                    {item.includeInEffective && (
-                      <span className="text-xs text-muted-foreground ml-2">
-                        ({item.percentage.toFixed(2)}%)
+                    <div className="text-right flex-shrink-0 ml-4">
+                      <span className="text-sm font-semibold">
+                        {item.count} días
                       </span>
-                    )}
+                      {item.includeInEffective && (
+                        <span className="text-xs text-muted-foreground ml-2">
+                          ({item.percentage.toFixed(2)}%)
+                        </span>
+                      )}
+                    </div>
                   </div>
+
+                  {item.includeInEffective && (
+                    <Progress
+                      value={item.percentage}
+                      className="h-2"
+                      indicatorClassName={item.color}
+                    />
+                  )}
+
+                  {!item.includeInEffective && (
+                    <p className="text-xs text-muted-foreground italic pl-8">
+                      (no incluido en estadísticas)
+                    </p>
+                  )}
                 </div>
+              ))}
+            </div>
+          </div>
+          {/* Additional Totals */}
+          <div className="pt-4 border-t space-y-3">
+            <h3 className="text-base font-semibold mb-3">
+              Información adicional
+            </h3>
 
-                {item.includeInEffective && (
-                  <Progress
-                    value={item.percentage}
-                    className="h-2"
-                    indicatorClassName={item.color}
-                  />
-                )}
-
-                {!item.includeInEffective && (
-                  <p className="text-xs text-muted-foreground italic pl-8">
-                    (no incluido en estadísticas)
-                  </p>
-                )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-xs text-muted-foreground">
+                  Días laborables totales
+                </p>
+                <p className="text-lg font-bold">
+                  {statistics.totalDiasLaborables}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Trabajo + Festivos trabajados
+                </p>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Additional Totals */}
-        <div className="pt-4 border-t space-y-3">
-          <h3 className="text-base font-semibold mb-3">Información adicional</h3>
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-xs text-muted-foreground">
+                  Días no laborables
+                </p>
+                <p className="text-lg font-bold">
+                  {statistics.totalDiasNoLaborables}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Descanso + Vacaciones + Festivos
+                </p>
+              </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="p-3 bg-muted/50 rounded-lg">
-              <p className="text-xs text-muted-foreground">
-                Días laborables totales
-              </p>
-              <p className="text-lg font-bold">
-                {statistics.totalDiasLaborables}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Trabajo + Festivos trabajados
-              </p>
-            </div>
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-xs text-muted-foreground">
+                  Ratio trabajo/descanso
+                </p>
+                <p className="text-lg font-bold">{workRestRatio}</p>
+                <p className="text-xs text-muted-foreground">
+                  Por cada día de descanso
+                </p>
+              </div>
 
-            <div className="p-3 bg-muted/50 rounded-lg">
-              <p className="text-xs text-muted-foreground">
-                Días no laborables
-              </p>
-              <p className="text-lg font-bold">
-                {statistics.totalDiasNoLaborables}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Descanso + Vacaciones + Festivos
-              </p>
-            </div>
-
-            <div className="p-3 bg-muted/50 rounded-lg">
-              <p className="text-xs text-muted-foreground">
-                Ratio trabajo/descanso
-              </p>
-              <p className="text-lg font-bold">{workRestRatio}</p>
-              <p className="text-xs text-muted-foreground">
-                Por cada día de descanso
-              </p>
-            </div>
-
-            <div className="p-3 bg-muted/50 rounded-lg">
-              <p className="text-xs text-muted-foreground">Total año</p>
-              <p className="text-lg font-bold">{statistics.totalDiasAnio}</p>
-              <p className="text-xs text-muted-foreground">
-                {statistics.totalDiasAnio === 366 ? "Año bisiesto" : "Año normal"}
-              </p>
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-xs text-muted-foreground">Total año</p>
+                <p className="text-lg font-bold">{statistics.totalDiasAnio}</p>
+                <p className="text-xs text-muted-foreground">
+                  {statistics.totalDiasAnio === 366
+                    ? "Año bisiesto"
+                    : "Año normal"}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </CardContent>
+        </CardContent>
+      )}
     </Card>
   );
 }

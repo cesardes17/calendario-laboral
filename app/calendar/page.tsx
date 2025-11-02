@@ -22,7 +22,7 @@ import Link from "next/link";
 import { CalculateDayStatisticsUseCase } from "@/src/core/usecases";
 
 export default function CalendarPage() {
-  const { days, year, isLeapYear, isLoading, error } = useCalendar();
+  const { days, year, isLoading, error } = useCalendar();
 
   const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
   const [wizardData, setWizardData] = useState<WizardData | undefined>(
