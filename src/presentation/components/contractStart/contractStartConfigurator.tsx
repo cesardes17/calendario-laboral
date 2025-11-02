@@ -90,7 +90,11 @@ export const ContractStartConfigurator: React.FC<
   } = useEmploymentStatus();
 
   // Local state for form inputs
-  const [contractDate, setContractDate] = useState<Date | null>(initialConfig?.contractStartDate ?? null);
+  const [contractDate, setContractDate] = useState<Date | null>(
+    initialConfig?.contractStartDate
+      ? new Date(initialConfig.contractStartDate) // Convert from string (localStorage)
+      : null
+  );
   const [offsetPartNumber, setOffsetPartNumber] = useState<number>(initialConfig?.cycleOffset?.partNumber ?? 1);
   const [offsetDayWithinPart, setOffsetDayWithinPart] = useState<number>(initialConfig?.cycleOffset?.dayWithinPart ?? 1);
   const [offsetDayType, setOffsetDayType] = useState<CycleDayType>(
