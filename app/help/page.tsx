@@ -139,36 +139,9 @@ export default function HelpPage() {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="space-y-4 pt-4">
+                  {/* Paso 1: Ciclo de Trabajo */}
                   <div className="space-y-3">
-                    <h4 className="font-semibold">Año</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Selecciona el año para el cual deseas generar el
-                      calendario. Por defecto, se muestra el año actual.
-                    </p>
-                  </div>
-
-                  <div className="space-y-3">
-                    <h4 className="font-semibold">Inicio de Contrato</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Indica si empezaste a trabajar este año o ya trabajabas
-                      antes:
-                    </p>
-                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 ml-4">
-                      <li>
-                        <strong>Empecé este año:</strong> Selecciona la fecha de
-                        inicio. Los días anteriores aparecerán como &ldquo;No
-                        Contratado&rdquo;.
-                      </li>
-                      <li>
-                        <strong>Ya trabajaba antes:</strong> Si usas ciclos por
-                        partes, especifica en qué parte y día del ciclo estabas
-                        el 1 de enero.
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="space-y-3">
-                    <h4 className="font-semibold">Ciclo Laboral</h4>
+                    <h4 className="font-semibold">1. Ciclo de Trabajo</h4>
                     <p className="text-sm text-muted-foreground">
                       Define tu patrón de trabajo:
                     </p>
@@ -187,27 +160,39 @@ export default function HelpPage() {
                     </ul>
                   </div>
 
+                  {/* Paso 2: Año de Referencia */}
                   <div className="space-y-3">
-                    <h4 className="font-semibold">Vacaciones</h4>
+                    <h4 className="font-semibold">2. Año de Referencia</h4>
                     <p className="text-sm text-muted-foreground">
-                      Agrega todos tus períodos de vacaciones del año. Puedes
-                      añadir múltiples períodos con descripciones opcionales
-                      (ej: &ldquo;Verano&rdquo;, &ldquo;Navidad&rdquo;).
+                      Selecciona el año para el cual deseas generar el
+                      calendario. Por defecto, se muestra el año actual.
                     </p>
                   </div>
 
+                  {/* Paso 3: Inicio de Contrato */}
                   <div className="space-y-3">
-                    <h4 className="font-semibold">Festivos</h4>
+                    <h4 className="font-semibold">3. Inicio de Contrato</h4>
                     <p className="text-sm text-muted-foreground">
-                      Puedes importar festivos automáticamente desde el BOE o
-                      agregarlos manualmente. Marca si trabajaste en algún
-                      festivo (estos contarán como días trabajados con horas
-                      especiales).
+                      Indica si empezaste a trabajar este año o ya trabajabas
+                      antes:
                     </p>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 ml-4">
+                      <li>
+                        <strong>Empecé este año:</strong> Selecciona la fecha de
+                        inicio. Los días anteriores aparecerán como &ldquo;No
+                        Contratado&rdquo;.
+                      </li>
+                      <li>
+                        <strong>Ya trabajaba antes:</strong> Si usas ciclos por
+                        partes, especifica en qué parte y día del ciclo estabas
+                        el 1 de enero.
+                      </li>
+                    </ul>
                   </div>
 
+                  {/* Paso 4: Horas de Trabajo */}
                   <div className="space-y-3">
-                    <h4 className="font-semibold">Horas de Trabajo</h4>
+                    <h4 className="font-semibold">4. Horas de Trabajo</h4>
                     <p className="text-sm text-muted-foreground">
                       Define cuántas horas trabajas por día según el tipo de
                       día:
@@ -218,9 +203,50 @@ export default function HelpPage() {
                       <li>Domingos</li>
                       <li>Festivos trabajados</li>
                     </ul>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      También especifica las horas anuales de tu convenio para
-                      calcular el balance de horas.
+                  </div>
+
+                  {/* Paso 5: Horas de Convenio Anual */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold">5. Horas de Convenio Anual</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Especifica las horas anuales establecidas en tu convenio
+                      colectivo. Este valor se utilizará para calcular el
+                      balance de horas (diferencia entre horas trabajadas y
+                      horas requeridas por convenio).
+                    </p>
+                  </div>
+
+                  {/* Paso 6: Festivos del Año */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold">6. Festivos del Año</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Puedes importar festivos automáticamente desde el BOE o
+                      agregarlos manualmente. Marca si trabajaste en algún
+                      festivo (estos contarán como días trabajados con horas
+                      especiales).
+                    </p>
+                  </div>
+
+                  {/* Paso 7: Vacaciones del Año */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold">7. Vacaciones del Año</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Agrega todos tus períodos de vacaciones del año. Puedes
+                      añadir múltiples períodos con descripciones opcionales
+                      (ej: &ldquo;Verano&rdquo;, &ldquo;Navidad&rdquo;).
+                    </p>
+                  </div>
+
+                  {/* Paso 8: Revisión Final */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold">8. Revisión Final</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Revisa toda la configuración antes de generar el
+                      calendario. Podrás ver un resumen de tu ciclo de trabajo,
+                      fechas de vacaciones, festivos configurados y el total de
+                      horas anuales. Si todo es correcto, haz clic en
+                      &ldquo;Generar Calendario&rdquo; para visualizar tu año
+                      completo.
                     </p>
                   </div>
                 </AccordionContent>
