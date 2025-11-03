@@ -8,6 +8,7 @@ import {
   getTotalVacationDays,
   detectOverlaps,
   unifyVacationPeriods,
+  calculateMaxVacationDays,
   type OverlapInfo,
 } from '@/src/core/usecases/manageVacations.usecase';
 
@@ -18,11 +19,12 @@ import {
  * Integrates with domain layer use cases for business logic.
  *
  * @param year - The selected year (required for validation)
+ * @param contractStartDate - Optional contract start date for proportional calculation
  * @returns Vacation management interface
  *
  * @example
  * ```typescript
- * const { vacations, addVacation, removeVacation, totalDays, error } = useVacations(year);
+ * const { vacations, addVacation, removeVacation, totalDays, maxVacationDays, error } = useVacations(year, contractStartDate);
  *
  * const handleAdd = () => {
  *   const vacation = VacationPeriod.create({
@@ -36,9 +38,17 @@ import {
  * };
  * ```
  */
-export function useVacations(year: Year | null) {
+export function useVacations(year: Year | null, contractStartDate?: Date) {
   const [vacations, setVacations] = useState<VacationPeriod[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  /**
+   * Calculate maximum vacation days based on contract start date
+   */
+  const maxVacationDays = useMemo(() => {
+    if (!year) return 30;
+    return calculateMaxVacationDays(contractStartDate, year);
+  }, [year, contractStartDate]);
 
   /**
    * Get total vacation days (accounting for overlaps)
@@ -65,7 +75,7 @@ export function useVacations(year: Year | null) {
         return false;
       }
 
-      const result = addVacationPeriodUseCase(period, vacations, year);
+      const result = addVacationPeriodUseCase(period, vacations, year, maxVacationDays);
 
       if (result.isFailure()) {
         setError(result.errorValue());
@@ -76,7 +86,7 @@ export function useVacations(year: Year | null) {
       setError(null);
       return true;
     },
-    [vacations, year]
+    [vacations, year, maxVacationDays]
   );
 
   /**
@@ -112,7 +122,8 @@ export function useVacations(year: Year | null) {
         index,
         updatedPeriod,
         vacations,
-        year
+        year,
+        maxVacationDays
       );
 
       if (result.isFailure()) {
@@ -124,7 +135,7 @@ export function useVacations(year: Year | null) {
       setError(null);
       return true;
     },
-    [vacations, year]
+    [vacations, year, maxVacationDays]
   );
 
   /**
@@ -196,6 +207,7 @@ export function useVacations(year: Year | null) {
     setVacations,
     error,
     totalDays,
+    maxVacationDays,
 
     // Operations
     addVacation,

@@ -180,10 +180,15 @@ export class CalculateDayStatisticsUseCase {
 
       // Calculate hours balance if contract hours provided
       if (horasConvenio !== undefined && horasConvenio > 0) {
+        // Calculate proportional contract hours based on effective days
+        // If someone started mid-year, they should only fulfill proportional hours
+        const horasConvenioProporcional =
+          (horasConvenio * stats.diasEfectivos) / stats.totalDiasAnio;
+
         const balanceUseCase = new CalculateHoursBalanceUseCase();
         const balanceResult = balanceUseCase.execute({
           horasTrabajadas: totalHorasTrabajadas,
-          horasConvenio,
+          horasConvenio: horasConvenioProporcional,
         });
 
         if (balanceResult.isSuccess()) {

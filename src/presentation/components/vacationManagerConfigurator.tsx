@@ -46,6 +46,11 @@ export interface VacationManagerConfiguratorProps {
   initialVacations?: VacationPeriod[];
 
   /**
+   * Contract start date for proportional vacation calculation (optional)
+   */
+  contractStartDate?: Date;
+
+  /**
    * Callback when configuration validity changes
    */
   onConfigurationChange?: (isValid: boolean) => void;
@@ -66,6 +71,7 @@ export const VacationManagerConfigurator: React.FC<
 > = ({
   initialYear,
   initialVacations,
+  contractStartDate,
   onConfigurationChange,
   onVacationsChange,
   className = "",
@@ -85,9 +91,10 @@ export const VacationManagerConfigurator: React.FC<
     error,
     clearError,
     totalDays,
+    maxVacationDays,
     getCount,
     setVacations,
-  } = useVacations(yearObj);
+  } = useVacations(yearObj, contractStartDate);
 
   // Load initial vacations if provided
   React.useEffect(() => {
@@ -158,7 +165,7 @@ export const VacationManagerConfigurator: React.FC<
           Gestión de Vacaciones
         </CardTitle>
         <CardDescription>
-          Añade tus períodos de vacaciones para el año (máximo 30 días)
+          Añade tus períodos de vacaciones para el año (máximo {maxVacationDays} días)
         </CardDescription>
       </CardHeader>
 
@@ -182,7 +189,7 @@ export const VacationManagerConfigurator: React.FC<
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.05 }}
         >
-          <VacationProgressCard totalDays={totalDays} />
+          <VacationProgressCard totalDays={totalDays} maxVacationDays={maxVacationDays} />
         </motion.div>
 
         {/* Vacation List Card */}

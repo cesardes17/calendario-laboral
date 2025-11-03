@@ -168,7 +168,7 @@ export function CalendarStatistics({
         statistics.diasEfectivos > 0
           ? (statistics.diasFestivosTrabajados / statistics.diasEfectivos) * 100
           : 0,
-      color: "bg-red-500 dark:bg-red-400",
+      color: "bg-purple-500 dark:bg-purple-400",
       includeInEffective: true,
     },
     {
@@ -180,7 +180,7 @@ export function CalendarStatistics({
         statistics.diasEfectivos > 0
           ? (statistics.diasFestivos / statistics.diasEfectivos) * 100
           : 0,
-      color: "bg-orange-400 dark:bg-orange-300",
+      color: "bg-red-500 dark:bg-red-400",
       includeInEffective: true,
     },
     {

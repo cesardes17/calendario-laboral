@@ -508,5 +508,88 @@ describe('CalculateDayStatisticsUseCase', () => {
         expect(endTime - startTime).toBeLessThan(10);
       });
     });
+
+    describe('Hours balance with proportional contract hours', () => {
+      it('should calculate proportional contract hours for mid-year start', () => {
+        const days: CalendarDay[] = [];
+
+        // First 6 months (182 days) not contracted
+        for (let i = 0; i < 182; i++) {
+          days.push(createDay(2025, 1, i + 1, 'NoContratado'));
+        }
+
+        // Second 6 months (183 days) working 5 days/week
+        for (let i = 0; i < 183; i++) {
+          const estado: EstadoDia = i % 7 === 5 || i % 7 === 6 ? 'Descanso' : 'Trabajo';
+          days.push(createDay(2025, 7, i + 1, estado));
+        }
+
+        // Annual contract hours: 1752
+        // Proportional hours should be: 1752 * (183 / 365) ≈ 878.05
+        const result = useCase.execute({ days, horasConvenio: 1752 });
+
+        expect(result.isSuccess()).toBe(true);
+        const stats = result.getValue();
+
+        expect(stats.diasNoContratados).toBe(182);
+        expect(stats.diasEfectivos).toBe(183); // 365 - 182
+        expect(stats.balanceHoras).toBeDefined();
+
+        // The contract hours used for balance should be proportional
+        // Expected: 1752 * (183/365) ≈ 878.05 hours
+        const expectedProportionalHours = (1752 * 183) / 365;
+        expect(stats.balanceHoras?.horasConvenio).toBeCloseTo(expectedProportionalHours, 1);
+      });
+
+      it('should use full contract hours when working entire year', () => {
+        const days: CalendarDay[] = [];
+
+        // Full year (365 days) working 5 days/week
+        for (let i = 0; i < 365; i++) {
+          const estado: EstadoDia = i % 7 === 5 || i % 7 === 6 ? 'Descanso' : 'Trabajo';
+          days.push(createDay(2025, 1, i + 1, estado));
+        }
+
+        const result = useCase.execute({ days, horasConvenio: 1752 });
+
+        expect(result.isSuccess()).toBe(true);
+        const stats = result.getValue();
+
+        expect(stats.diasNoContratados).toBe(0);
+        expect(stats.diasEfectivos).toBe(365);
+        expect(stats.balanceHoras).toBeDefined();
+
+        // Should use full contract hours (365/365 = 1)
+        expect(stats.balanceHoras?.horasConvenio).toBe(1752);
+      });
+
+      it('should calculate proportional hours for quarter-year employment', () => {
+        const days: CalendarDay[] = [];
+
+        // First 3 quarters (274 days) not contracted
+        for (let i = 0; i < 274; i++) {
+          days.push(createDay(2025, 1, i + 1, 'NoContratado'));
+        }
+
+        // Last quarter (91 days) working
+        for (let i = 0; i < 91; i++) {
+          days.push(createDay(2025, 10, i + 1, 'Trabajo'));
+        }
+
+        // Annual contract hours: 1752
+        // Proportional hours should be: 1752 * (91 / 365) ≈ 437.03
+        const result = useCase.execute({ days, horasConvenio: 1752 });
+
+        expect(result.isSuccess()).toBe(true);
+        const stats = result.getValue();
+
+        expect(stats.diasNoContratados).toBe(274);
+        expect(stats.diasEfectivos).toBe(91);
+        expect(stats.balanceHoras).toBeDefined();
+
+        const expectedProportionalHours = (1752 * 91) / 365;
+        expect(stats.balanceHoras?.horasConvenio).toBeCloseTo(expectedProportionalHours, 1);
+      });
+    });
   });
 });

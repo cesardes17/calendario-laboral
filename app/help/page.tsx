@@ -310,10 +310,10 @@ export default function HelpPage() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-violet-500 rounded" />
+                      <div className="w-8 h-8 bg-purple-500 rounded" />
                       <div>
                         <p className="text-sm font-semibold">
-                          Violeta - Festivo Trabajado
+                          Morado - Festivo Trabajado
                         </p>
                         <p className="text-xs text-muted-foreground">
                           Festivos en los que sí trabajaste

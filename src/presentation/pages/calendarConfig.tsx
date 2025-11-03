@@ -437,6 +437,11 @@ export function CalendarWizard() {
         <VacationManagerConfigurator
           initialYear={selectedYear}
           initialVacations={vacations}
+          contractStartDate={
+            contractStartConfig?.statusType === "STARTED_THIS_YEAR"
+              ? contractStartConfig.contractStartDate
+              : undefined
+          }
           onConfigurationChange={handleVacationsValidation}
           onVacationsChange={handleVacationsChange}
         />

@@ -60,11 +60,11 @@ function getDayColorClass(estado: EstadoDia | null): string {
     // Vacaciones: #F59E0B (light) / #FBBF24 (dark)
     Vacaciones: 'bg-amber-500 dark:bg-amber-400 text-white hover:bg-amber-600 dark:hover:bg-amber-500',
 
-    // Festivo: #FB923C (light) / #FDBA74 (dark)
-    Festivo: 'bg-orange-400 dark:bg-orange-300 text-white hover:bg-orange-500 dark:hover:bg-orange-400',
+    // Festivo: #EF4444 (light) / #F87171 (dark)
+    Festivo: 'bg-red-500 dark:bg-red-400 text-white hover:bg-red-600 dark:hover:bg-red-500',
 
-    // Festivo Trabajado: #EF4444 (light) / #F87171 (dark)
-    FestivoTrabajado: 'bg-red-500 dark:bg-red-400 text-white hover:bg-red-600 dark:hover:bg-red-500',
+    // Festivo Trabajado: #A855F7 (light) / #C084FC (dark)
+    FestivoTrabajado: 'bg-purple-500 dark:bg-purple-400 text-white hover:bg-purple-600 dark:hover:bg-purple-500',
 
     // No Contratado: #E5E7EB (light) / #374151 (dark)
     NoContratado: 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600',

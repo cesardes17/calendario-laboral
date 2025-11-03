@@ -17,17 +17,17 @@ import { Badge } from "../ui/badge";
 
 interface VacationProgressCardProps {
   totalDays: number;
-  maxDays?: number;
+  maxVacationDays?: number;
 }
 
 const DEFAULT_MAX_DAYS = 30;
 
 export function VacationProgressCard({
   totalDays,
-  maxDays = DEFAULT_MAX_DAYS,
+  maxVacationDays = DEFAULT_MAX_DAYS,
 }: VacationProgressCardProps) {
-  const remainingDays = Math.max(0, maxDays - totalDays);
-  const percentage = Math.min(100, (totalDays / maxDays) * 100);
+  const remainingDays = Math.max(0, maxVacationDays - totalDays);
+  const percentage = Math.min(100, (totalDays / maxVacationDays) * 100);
 
   // Determine color based on usage
   const getColorClass = () => {
@@ -105,7 +105,7 @@ export function VacationProgressCard({
           {/* Limit Info */}
           <div className="text-center pt-2 border-t border-border">
             <p className="text-xs text-muted-foreground">
-              Límite anual: {maxDays} días
+              Límite anual: {maxVacationDays} días
             </p>
           </div>
         </div>

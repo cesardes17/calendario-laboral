@@ -21,7 +21,7 @@ const DAY_STATE_COLORS = {
   Descanso: "#64748b", // slate-500
   Vacaciones: "#f59e0b", // amber-500
   Festivo: "#ef4444", // red-500
-  FestivoTrabajado: "#8b5cf6", // violet-500
+  FestivoTrabajado: "#a855f7", // purple-500
   NoContratado: "#9ca3af", // gray-400
 };
 

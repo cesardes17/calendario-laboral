@@ -68,10 +68,14 @@ export const AnnualContractHoursConfigurator: React.FC<
     getFormattedWeeklyHours,
   } = useAnnualContractHours();
 
-  // Load initial hours if provided
+  // Track if initial hours have been loaded
+  const initialHoursLoadedRef = React.useRef(false);
+
+  // Load initial hours if provided (only once)
   useEffect(() => {
-    if (initialHours !== undefined) {
+    if (initialHours !== undefined && !initialHoursLoadedRef.current) {
       setAnnualHours(initialHours.toString());
+      initialHoursLoadedRef.current = true;
     }
   }, [initialHours, setAnnualHours]);
 
