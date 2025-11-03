@@ -22,8 +22,21 @@ import { VacationPeriod } from "@/src/core/domain/vacationPeriod";
 import type { WorkingHoursConfig } from "@/src/core/domain/workingHours";
 import type { ContractStartConfig } from "../components/contractStart/contractStartConfigurator";
 import { motion } from "framer-motion";
-import { CheckCircle2, Calendar, ArrowLeft, AlertCircle, Upload, Trash2 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  CheckCircle2,
+  Calendar,
+  ArrowLeft,
+  AlertCircle,
+  Upload,
+  Trash2,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import Link from "next/link";
 
@@ -99,10 +112,13 @@ function ConfigurationSummaryContent() {
             Ver Calendario
           </button>
         </Link>
-        <button className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md border border-input bg-background hover:bg-muted font-medium transition-colors">
-          <ArrowLeft className="h-5 w-5" />
-          Editar Configuración
-        </button>
+
+        <Link href="/">
+          <button className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md border border-input bg-background hover:bg-muted font-medium transition-colors">
+            <ArrowLeft className="h-5 w-5" />
+            Editar Configuración
+          </button>
+        </Link>
       </motion.div>
 
       {/* Next Steps Info */}
@@ -153,9 +169,13 @@ export function CalendarWizard() {
   const [workCycle, setWorkCycle] = useState<WorkCycle | null>(null);
 
   // Store configuration data from each step
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-  const [contractStartConfig, setContractStartConfig] = useState<ContractStartConfig | null>(null);
-  const [workingHoursConfig, setWorkingHoursConfig] = useState<WorkingHoursConfig | null>(null);
+  const [selectedYear, setSelectedYear] = useState<number>(
+    new Date().getFullYear()
+  );
+  const [contractStartConfig, setContractStartConfig] =
+    useState<ContractStartConfig | null>(null);
+  const [workingHoursConfig, setWorkingHoursConfig] =
+    useState<WorkingHoursConfig | null>(null);
   const [annualHours, setAnnualHours] = useState<number | null>(null);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [vacations, setVacations] = useState<VacationPeriod[]>([]);
@@ -189,9 +209,12 @@ export function CalendarWizard() {
     setSelectedYear(year);
   }, []);
 
-  const handleContractStartChange = useCallback((config: ContractStartConfig) => {
-    setContractStartConfig(config);
-  }, []);
+  const handleContractStartChange = useCallback(
+    (config: ContractStartConfig) => {
+      setContractStartConfig(config);
+    },
+    []
+  );
 
   const handleWorkingHoursChange = useCallback((config: WorkingHoursConfig) => {
     setWorkingHoursConfig(config);
@@ -205,9 +228,12 @@ export function CalendarWizard() {
     setHolidays(holidayList);
   }, []);
 
-  const handleVacationsChange = useCallback((vacationList: VacationPeriod[]) => {
-    setVacations(vacationList);
-  }, []);
+  const handleVacationsChange = useCallback(
+    (vacationList: VacationPeriod[]) => {
+      setVacations(vacationList);
+    },
+    []
+  );
 
   const handleContractStartValidation = useCallback((isValid: boolean) => {
     setStepsValidation((prev) => ({ ...prev, contractStart: isValid }));
@@ -235,7 +261,7 @@ export function CalendarWizard() {
 
   // Check for saved configuration on mount
   useEffect(() => {
-    const savedConfig = localStorage.getItem('calendarWizardData');
+    const savedConfig = localStorage.getItem("calendarWizardData");
     if (savedConfig) {
       setHasStoredConfig(true);
       setShowLoadDialog(true);
@@ -245,7 +271,7 @@ export function CalendarWizard() {
   // Load configuration from localStorage
   const handleLoadConfiguration = useCallback(() => {
     try {
-      const savedConfig = localStorage.getItem('calendarWizardData');
+      const savedConfig = localStorage.getItem("calendarWizardData");
       if (!savedConfig) {
         setShowLoadDialog(false);
         return;
@@ -260,13 +286,21 @@ export function CalendarWizard() {
 
       // Restore work cycle
       if (data.workCycle) {
-        if (data.workCycle.mode === 'WEEKLY' && data.workCycle.data.weeklyMask) {
-          const cycleResult = WorkCycle.createWeekly(data.workCycle.data.weeklyMask);
+        if (
+          data.workCycle.mode === "WEEKLY" &&
+          data.workCycle.data.weeklyMask
+        ) {
+          const cycleResult = WorkCycle.createWeekly(
+            data.workCycle.data.weeklyMask
+          );
           if (cycleResult.isSuccess()) {
             setWorkCycle(cycleResult.getValue());
             setStepsValidation((prev) => ({ ...prev, workCycle: true }));
           }
-        } else if (data.workCycle.mode === 'PARTS' && data.workCycle.data.parts) {
+        } else if (
+          data.workCycle.mode === "PARTS" &&
+          data.workCycle.data.parts
+        ) {
           const cycleResult = WorkCycle.createParts(data.workCycle.data.parts);
           if (cycleResult.isSuccess()) {
             setWorkCycle(cycleResult.getValue());
@@ -312,27 +346,29 @@ export function CalendarWizard() {
       // Restore vacations
       if (data.vacations && Array.isArray(data.vacations)) {
         const restoredVacations: VacationPeriod[] = [];
-        data.vacations.forEach((v: { startDate: string; endDate: string; description: string }) => {
-          const vacationResult = VacationPeriod.create({
-            startDate: new Date(v.startDate),
-            endDate: new Date(v.endDate),
-            description: v.description,
-          });
-          if (vacationResult.isSuccess()) {
-            restoredVacations.push(vacationResult.getValue());
+        data.vacations.forEach(
+          (v: { startDate: string; endDate: string; description: string }) => {
+            const vacationResult = VacationPeriod.create({
+              startDate: new Date(v.startDate),
+              endDate: new Date(v.endDate),
+              description: v.description,
+            });
+            if (vacationResult.isSuccess()) {
+              restoredVacations.push(vacationResult.getValue());
+            }
           }
-        });
+        );
         setVacations(restoredVacations);
         setStepsValidation((prev) => ({ ...prev, vacations: true }));
       }
 
       setShowLoadDialog(false);
-      console.log('Configuration loaded from localStorage');
+      console.log("Configuration loaded from localStorage");
 
       // Force wizard re-mount with loaded data
-      setWizardKey(prev => prev + 1);
+      setWizardKey((prev) => prev + 1);
     } catch (error) {
-      console.error('Error loading configuration:', error);
+      console.error("Error loading configuration:", error);
       setShowLoadDialog(false);
     }
   }, []);
@@ -340,12 +376,12 @@ export function CalendarWizard() {
   // Delete configuration and start fresh
   const handleDeleteConfiguration = useCallback(() => {
     try {
-      localStorage.removeItem('calendarWizardData');
+      localStorage.removeItem("calendarWizardData");
       setHasStoredConfig(false);
       setShowLoadDialog(false);
-      console.log('Configuration deleted from localStorage');
+      console.log("Configuration deleted from localStorage");
     } catch (error) {
-      console.error('Error deleting configuration:', error);
+      console.error("Error deleting configuration:", error);
       setShowLoadDialog(false);
     }
   }, []);
@@ -371,7 +407,12 @@ export function CalendarWizard() {
       id: "year",
       title: "Año de Referencia",
       description: "Selecciona el año para tu calendario",
-      component: <YearSelector initialYear={selectedYear} onYearChange={handleYearChange} />,
+      component: (
+        <YearSelector
+          initialYear={selectedYear}
+          onYearChange={handleYearChange}
+        />
+      ),
       isValid: stepsValidation.year,
     },
     {
@@ -465,21 +506,23 @@ export function CalendarWizard() {
   const handleComplete = (_data: WizardData) => {
     // Collect all configuration data
     const completeWizardData = {
-      workCycle: workCycle ? {
-        mode: workCycle.mode,
-        data: workCycle.isWeekly()
-          ? { weeklyMask: workCycle.getWeeklyMask() }
-          : { parts: workCycle.getParts() }
-      } : null,
+      workCycle: workCycle
+        ? {
+            mode: workCycle.mode,
+            data: workCycle.isWeekly()
+              ? { weeklyMask: workCycle.getWeeklyMask() }
+              : { parts: workCycle.getParts() },
+          }
+        : null,
       selectedYear,
       contractStart: contractStartConfig,
       workingHours: workingHoursConfig,
       annualHours,
-      holidays: holidays.map(h => ({
+      holidays: holidays.map((h) => ({
         date: h.date.toISOString(),
         name: h.name,
       })),
-      vacations: vacations.map(v => ({
+      vacations: vacations.map((v) => ({
         startDate: v.startDate.toISOString(),
         endDate: v.endDate.toISOString(),
         description: v.description,
@@ -491,7 +534,10 @@ export function CalendarWizard() {
 
     // Save to localStorage
     try {
-      localStorage.setItem('calendarWizardData', JSON.stringify(completeWizardData));
+      localStorage.setItem(
+        "calendarWizardData",
+        JSON.stringify(completeWizardData)
+      );
       console.log("Configuration saved to localStorage");
     } catch (error) {
       console.error("Error saving to localStorage:", error);
@@ -514,7 +560,11 @@ export function CalendarWizard() {
               </p>
             </div>
 
-            <WizardStepper key={wizardKey} steps={steps} onComplete={handleComplete} />
+            <WizardStepper
+              key={wizardKey}
+              steps={steps}
+              onComplete={handleComplete}
+            />
           </>
         ) : (
           <ConfigurationSummaryContent />
@@ -537,11 +587,14 @@ export function CalendarWizard() {
                     <AlertCircle className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl">Configuración Guardada Encontrada</CardTitle>
+                    <CardTitle className="text-xl">
+                      Configuración Guardada Encontrada
+                    </CardTitle>
                   </div>
                 </div>
                 <CardDescription className="text-base">
-                  Se ha detectado una configuración guardada anteriormente. ¿Qué deseas hacer?
+                  Se ha detectado una configuración guardada anteriormente. ¿Qué
+                  deseas hacer?
                 </CardDescription>
               </CardHeader>
 
@@ -554,7 +607,9 @@ export function CalendarWizard() {
                 >
                   <Upload className="h-5 w-5 mt-0.5 flex-shrink-0" />
                   <div className="text-left flex-1">
-                    <div className="font-semibold text-base">Cargar Configuración</div>
+                    <div className="font-semibold text-base">
+                      Cargar Configuración
+                    </div>
                     <div className="text-sm font-normal text-primary-foreground/80 mt-1">
                       Continúa con los datos guardados de tu última sesión
                     </div>
@@ -569,7 +624,9 @@ export function CalendarWizard() {
                 >
                   <Trash2 className="h-5 w-5 mt-0.5 flex-shrink-0 text-destructive" />
                   <div className="text-left flex-1">
-                    <div className="font-semibold text-base">Empezar de Cero</div>
+                    <div className="font-semibold text-base">
+                      Empezar de Cero
+                    </div>
                     <div className="text-sm font-normal text-muted-foreground mt-1">
                       Borra la configuración guardada y comienza una nueva
                     </div>
@@ -578,7 +635,8 @@ export function CalendarWizard() {
 
                 {/* Info */}
                 <div className="text-xs text-muted-foreground text-center pt-2">
-                  La configuración se guarda automáticamente al completar el asistente
+                  La configuración se guarda automáticamente al completar el
+                  asistente
                 </div>
               </CardContent>
             </Card>

@@ -11,7 +11,7 @@ export const ANNUAL_CONTRACT_HOURS_CONSTRAINTS = {
   MAX: 3000,
   WARNING_LOW: 1000,
   WARNING_HIGH: 2500,
-  DEFAULT: 1752, // Jornada típica completa en España
+  DEFAULT: 1762, // Jornada típica completa en España
   WEEKS_PER_YEAR: 52,
 } as const;
 
@@ -19,9 +19,13 @@ export const ANNUAL_CONTRACT_HOURS_CONSTRAINTS = {
  * Ejemplos comunes de horas anuales
  */
 export const COMMON_ANNUAL_HOURS_EXAMPLES = [
-  { weeklyHours: 37.5, annualHours: 1950, description: 'Jornada reducida' },
-  { weeklyHours: 40, annualHours: 2080, description: 'Jornada completa estándar' },
-  { weeklyHours: 35, annualHours: 1820, description: 'Jornada europea típica' },
+  { weeklyHours: 37.5, annualHours: 1950, description: "Jornada reducida" },
+  {
+    weeklyHours: 40,
+    annualHours: 2080,
+    description: "Jornada completa estándar",
+  },
+  { weeklyHours: 35, annualHours: 1820, description: "Jornada europea típica" },
 ] as const;
 
 /**
@@ -30,7 +34,7 @@ export const COMMON_ANNUAL_HOURS_EXAMPLES = [
 export class AnnualContractHoursError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'AnnualContractHoursError';
+    this.name = "AnnualContractHoursError";
   }
 }
 
@@ -38,9 +42,9 @@ export class AnnualContractHoursError extends Error {
  * Tipo de advertencia
  */
 export enum WarningType {
-  NONE = 'none',
-  UNUSUALLY_LOW = 'unusually_low',
-  UNUSUALLY_HIGH = 'unusually_high',
+  NONE = "none",
+  UNUSUALLY_LOW = "unusually_low",
+  UNUSUALLY_HIGH = "unusually_high",
 }
 
 /**
@@ -85,13 +89,13 @@ export class AnnualContractHours {
   static fromWeeklyHours(weeklyHours: number): AnnualContractHours {
     if (weeklyHours <= 0) {
       throw new AnnualContractHoursError(
-        'Las horas semanales deben ser mayores que 0'
+        "Las horas semanales deben ser mayores que 0"
       );
     }
 
     if (weeklyHours > 168) {
       throw new AnnualContractHoursError(
-        'Las horas semanales no pueden superar 168 (horas en una semana)'
+        "Las horas semanales no pueden superar 168 (horas en una semana)"
       );
     }
 
@@ -108,13 +112,13 @@ export class AnnualContractHours {
   private validate(hours: number): void {
     if (!Number.isFinite(hours)) {
       throw new AnnualContractHoursError(
-        'Las horas deben ser un número válido'
+        "Las horas deben ser un número válido"
       );
     }
 
     if (hours <= 0) {
       throw new AnnualContractHoursError(
-        'Las horas anuales deben ser mayores que 0'
+        "Las horas anuales deben ser mayores que 0"
       );
     }
 
@@ -167,9 +171,11 @@ export class AnnualContractHours {
    * Calcula las horas semanales equivalentes
    */
   toWeeklyHours(): number {
-    return Math.round(
-      (this.hours / ANNUAL_CONTRACT_HOURS_CONSTRAINTS.WEEKS_PER_YEAR) * 100
-    ) / 100;
+    return (
+      Math.round(
+        (this.hours / ANNUAL_CONTRACT_HOURS_CONSTRAINTS.WEEKS_PER_YEAR) * 100
+      ) / 100
+    );
   }
 
   /**
