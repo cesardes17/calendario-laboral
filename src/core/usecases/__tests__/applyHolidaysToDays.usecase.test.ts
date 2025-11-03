@@ -61,14 +61,13 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
   });
 
   describe('Non-worked holiday (Festivo)', () => {
-    it('should mark a work day as Festivo with 0 hours when holiday is not worked', () => {
+    it('should mark a rest day as Festivo with 0 hours when cycle says rest', () => {
       const jan1 = new Date(2025, 0, 1); // January 1
-      const days: CalendarDay[] = [createDay(jan1, 'Trabajo', 8)];
+      const days: CalendarDay[] = [createDay(jan1, 'Descanso', 0)]; // Rest day according to cycle
 
       const holidayResult = Holiday.create({
         date: jan1,
         name: 'Año Nuevo',
-        worked: false,
       });
 
       expect(holidayResult.isSuccess()).toBe(true);
@@ -88,7 +87,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
       expect(output.workedHolidayDaysMarked).toBe(0);
       expect(output.holidaysProcessed).toBe(1);
       expect(output.totalDaysProcessed).toBe(1);
-      expect(output.stateChanges.fromWork).toBe(1);
+      expect(output.stateChanges.fromRest).toBe(1);
 
       // Check day state
       expect(days[0].estado).toBe('Festivo');
@@ -96,14 +95,13 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
       expect(days[0].descripcion).toBe('Año Nuevo');
     });
 
-    it('should mark a rest day as Festivo when holiday is not worked', () => {
+    it('should mark a null state day as Festivo by default', () => {
       const jan1 = new Date(2025, 0, 1);
-      const days: CalendarDay[] = [createDay(jan1, 'Descanso', 0)];
+      const days: CalendarDay[] = [createDay(jan1, null, 0)]; // Unprocessed day
 
       const holidayResult = Holiday.create({
         date: jan1,
         name: 'Año Nuevo',
-        worked: false,
       });
 
       const result = useCase.execute({
@@ -116,21 +114,20 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
       const output = result.getValue();
 
       expect(output.holidayDaysMarked).toBe(1);
-      expect(output.stateChanges.fromRest).toBe(1);
+      expect(output.stateChanges.fromNull).toBe(1);
       expect(days[0].estado).toBe('Festivo');
       expect(days[0].horasTrabajadas).toBe(0);
     });
   });
 
   describe('Worked holiday (FestivoTrabajado)', () => {
-    it('should mark a work day as FestivoTrabajado with holiday hours when worked', () => {
+    it('should mark a work day as FestivoTrabajado with holiday hours when cycle says work', () => {
       const jan6 = new Date(2025, 0, 6); // January 6
-      const days: CalendarDay[] = [createDay(jan6, 'Descanso', 0)];
+      const days: CalendarDay[] = [createDay(jan6, 'Trabajo', 8)]; // Work day according to cycle
 
       const holidayResult = Holiday.create({
         date: jan6,
         name: 'Reyes Magos',
-        worked: true,
       });
 
       const result = useCase.execute({
@@ -147,7 +144,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
       expect(output.workedHolidayDaysMarked).toBe(1);
       expect(output.holidaysProcessed).toBe(1);
       expect(output.totalDaysProcessed).toBe(1);
-      expect(output.stateChanges.fromRest).toBe(1);
+      expect(output.stateChanges.fromWork).toBe(1);
 
       // Check day state
       expect(days[0].estado).toBe('FestivoTrabajado');
@@ -164,12 +161,11 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
       });
 
       const jan1 = new Date(2025, 0, 1);
-      const days: CalendarDay[] = [createDay(jan1, 'Trabajo', 8)];
+      const days: CalendarDay[] = [createDay(jan1, 'Trabajo', 8)]; // Work day according to cycle
 
       const holidayResult = Holiday.create({
         date: jan1,
         name: 'Año Nuevo',
-        worked: true,
       });
 
       const result = useCase.execute({
@@ -192,7 +188,6 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
       const holidayResult = Holiday.create({
         date: jan1,
         name: 'Año Nuevo',
-        worked: false,
       });
 
       const result = useCase.execute({
@@ -220,7 +215,6 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
       const holidayResult = Holiday.create({
         date: aug15,
         name: 'Asunción',
-        worked: false,
       });
 
       const result = useCase.execute({
@@ -240,14 +234,13 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
       expect(days[0].estado).toBe('Vacaciones');
     });
 
-    it('should override Trabajo days (priority 5)', () => {
+    it('should override Trabajo days (priority 5) and mark as FestivoTrabajado', () => {
       const jan1 = new Date(2025, 0, 1);
       const days: CalendarDay[] = [createDay(jan1, 'Trabajo', 8)];
 
       const holidayResult = Holiday.create({
         date: jan1,
         name: 'Año Nuevo',
-        worked: false,
       });
 
       const result = useCase.execute({
@@ -259,19 +252,18 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
       expect(result.isSuccess()).toBe(true);
       const output = result.getValue();
 
-      expect(output.holidayDaysMarked).toBe(1);
+      expect(output.workedHolidayDaysMarked).toBe(1);
       expect(output.stateChanges.fromWork).toBe(1);
-      expect(days[0].estado).toBe('Festivo');
+      expect(days[0].estado).toBe('FestivoTrabajado');
     });
 
-    it('should override Descanso days (priority 4)', () => {
+    it('should override Descanso days (priority 4) and mark as Festivo', () => {
       const jan1 = new Date(2025, 0, 1);
       const days: CalendarDay[] = [createDay(jan1, 'Descanso', 0)];
 
       const holidayResult = Holiday.create({
         date: jan1,
         name: 'Año Nuevo',
-        worked: false,
       });
 
       const result = useCase.execute({
@@ -290,33 +282,30 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
   });
 
   describe('Multiple holidays', () => {
-    it('should process multiple holidays correctly', () => {
+    it('should process multiple holidays correctly based on cycle state', () => {
       const jan1 = new Date(2025, 0, 1);
       const jan6 = new Date(2025, 0, 6);
       const dec25 = new Date(2025, 11, 25);
 
       const days: CalendarDay[] = [
-        createDay(jan1, 'Trabajo', 8),
-        createDay(jan6, 'Descanso', 0),
-        createDay(dec25, 'Trabajo', 8),
+        createDay(jan1, 'Descanso', 0),  // Rest day → Festivo
+        createDay(jan6, 'Trabajo', 8),   // Work day → FestivoTrabajado
+        createDay(dec25, 'Descanso', 0), // Rest day → Festivo
       ];
 
       const holiday1 = Holiday.create({
         date: jan1,
         name: 'Año Nuevo',
-        worked: false,
       }).getValue();
 
       const holiday2 = Holiday.create({
         date: jan6,
         name: 'Reyes Magos',
-        worked: true,
       }).getValue();
 
       const holiday3 = Holiday.create({
         date: dec25,
         name: 'Navidad',
-        worked: false,
       }).getValue();
 
       const result = useCase.execute({
@@ -349,12 +338,11 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
   describe('Holiday without name', () => {
     it('should not set description when holiday has no name', () => {
       const jan1 = new Date(2025, 0, 1);
-      const days: CalendarDay[] = [createDay(jan1, 'Trabajo', 8)];
+      const days: CalendarDay[] = [createDay(jan1, 'Descanso', 0)]; // Rest day → Festivo
 
       const holidayResult = Holiday.create({
         date: jan1,
         // No name provided
-        worked: false,
       });
 
       const result = useCase.execute({
@@ -370,10 +358,10 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
   });
 
   describe('Examples from HU-024', () => {
-    it('Example 1: Non-worked holiday on work day', () => {
+    it('Example 1: Holiday on work day (automatic worked holiday)', () => {
       // 1 enero: Trabajo (según ciclo)
-      // + Festivo: 1 enero - Año Nuevo (no trabajado)
-      // → 1 enero: Festivo, Horas: 0
+      // + Festivo: 1 enero - Año Nuevo
+      // → 1 enero: FestivoTrabajado, Horas: 8 (automatic detection)
 
       const jan1 = new Date(2025, 0, 1);
       const days: CalendarDay[] = [createDay(jan1, 'Trabajo', 8)];
@@ -381,32 +369,6 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
       const holiday = Holiday.create({
         date: jan1,
         name: 'Año Nuevo',
-        worked: false,
-      }).getValue();
-
-      const result = useCase.execute({
-        days,
-        holidays: [holiday],
-        workingHours,
-      });
-
-      expect(result.isSuccess()).toBe(true);
-      expect(days[0].estado).toBe('Festivo');
-      expect(days[0].horasTrabajadas).toBe(0);
-    });
-
-    it('Example 2: Worked holiday on rest day', () => {
-      // 6 enero: Descanso (según ciclo)
-      // + Festivo: 6 enero - Reyes Magos (trabajado)
-      // → 6 enero: FestivoTrabajado, Horas: 8.0
-
-      const jan6 = new Date(2025, 0, 6);
-      const days: CalendarDay[] = [createDay(jan6, 'Descanso', 0)];
-
-      const holiday = Holiday.create({
-        date: jan6,
-        name: 'Reyes Magos',
-        worked: true,
       }).getValue();
 
       const result = useCase.execute({
@@ -420,6 +382,30 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
       expect(days[0].horasTrabajadas).toBe(8);
     });
 
+    it('Example 2: Holiday on rest day (automatic non-worked holiday)', () => {
+      // 6 enero: Descanso (según ciclo)
+      // + Festivo: 6 enero - Reyes Magos
+      // → 6 enero: Festivo, Horas: 0 (automatic detection)
+
+      const jan6 = new Date(2025, 0, 6);
+      const days: CalendarDay[] = [createDay(jan6, 'Descanso', 0)];
+
+      const holiday = Holiday.create({
+        date: jan6,
+        name: 'Reyes Magos',
+      }).getValue();
+
+      const result = useCase.execute({
+        days,
+        holidays: [holiday],
+        workingHours,
+      });
+
+      expect(result.isSuccess()).toBe(true);
+      expect(days[0].estado).toBe('Festivo');
+      expect(days[0].horasTrabajadas).toBe(0);
+    });
+
     it('Example 3: Holiday on vacation day (vacation prevails)', () => {
       // 15 agosto: Vacaciones
       // + Festivo: 15 agosto - Asunción
@@ -431,7 +417,6 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
       const holiday = Holiday.create({
         date: aug15,
         name: 'Asunción',
-        worked: false,
       }).getValue();
 
       const result = useCase.execute({
@@ -455,7 +440,6 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
       const holiday = Holiday.create({
         date: jan1,
         name: 'Año Nuevo',
-        worked: false,
       }).getValue();
 
       const result = useCase.execute({
@@ -479,7 +463,6 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
       const holiday = Holiday.create({
         date: feb1,
         name: 'Test',
-        worked: false,
       }).getValue();
 
       const result = useCase.execute({
@@ -496,14 +479,13 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
       expect(days[0].estado).toBe('Trabajo'); // Unchanged
     });
 
-    it('should handle null state days', () => {
+    it('should handle null state days (default to Festivo)', () => {
       const jan1 = new Date(2025, 0, 1);
       const days: CalendarDay[] = [createDay(jan1, null, 0)];
 
       const holiday = Holiday.create({
         date: jan1,
         name: 'Año Nuevo',
-        worked: false,
       }).getValue();
 
       const result = useCase.execute({

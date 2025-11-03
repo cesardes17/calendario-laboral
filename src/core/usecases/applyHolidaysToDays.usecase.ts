@@ -10,8 +10,9 @@
  * - Holidays have priority 3 (after NoContratado and Vacaciones)
  * - Holidays override: Work, Rest
  * - Holidays DO NOT override: NoContratado, Vacaciones
- * - Worked holidays have horasTrabajadas calculated based on day type
- * - Non-worked holidays have horasTrabajadas = 0
+ * - Automatically determines if holiday is worked based on work cycle state
+ * - Worked holidays (cycle says "Trabajo") have horasTrabajadas from holiday config
+ * - Non-worked holidays (cycle says "Descanso") have horasTrabajadas = 0
  */
 
 import { CalendarDay, Holiday, Result, WorkingHours } from '../domain';
@@ -64,12 +65,13 @@ export interface ApplyHolidaysToDaysOutput {
  * - For each holiday, locate the day in the calendar
  * - If the day is "NoContratado": do nothing (NoContratado prevails)
  * - If the day is "Vacaciones": do nothing (Vacaciones prevails)
- * - If the holiday is marked as "worked":
- *     - Estado: 'FestivoTrabajado'
- *     - Calculate hours based on day type + holiday hours
- * - If the holiday is NOT marked as worked:
- *     - Estado: 'Festivo'
- *     - Horas trabajadas: 0
+ * - Automatic detection based on work cycle:
+ *     - If the day was "Trabajo" (work day according to cycle):
+ *       → Estado: 'FestivoTrabajado'
+ *       → Calculate hours based on holiday hours configuration
+ *     - If the day was "Descanso" or null (rest day according to cycle):
+ *       → Estado: 'Festivo'
+ *       → Horas trabajadas: 0
  * - Holidays prevail over: Work, Rest (from cycle)
  * - Holidays DO NOT prevail over: NoContratado, Vacaciones
  *
@@ -82,16 +84,18 @@ export interface ApplyHolidaysToDaysOutput {
  *
  * @example
  * ```typescript
+ * // Create a holiday (no need to specify 'worked' flag)
  * const holiday = Holiday.create({
  *   date: new Date(2025, 0, 1), // January 1
- *   name: 'Año Nuevo',
- *   worked: false
+ *   name: 'Año Nuevo'
  * });
  * const workingHours = WorkingHours.default();
  * const useCase = new ApplyHolidaysToDaysUseCase();
  *
+ * // The use case will automatically determine if it's a worked holiday
+ * // based on whether the day was scheduled to be worked according to the cycle
  * const result = useCase.execute({
- *   days,
+ *   days, // Days must have already been processed by the work cycle
  *   holidays: [holiday.getValue()],
  *   workingHours
  * });
@@ -160,14 +164,16 @@ export class ApplyHolidaysToDaysUseCase {
         // Track the previous state for statistics
         const previousState = day.estado;
 
-        // Apply holiday state based on whether it was worked or not
-        if (holiday.isWorked()) {
-          // Worked holiday - calculate hours based on day type
+        // Apply holiday state based on the PREVIOUS state from the work cycle
+        // If the day was scheduled to be worked according to the cycle → Worked Holiday
+        // If the day was scheduled to be rest according to the cycle → Holiday
+        if (previousState === 'Trabajo') {
+          // The cycle says this day should be worked → Worked holiday
           day.estado = 'FestivoTrabajado';
           day.horasTrabajadas = this.calculateWorkedHolidayHours(day.fecha, workingHours);
           workedHolidayDaysMarked++;
         } else {
-          // Non-worked holiday - no hours worked
+          // The cycle says this day is rest (or null) → Non-worked holiday
           day.estado = 'Festivo';
           day.horasTrabajadas = 0;
           holidayDaysMarked++;
