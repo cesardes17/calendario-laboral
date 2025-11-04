@@ -41,7 +41,13 @@ import { Button } from "../components/ui/button";
 import Link from "next/link";
 
 // Configuration Summary
-function ConfigurationSummaryContent() {
+interface ConfigurationSummaryContentProps {
+  onEditConfiguration: () => void;
+}
+
+function ConfigurationSummaryContent({
+  onEditConfiguration,
+}: ConfigurationSummaryContentProps) {
   return (
     <div className="space-y-8">
       {/* Success Header */}
@@ -112,47 +118,13 @@ function ConfigurationSummaryContent() {
             Ver Calendario
           </button>
         </Link>
-
-        <Link href="/">
-          <button className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md border border-input bg-background hover:bg-muted font-medium transition-colors">
-            <ArrowLeft className="h-5 w-5" />
-            Editar Configuración
-          </button>
-        </Link>
-      </motion.div>
-
-      {/* Next Steps Info */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.8 }}
-        className="max-w-2xl mx-auto"
-      >
-        <div className="p-6 rounded-lg border border-blue-500/30 bg-blue-500/5">
-          <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-            <span className="text-blue-600 dark:text-blue-400">ℹ️</span>
-            Próximos Pasos
-          </h3>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li className="flex items-start gap-2">
-              <span className="text-primary font-bold">1.</span>
-              <span>
-                Revisa tu calendario laboral completo con todos los días
-                marcados
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary font-bold">2.</span>
-              <span>Descarga tu configuración para futuras referencias</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary font-bold">3.</span>
-              <span>
-                Calcula tu balance de horas trabajadas vs. horas de convenio
-              </span>
-            </li>
-          </ul>
-        </div>
+        <button
+          onClick={onEditConfiguration}
+          className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md border border-input bg-background hover:bg-muted font-medium transition-colors"
+        >
+          <ArrowLeft className="h-5 w-5" />
+          Editar Configuración
+        </button>
       </motion.div>
     </div>
   );
@@ -546,6 +518,13 @@ export function CalendarWizard() {
     setShowSummary(true);
   };
 
+  // Handle edit configuration - return to wizard step 1
+  const handleEditConfiguration = useCallback(() => {
+    setShowSummary(false);
+    // Force wizard re-mount to go back to step 1
+    setWizardKey((prev) => prev + 1);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background py-12 px-4">
       <div className="max-w-5xl mx-auto">
@@ -567,7 +546,9 @@ export function CalendarWizard() {
             />
           </>
         ) : (
-          <ConfigurationSummaryContent />
+          <ConfigurationSummaryContent
+            onEditConfiguration={handleEditConfiguration}
+          />
         )}
       </div>
 
