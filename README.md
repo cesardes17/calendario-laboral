@@ -130,45 +130,6 @@ Ver documentación completa en [`.claude/commands/README.md`](./.claude/commands
 
 ## Estado del proyecto
 
-**Versión actual:** 1.0.0-alpha
+**Versión actual:** 1.0.0
 **Estado:** En desarrollo activo
 
-### Funcionalidades implementadas (HUs completadas)
-
-#### ✅ Epic 1: Configuración Inicial
-- **HU-001**: Seleccionar año de referencia
-  - Selector de año con validación
-  - Rango: año actual -2 a +5
-  - Año actual seleccionado por defecto
-
-- **HU-002**: Indicar situación laboral al inicio del año
-  - Opciones: "Empecé este año" / "Ya trabajaba antes"
-  - Fecha de inicio de contrato (si empezó este año)
-  - Offset de ciclo (si ya trabajaba antes)
-  - Validación contra ciclo configurado
-
-#### ✅ Epic 2: Definición del Ciclo Laboral
-- **HU-003**: Seleccionar tipo de ciclo laboral
-  - Modo semanal: máscara L-D (7 días)
-  - Modo por partes: bloques trabajo/descanso personalizados
-  - Validación y feedback visual
-  - Soporte para ciclos complejos (ej: 6-3, 6-3, 6-3, 6-2)
-
-#### ✅ UX/UI Transversal
-- **HU-032**: Tema claro/oscuro
-  - Tres modos: claro, oscuro, sistema (por defecto)
-  - Toggle accesible con iconos
-  - Persistencia en localStorage
-  - Paleta de colores neutra y accesible
-  - Sin flash en carga (SSR compatible)
-
-### Próximas funcionalidades
-
-- Epic 4: Configuración de Jornada Laboral
-- Epic 5: Gestión de Excepciones (festivos, vacaciones)
-- Epic 7: Generación del Calendario
-- Epic 8: Cálculo de Estadísticas
-- Epic 9: Visualización del Calendario
-- Epic 10: Visualización de Estadísticas
-
-Ver [backlog completo en Jira](https://cesarjoseds.atlassian.net/jira/software/projects/SCRUM)
