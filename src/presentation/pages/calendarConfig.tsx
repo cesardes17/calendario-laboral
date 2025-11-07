@@ -20,6 +20,8 @@ import { WorkCycle } from "@/src/core/domain/workCycle";
 import { Holiday } from "@/src/core/domain/holiday";
 import { VacationPeriod } from "@/src/core/domain/vacationPeriod";
 import type { WorkingHoursConfig } from "@/src/core/domain/workingHours";
+import type { HolidayPolicyType } from "@/src/core/domain/holidayPolicy";
+import { HolidayPolicyType as HolidayPolicyTypeEnum } from "@/src/core/domain/holidayPolicy";
 import type { ContractStartConfig } from "../components/contractStart/contractStartConfigurator";
 import { motion } from "framer-motion";
 import {
@@ -148,6 +150,9 @@ export function CalendarWizard() {
     useState<ContractStartConfig | null>(null);
   const [workingHoursConfig, setWorkingHoursConfig] =
     useState<WorkingHoursConfig | null>(null);
+  const [holidayPolicy, setHolidayPolicy] = useState<HolidayPolicyType>(
+    HolidayPolicyTypeEnum.TRABAJAR_FESTIVOS
+  );
   const [annualHours, setAnnualHours] = useState<number | null>(null);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [vacations, setVacations] = useState<VacationPeriod[]>([]);
@@ -190,6 +195,10 @@ export function CalendarWizard() {
 
   const handleWorkingHoursChange = useCallback((config: WorkingHoursConfig) => {
     setWorkingHoursConfig(config);
+  }, []);
+
+  const handleHolidayPolicyChange = useCallback((policy: HolidayPolicyType) => {
+    setHolidayPolicy(policy);
   }, []);
 
   const handleAnnualHoursChange = useCallback((hours: number) => {
@@ -291,6 +300,11 @@ export function CalendarWizard() {
       if (data.workingHours) {
         setWorkingHoursConfig(data.workingHours);
         setStepsValidation((prev) => ({ ...prev, workingHours: true }));
+      }
+
+      // Restore holiday policy
+      if (data.holidayPolicy) {
+        setHolidayPolicy(data.holidayPolicy);
       }
 
       // Restore annual hours
@@ -409,8 +423,10 @@ export function CalendarWizard() {
       component: (
         <WorkingHoursConfigurator
           initialConfig={workingHoursConfig ?? undefined}
+          initialHolidayPolicy={holidayPolicy}
           onConfigurationChange={handleWorkingHoursValidation}
           onChange={handleWorkingHoursChange}
+          onHolidayPolicyChange={handleHolidayPolicyChange}
         />
       ),
       isValid: stepsValidation.workingHours,
@@ -489,6 +505,7 @@ export function CalendarWizard() {
       selectedYear,
       contractStart: contractStartConfig,
       workingHours: workingHoursConfig,
+      holidayPolicy,
       annualHours,
       holidays: holidays.map((h) => ({
         date: h.date.toISOString(),

@@ -24,7 +24,9 @@ import {
   CardTitle,
 } from "./ui/card";
 import { useWorkingHours } from "@/src/application/hooks/useWorkingHours";
+import { useHolidayPolicy } from "@/src/application/hooks/useHolidayPolicy";
 import type { WorkingHoursConfig } from "@/src/core/domain/workingHours";
+import type { HolidayPolicyType } from "@/src/core/domain/holidayPolicy";
 import { HoursInputCard } from "./workingHours/hoursInputCard";
 import { WorkingHoursStatusAlerts } from "./workingHours/workingHoursStatusAlerts";
 
@@ -33,6 +35,11 @@ export interface WorkingHoursConfiguratorProps {
    * Initial configuration (optional)
    */
   initialConfig?: Partial<WorkingHoursConfig>;
+
+  /**
+   * Initial holiday policy (optional)
+   */
+  initialHolidayPolicy?: HolidayPolicyType;
 
   /**
    * Callback when configuration validity changes
@@ -45,6 +52,11 @@ export interface WorkingHoursConfiguratorProps {
   onChange?: (config: WorkingHoursConfig) => void;
 
   /**
+   * Callback when holiday policy changes
+   */
+  onHolidayPolicyChange?: (policyType: HolidayPolicyType) => void;
+
+  /**
    * Additional CSS classes
    */
   className?: string;
@@ -52,7 +64,14 @@ export interface WorkingHoursConfiguratorProps {
 
 export const WorkingHoursConfigurator: React.FC<
   WorkingHoursConfiguratorProps
-> = ({ initialConfig, onConfigurationChange, onChange, className = "" }) => {
+> = ({
+  initialConfig,
+  initialHolidayPolicy,
+  onConfigurationChange,
+  onChange,
+  onHolidayPolicyChange,
+  className = ""
+}) => {
   const {
     workingHours,
     weekdayInput,
@@ -69,6 +88,12 @@ export const WorkingHoursConfigurator: React.FC<
     updateSundayHours,
     updateHolidayHours,
   } = useWorkingHours(initialConfig);
+
+  const {
+    holidayPolicy,
+    respectsHolidays,
+    togglePolicy,
+  } = useHolidayPolicy(initialHolidayPolicy);
 
   // Check if there are any errors
   const hasErrors =
@@ -88,6 +113,11 @@ export const WorkingHoursConfigurator: React.FC<
       onChange(workingHours.toJSON());
     }
   }, [workingHours, isValid, onChange]);
+
+  // Notify parent when holiday policy changes
+  useEffect(() => {
+    onHolidayPolicyChange?.(holidayPolicy.type);
+  }, [holidayPolicy, onHolidayPolicyChange]);
 
   return (
     <Card className={className}>
@@ -172,6 +202,39 @@ export const WorkingHoursConfigurator: React.FC<
             />
           </motion.div>
         </div>
+
+        {/* Holiday Policy Toggle */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+          className="border-t pt-6"
+        >
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="respectsHolidays"
+                checked={respectsHolidays}
+                onChange={togglePolicy}
+                className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              />
+              <div className="flex-1">
+                <label
+                  htmlFor="respectsHolidays"
+                  className="text-sm font-medium leading-none cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Respeto festivos (no trabajo en días festivos)
+                </label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {respectsHolidays
+                    ? "Los festivos nunca se trabajarán, independientemente de tu ciclo laboral"
+                    : "Los festivos se trabajarán solo si tu ciclo indica que es un día de trabajo"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
 
         {/* Info Box */}
         <div className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-lg">

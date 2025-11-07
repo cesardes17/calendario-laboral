@@ -10,6 +10,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Year, CalendarDay, EmploymentStatus, ContractStartDate, EmploymentStatusType, WorkCycle, CycleMode, CycleOffset, CycleDayType, VacationPeriod, Holiday, WorkingHours } from '@/src/core/domain';
+import { HolidayPolicy, HolidayPolicyType } from '@/src/core/domain/holidayPolicy';
 import { GenerateAnnualCalendarUseCase, ApplyWeeklyCycleToDaysUseCase, ApplyPartsCycleToDaysUseCase, ApplyVacationsToDaysUseCase, ApplyHolidaysToDaysUseCase, ApplyHoursToCalendarUseCase } from '@/src/core/usecases';
 
 export interface UseCalendarOptions {
@@ -293,6 +294,7 @@ export function useCalendar(options: UseCalendarOptions = {}): UseCalendarReturn
             const wizardData = JSON.parse(savedConfig);
             const holidaysData = wizardData.holidays;
             const workingHoursData = wizardData.workingHours;
+            const holidayPolicyData = wizardData.holidayPolicy;
 
             if (holidaysData && Array.isArray(holidaysData) && holidaysData.length > 0) {
               // Restore Holiday value objects from stored data
@@ -321,6 +323,15 @@ export function useCalendar(options: UseCalendarOptions = {}): UseCalendarReturn
                 });
               }
 
+              // Get holiday policy (default to TRABAJAR_FESTIVOS if not specified)
+              let holidayPolicy = HolidayPolicy.default();
+              if (holidayPolicyData) {
+                const policyResult = HolidayPolicy.create(holidayPolicyData as HolidayPolicyType);
+                if (policyResult.isSuccess()) {
+                  holidayPolicy = policyResult.getValue();
+                }
+              }
+
               // Apply holidays to days
               if (holidays.length > 0) {
                 const applyHolidaysUseCase = new ApplyHolidaysToDaysUseCase();
@@ -328,6 +339,7 @@ export function useCalendar(options: UseCalendarOptions = {}): UseCalendarReturn
                   days: finalDays,
                   holidays,
                   workingHours,
+                  holidayPolicy,
                 });
 
                 if (!applyHolidaysResult.isSuccess()) {

@@ -6,15 +6,19 @@ import { ApplyHolidaysToDaysUseCase } from '../applyHolidaysToDays.usecase';
 import { Holiday } from '../../domain/holiday';
 import { CalendarDay } from '../../domain/calendarDay';
 import { WorkingHours } from '../../domain/workingHours';
+import { HolidayPolicy, HolidayPolicyType } from '../../domain/holidayPolicy';
 
 describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
   let useCase: ApplyHolidaysToDaysUseCase;
   let workingHours: WorkingHours;
+  let defaultHolidayPolicy: HolidayPolicy;
 
   beforeEach(() => {
     useCase = new ApplyHolidaysToDaysUseCase();
     // Default working hours: 8 hours for all days including holidays
     workingHours = WorkingHours.default();
+    // Default policy: TRABAJAR_FESTIVOS (maintains current behavior)
+    defaultHolidayPolicy = HolidayPolicy.default();
   });
 
   /**
@@ -49,6 +53,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
         days,
         holidays: [],
         workingHours,
+        holidayPolicy: defaultHolidayPolicy,
       });
 
       expect(result.isSuccess()).toBe(true);
@@ -77,6 +82,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
         days,
         holidays: [holiday],
         workingHours,
+        holidayPolicy: defaultHolidayPolicy,
       });
 
       expect(result.isSuccess()).toBe(true);
@@ -108,6 +114,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
         days,
         holidays: [holidayResult.getValue()],
         workingHours,
+        holidayPolicy: defaultHolidayPolicy,
       });
 
       expect(result.isSuccess()).toBe(true);
@@ -134,6 +141,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
         days,
         holidays: [holidayResult.getValue()],
         workingHours,
+        holidayPolicy: defaultHolidayPolicy,
       });
 
       expect(result.isSuccess()).toBe(true);
@@ -172,6 +180,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
         days,
         holidays: [holidayResult.getValue()],
         workingHours: customWorkingHours,
+        holidayPolicy: defaultHolidayPolicy,
       });
 
       expect(result.isSuccess()).toBe(true);
@@ -194,6 +203,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
         days,
         holidays: [holidayResult.getValue()],
         workingHours,
+        holidayPolicy: defaultHolidayPolicy,
       });
 
       expect(result.isSuccess()).toBe(true);
@@ -221,6 +231,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
         days,
         holidays: [holidayResult.getValue()],
         workingHours,
+        holidayPolicy: defaultHolidayPolicy,
       });
 
       expect(result.isSuccess()).toBe(true);
@@ -247,6 +258,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
         days,
         holidays: [holidayResult.getValue()],
         workingHours,
+        holidayPolicy: defaultHolidayPolicy,
       });
 
       expect(result.isSuccess()).toBe(true);
@@ -270,6 +282,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
         days,
         holidays: [holidayResult.getValue()],
         workingHours,
+        holidayPolicy: defaultHolidayPolicy,
       });
 
       expect(result.isSuccess()).toBe(true);
@@ -312,6 +325,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
         days,
         holidays: [holiday1, holiday2, holiday3],
         workingHours,
+        holidayPolicy: defaultHolidayPolicy,
       });
 
       expect(result.isSuccess()).toBe(true);
@@ -349,6 +363,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
         days,
         holidays: [holidayResult.getValue()],
         workingHours,
+        holidayPolicy: defaultHolidayPolicy,
       });
 
       expect(result.isSuccess()).toBe(true);
@@ -375,6 +390,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
         days,
         holidays: [holiday],
         workingHours,
+        holidayPolicy: defaultHolidayPolicy,
       });
 
       expect(result.isSuccess()).toBe(true);
@@ -399,6 +415,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
         days,
         holidays: [holiday],
         workingHours,
+        holidayPolicy: defaultHolidayPolicy,
       });
 
       expect(result.isSuccess()).toBe(true);
@@ -423,6 +440,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
         days,
         holidays: [holiday],
         workingHours,
+        holidayPolicy: defaultHolidayPolicy,
       });
 
       expect(result.isSuccess()).toBe(true);
@@ -446,6 +464,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
         days,
         holidays: [holiday],
         workingHours,
+        holidayPolicy: defaultHolidayPolicy,
       });
 
       expect(result.isSuccess()).toBe(true);
@@ -469,6 +488,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
         days,
         holidays: [holiday],
         workingHours,
+        holidayPolicy: defaultHolidayPolicy,
       });
 
       expect(result.isSuccess()).toBe(true);
@@ -492,6 +512,7 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
         days,
         holidays: [holiday],
         workingHours,
+        holidayPolicy: defaultHolidayPolicy,
       });
 
       expect(result.isSuccess()).toBe(true);
@@ -500,6 +521,186 @@ describe('ApplyHolidaysToDaysUseCase (HU-024)', () => {
       expect(output.holidayDaysMarked).toBe(1);
       expect(output.stateChanges.fromNull).toBe(1);
       expect(days[0].estado).toBe('Festivo');
+    });
+  });
+
+  describe('Holiday Policy (RESPETAR_FESTIVOS vs TRABAJAR_FESTIVOS)', () => {
+    describe('TRABAJAR_FESTIVOS policy (default behavior)', () => {
+      it('should mark holiday as FestivoTrabajado when cycle says Trabajo', () => {
+        const policy = HolidayPolicy.create(HolidayPolicyType.TRABAJAR_FESTIVOS).getValue();
+        const jan1 = new Date(2025, 0, 1);
+        const days: CalendarDay[] = [createDay(jan1, 'Trabajo', 8)];
+
+        const holiday = Holiday.create({
+          date: jan1,
+          name: 'Año Nuevo',
+        }).getValue();
+
+        const result = useCase.execute({
+          days,
+          holidays: [holiday],
+          workingHours,
+          holidayPolicy: policy,
+        });
+
+        expect(result.isSuccess()).toBe(true);
+        expect(days[0].estado).toBe('FestivoTrabajado');
+        expect(days[0].horasTrabajadas).toBe(8);
+      });
+
+      it('should mark holiday as Festivo when cycle says Descanso', () => {
+        const policy = HolidayPolicy.create(HolidayPolicyType.TRABAJAR_FESTIVOS).getValue();
+        const jan1 = new Date(2025, 0, 1);
+        const days: CalendarDay[] = [createDay(jan1, 'Descanso', 0)];
+
+        const holiday = Holiday.create({
+          date: jan1,
+          name: 'Año Nuevo',
+        }).getValue();
+
+        const result = useCase.execute({
+          days,
+          holidays: [holiday],
+          workingHours,
+          holidayPolicy: policy,
+        });
+
+        expect(result.isSuccess()).toBe(true);
+        expect(days[0].estado).toBe('Festivo');
+        expect(days[0].horasTrabajadas).toBe(0);
+      });
+    });
+
+    describe('RESPETAR_FESTIVOS policy (always respects holidays)', () => {
+      it('should ALWAYS mark holiday as Festivo even when cycle says Trabajo', () => {
+        const policy = HolidayPolicy.create(HolidayPolicyType.RESPETAR_FESTIVOS).getValue();
+        const jan1 = new Date(2025, 0, 1);
+        const days: CalendarDay[] = [createDay(jan1, 'Trabajo', 8)];
+
+        const holiday = Holiday.create({
+          date: jan1,
+          name: 'Año Nuevo',
+        }).getValue();
+
+        const result = useCase.execute({
+          days,
+          holidays: [holiday],
+          workingHours,
+          holidayPolicy: policy,
+        });
+
+        expect(result.isSuccess()).toBe(true);
+        const output = result.getValue();
+
+        // Should be marked as Festivo (NOT FestivoTrabajado)
+        expect(days[0].estado).toBe('Festivo');
+        expect(days[0].horasTrabajadas).toBe(0);
+
+        // Statistics should reflect non-worked holiday
+        expect(output.holidayDaysMarked).toBe(1);
+        expect(output.workedHolidayDaysMarked).toBe(0);
+      });
+
+      it('should mark holiday as Festivo when cycle says Descanso', () => {
+        const policy = HolidayPolicy.create(HolidayPolicyType.RESPETAR_FESTIVOS).getValue();
+        const jan1 = new Date(2025, 0, 1);
+        const days: CalendarDay[] = [createDay(jan1, 'Descanso', 0)];
+
+        const holiday = Holiday.create({
+          date: jan1,
+          name: 'Año Nuevo',
+        }).getValue();
+
+        const result = useCase.execute({
+          days,
+          holidays: [holiday],
+          workingHours,
+          holidayPolicy: policy,
+        });
+
+        expect(result.isSuccess()).toBe(true);
+        expect(days[0].estado).toBe('Festivo');
+        expect(days[0].horasTrabajadas).toBe(0);
+      });
+
+      it('should mark all holidays as Festivo regardless of cycle state', () => {
+        const policy = HolidayPolicy.create(HolidayPolicyType.RESPETAR_FESTIVOS).getValue();
+
+        const jan1 = new Date(2025, 0, 1);
+        const jan6 = new Date(2025, 0, 6);
+        const dec25 = new Date(2025, 11, 25);
+
+        const days: CalendarDay[] = [
+          createDay(jan1, 'Trabajo', 8),    // Would be FestivoTrabajado with TRABAJAR_FESTIVOS
+          createDay(jan6, 'Trabajo', 8),    // Would be FestivoTrabajado with TRABAJAR_FESTIVOS
+          createDay(dec25, 'Descanso', 0),  // Would be Festivo anyway
+        ];
+
+        const holiday1 = Holiday.create({ date: jan1, name: 'Año Nuevo' }).getValue();
+        const holiday2 = Holiday.create({ date: jan6, name: 'Reyes Magos' }).getValue();
+        const holiday3 = Holiday.create({ date: dec25, name: 'Navidad' }).getValue();
+
+        const result = useCase.execute({
+          days,
+          holidays: [holiday1, holiday2, holiday3],
+          workingHours,
+          holidayPolicy: policy,
+        });
+
+        expect(result.isSuccess()).toBe(true);
+        const output = result.getValue();
+
+        // ALL holidays should be non-worked
+        expect(output.holidayDaysMarked).toBe(3);
+        expect(output.workedHolidayDaysMarked).toBe(0);
+
+        // All days should be Festivo
+        expect(days[0].estado).toBe('Festivo');
+        expect(days[0].horasTrabajadas).toBe(0);
+        expect(days[1].estado).toBe('Festivo');
+        expect(days[1].horasTrabajadas).toBe(0);
+        expect(days[2].estado).toBe('Festivo');
+        expect(days[2].horasTrabajadas).toBe(0);
+      });
+    });
+
+    describe('Policy comparison', () => {
+      it('should produce different results for same data with different policies', () => {
+        const trabajarPolicy = HolidayPolicy.create(HolidayPolicyType.TRABAJAR_FESTIVOS).getValue();
+        const respetarPolicy = HolidayPolicy.create(HolidayPolicyType.RESPETAR_FESTIVOS).getValue();
+
+        const jan1 = new Date(2025, 0, 1);
+        const holiday = Holiday.create({ date: jan1, name: 'Año Nuevo' }).getValue();
+
+        // Scenario 1: TRABAJAR_FESTIVOS with work day
+        const days1: CalendarDay[] = [createDay(jan1, 'Trabajo', 8)];
+        const result1 = useCase.execute({
+          days: days1,
+          holidays: [holiday],
+          workingHours,
+          holidayPolicy: trabajarPolicy,
+        });
+
+        // Scenario 2: RESPETAR_FESTIVOS with work day
+        const days2: CalendarDay[] = [createDay(jan1, 'Trabajo', 8)];
+        const result2 = useCase.execute({
+          days: days2,
+          holidays: [holiday],
+          workingHours,
+          holidayPolicy: respetarPolicy,
+        });
+
+        expect(result1.isSuccess()).toBe(true);
+        expect(result2.isSuccess()).toBe(true);
+
+        // TRABAJAR_FESTIVOS: Work day + holiday = FestivoTrabajado
+        expect(days1[0].estado).toBe('FestivoTrabajado');
+        expect(days1[0].horasTrabajadas).toBe(8);
+
+        // RESPETAR_FESTIVOS: Work day + holiday = Festivo (respects holiday)
+        expect(days2[0].estado).toBe('Festivo');
+        expect(days2[0].horasTrabajadas).toBe(0);
+      });
     });
   });
 });
