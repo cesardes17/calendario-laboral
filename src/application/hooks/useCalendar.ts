@@ -9,9 +9,9 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { Year, CalendarDay, EmploymentStatus, ContractStartDate, EmploymentStatusType, WorkCycle, CycleMode, CycleOffset, CycleDayType, VacationPeriod, Holiday, WorkingHours } from '@/src/core/domain';
+import { Year, CalendarDay, EmploymentStatus, ContractStartDate, EmploymentStatusType, WorkCycle, CycleMode, CycleOffset, CycleDayType, VacationPeriod, Holiday, WorkingHours, Guardia } from '@/src/core/domain';
 import { HolidayPolicy, HolidayPolicyType } from '@/src/core/domain/holidayPolicy';
-import { GenerateAnnualCalendarUseCase, ApplyWeeklyCycleToDaysUseCase, ApplyPartsCycleToDaysUseCase, ApplyVacationsToDaysUseCase, ApplyHolidaysToDaysUseCase, ApplyHoursToCalendarUseCase } from '@/src/core/usecases';
+import { GenerateAnnualCalendarUseCase, ApplyWeeklyCycleToDaysUseCase, ApplyPartsCycleToDaysUseCase, ApplyVacationsToDaysUseCase, ApplyHolidaysToDaysUseCase, ApplyGuardiasToDaysUseCase, ApplyHoursToCalendarUseCase } from '@/src/core/usecases';
 
 export interface UseCalendarOptions {
   /** Initial year to display */
@@ -352,6 +352,56 @@ export function useCalendar(options: UseCalendarOptions = {}): UseCalendarReturn
         } catch (holidayError) {
           // Continue without holiday application if there's an error
           console.warn('Failed to apply holidays:', holidayError);
+        }
+
+        // Apply guardias if configured (only for weekly cycles)
+        // Guardias have priority 3 (after NoContratado and Vacaciones, before Festivos)
+        try {
+          const savedConfig = localStorage.getItem('calendarWizardData');
+          if (savedConfig) {
+            const wizardData = JSON.parse(savedConfig);
+            const guardiasData = wizardData.guardias;
+
+            // Only apply guardias if they exist and cycle mode is WEEKLY
+            if (guardiasData && Array.isArray(guardiasData) && guardiasData.length > 0) {
+              const workCycleData = wizardData.workCycle;
+              const isWeeklyCycle = workCycleData?.mode === CycleMode.WEEKLY;
+
+              if (isWeeklyCycle) {
+                // Restore Guardia value objects from stored data
+                const guardias: Guardia[] = [];
+
+                for (const guardiaData of guardiasData) {
+                  const guardiaResult = Guardia.fromObject({
+                    date: guardiaData.date,
+                    hours: guardiaData.hours,
+                    description: guardiaData.description,
+                  });
+
+                  if (guardiaResult.isSuccess()) {
+                    guardias.push(guardiaResult.getValue());
+                  }
+                }
+
+                // Apply guardias to days
+                if (guardias.length > 0) {
+                  const applyGuardiasUseCase = new ApplyGuardiasToDaysUseCase();
+                  const applyGuardiasResult = applyGuardiasUseCase.execute({
+                    days: finalDays,
+                    guardias,
+                  });
+
+                  if (!applyGuardiasResult.isSuccess()) {
+                    console.warn('Failed to apply guardias:', applyGuardiasResult.errorValue());
+                  }
+                  // Note: finalDays is mutated in place by the use case
+                }
+              }
+            }
+          }
+        } catch (guardiaError) {
+          // Continue without guardia application if there's an error
+          console.warn('Failed to apply guardias:', guardiaError);
         }
 
         // Apply hours to all worked days (HU-025 / SCRUM-37)

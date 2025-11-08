@@ -14,11 +14,13 @@ import {
   AnnualContractHoursConfigurator,
   HolidayManagerConfigurator,
   VacationManagerConfigurator,
+  GuardiaManagerConfigurator,
   ConfigurationReviewConfigurator,
 } from "../components";
 import { WorkCycle } from "@/src/core/domain/workCycle";
 import { Holiday } from "@/src/core/domain/holiday";
 import { VacationPeriod } from "@/src/core/domain/vacationPeriod";
+import { Guardia } from "@/src/core/domain/guardia";
 import type { WorkingHoursConfig } from "@/src/core/domain/workingHours";
 import type { HolidayPolicyType } from "@/src/core/domain/holidayPolicy";
 import { HolidayPolicyType as HolidayPolicyTypeEnum } from "@/src/core/domain/holidayPolicy";
@@ -158,6 +160,7 @@ export function CalendarWizard() {
   const [annualHours, setAnnualHours] = useState<number | null>(null);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [vacations, setVacations] = useState<VacationPeriod[]>([]);
+  const [guardias, setGuardias] = useState<Guardia[]>([]);
 
   // Track validation state for each step
   const [stepsValidation, setStepsValidation] = useState({
@@ -167,6 +170,7 @@ export function CalendarWizard() {
     workingHours: true, // Working hours has default values (8h all), starts valid
     annualHours: true, // Always valid, starts valid
     holidays: true, // Always valid, starts valid
+    guardias: true, // Always valid, starts valid (only for weekly cycles)
     vacations: true, // Always valid, starts valid
     review: false, // Review requires user confirmation
   });
@@ -218,6 +222,13 @@ export function CalendarWizard() {
     []
   );
 
+  const handleGuardiasChange = useCallback(
+    (guardiaList: Guardia[]) => {
+      setGuardias(guardiaList);
+    },
+    []
+  );
+
   const handleContractStartValidation = useCallback((isValid: boolean) => {
     setStepsValidation((prev) => ({ ...prev, contractStart: isValid }));
   }, []);
@@ -236,6 +247,10 @@ export function CalendarWizard() {
 
   const handleVacationsValidation = useCallback((isValid: boolean) => {
     setStepsValidation((prev) => ({ ...prev, vacations: isValid }));
+  }, []);
+
+  const handleGuardiasValidation = useCallback((isValid: boolean) => {
+    setStepsValidation((prev) => ({ ...prev, guardias: isValid }));
   }, []);
 
   const handleReviewValidation = useCallback((isValid: boolean) => {
@@ -350,6 +365,25 @@ export function CalendarWizard() {
         setStepsValidation((prev) => ({ ...prev, vacations: true }));
       }
 
+      // Restore guardias (only for weekly cycles)
+      if (data.guardias && Array.isArray(data.guardias)) {
+        const restoredGuardias: Guardia[] = [];
+        data.guardias.forEach(
+          (g: { date: string; hours: number; description: string }) => {
+            const guardiaResult = Guardia.create({
+              date: new Date(g.date),
+              hours: g.hours,
+              description: g.description,
+            });
+            if (guardiaResult.isSuccess()) {
+              restoredGuardias.push(guardiaResult.getValue());
+            }
+          }
+        );
+        setGuardias(restoredGuardias);
+        setStepsValidation((prev) => ({ ...prev, guardias: true }));
+      }
+
       setShowLoadDialog(false);
       console.log("Configuration loaded from localStorage");
 
@@ -460,6 +494,24 @@ export function CalendarWizard() {
       ),
       isValid: stepsValidation.holidays,
     },
+    ...(workCycle?.mode === "WEEKLY"
+      ? [
+          {
+            id: "guardias",
+            title: "Guardias",
+            description: "Añade guardias en días de descanso o festivos",
+            component: (
+              <GuardiaManagerConfigurator
+                initialYear={selectedYear}
+                initialGuardias={guardias}
+                onConfigurationChange={handleGuardiasValidation}
+                onGuardiasChange={handleGuardiasChange}
+              />
+            ),
+            isValid: stepsValidation.guardias,
+          },
+        ]
+      : []),
     {
       id: "vacations",
       title: "Vacaciones del Año",
@@ -512,6 +564,11 @@ export function CalendarWizard() {
       holidays: holidays.map((h) => ({
         date: h.date.toISOString(),
         name: h.name,
+      })),
+      guardias: guardias.map((g) => ({
+        date: g.date.toISOString(),
+        hours: g.hours,
+        description: g.description,
       })),
       vacations: vacations.map((v) => ({
         startDate: v.startDate.toISOString(),

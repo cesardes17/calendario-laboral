@@ -14,6 +14,7 @@ import {
   PartyPopper,
   CalendarClock,
   Ban,
+  Shield,
 } from 'lucide-react';
 
 interface DayCellProps {
@@ -33,6 +34,7 @@ function getDayIcon(estado: EstadoDia | null): React.ReactNode {
     Trabajo: <Briefcase {...iconProps} />,
     Descanso: <Coffee {...iconProps} />,
     Vacaciones: <Plane {...iconProps} />,
+    Guardia: <Shield {...iconProps} />,
     Festivo: <PartyPopper {...iconProps} />,
     FestivoTrabajado: <CalendarClock {...iconProps} />,
     NoContratado: <Ban {...iconProps} />,
@@ -57,14 +59,17 @@ function getDayColorClass(estado: EstadoDia | null): string {
     // Descanso: #10B981 (light) / #34D399 (dark)
     Descanso: 'bg-green-500 dark:bg-green-400 text-white hover:bg-green-600 dark:hover:bg-green-500',
 
-    // Vacaciones: #F59E0B (light) / #FBBF24 (dark)
-    Vacaciones: 'bg-amber-500 dark:bg-amber-400 text-white hover:bg-amber-600 dark:hover:bg-amber-500',
+    // Vacaciones: #FBBF24 (light) / #FCD34D (dark) - Yellow 400/300
+    Vacaciones: 'bg-yellow-400 dark:bg-yellow-300 text-gray-900 hover:bg-yellow-500 dark:hover:bg-yellow-400',
 
-    // Festivo: #EF4444 (light) / #F87171 (dark)
-    Festivo: 'bg-red-500 dark:bg-red-400 text-white hover:bg-red-600 dark:hover:bg-red-500',
+    // Guardia: #9333EA (light) / #A855F7 (dark) - Purple 600/500
+    Guardia: 'bg-purple-600 dark:bg-purple-500 text-white hover:bg-purple-700 dark:hover:bg-purple-600',
 
-    // Festivo Trabajado: #A855F7 (light) / #C084FC (dark)
-    FestivoTrabajado: 'bg-purple-500 dark:bg-purple-400 text-white hover:bg-purple-600 dark:hover:bg-purple-500',
+    // Festivo: #FB923C (light) / #FDBA74 (dark) - Orange 400/300
+    Festivo: 'bg-orange-400 dark:bg-orange-300 text-white hover:bg-orange-500 dark:hover:bg-orange-400',
+
+    // Festivo Trabajado: #EF4444 (light) / #F87171 (dark) - Red 500/400
+    FestivoTrabajado: 'bg-red-500 dark:bg-red-400 text-white hover:bg-red-600 dark:hover:bg-red-500',
 
     // No Contratado: #E5E7EB (light) / #374151 (dark)
     NoContratado: 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600',

@@ -23,6 +23,9 @@ export type { HolidayManagerConfiguratorProps } from "./holidayManagerConfigurat
 export { VacationManagerConfigurator } from "./vacationManagerConfigurator";
 export type { VacationManagerConfiguratorProps } from "./vacationManagerConfigurator";
 
+export { GuardiaManagerConfigurator } from "./guardiaManagerConfigurator";
+export type { GuardiaManagerConfiguratorProps } from "./guardiaManagerConfigurator";
+
 export { ConfigurationReviewConfigurator } from "./configurationReviewConfigurator";
 export type { ConfigurationReviewConfiguratorProps } from "./configurationReviewConfigurator";
 

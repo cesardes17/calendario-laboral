@@ -27,9 +27,19 @@ export default function CalendarPage() {
   const [wizardData, setWizardData] = useState<WizardData | undefined>(
     undefined
   );
-  const [selectedYear, setSelectedYear] = useState<number | undefined>(
-    undefined
-  );
+  const [selectedYear, setSelectedYear] = useState<number>(() => {
+    // Try to load year from localStorage on initial render
+    try {
+      const savedConfig = localStorage.getItem("calendarWizardData");
+      if (savedConfig) {
+        const data = JSON.parse(savedConfig);
+        return data.selectedYear || new Date().getFullYear();
+      }
+    } catch (error) {
+      console.warn("Failed to load year from wizard data:", error);
+    }
+    return new Date().getFullYear();
+  });
 
   // Load wizard data from localStorage
   useEffect(() => {
@@ -38,7 +48,9 @@ export default function CalendarPage() {
       if (savedConfig) {
         const data = JSON.parse(savedConfig);
         setWizardData(data);
-        setSelectedYear(data.selectedYear);
+        if (data.selectedYear) {
+          setSelectedYear(data.selectedYear);
+        }
       }
     } catch (error) {
       console.warn("Failed to load wizard data:", error);

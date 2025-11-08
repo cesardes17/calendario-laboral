@@ -24,6 +24,8 @@ export { useHolidays } from './useHolidays';
 
 export { useVacations } from './useVacations';
 
+export { useGuardias } from './useGuardias';
+
 export { useConfigurationValidation } from './useConfigurationValidation';
 export type { UseConfigurationValidationParams } from './useConfigurationValidation';
 

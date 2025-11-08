@@ -28,6 +28,7 @@ import {
   TrendingDown,
   CheckCircle2,
   AlertTriangle,
+  Shield,
 } from "lucide-react";
 import { Button } from "../ui";
 
@@ -156,7 +157,19 @@ export function CalendarStatistics({
       description: "Períodos de vacaciones configurados",
       count: statistics.diasVacaciones,
       percentage: statistics.porcentajeVacaciones,
-      color: "bg-amber-500 dark:bg-amber-400",
+      color: "bg-yellow-400 dark:bg-yellow-300",
+      includeInEffective: true,
+    },
+    {
+      icon: <Shield className="w-4 h-4" />,
+      label: "Guardia",
+      description: `Guardias en días de descanso o festivos (${statistics.horasGuardias.toFixed(2)} horas)`,
+      count: statistics.diasGuardias,
+      percentage:
+        statistics.diasEfectivos > 0
+          ? (statistics.diasGuardias / statistics.diasEfectivos) * 100
+          : 0,
+      color: "bg-purple-600 dark:bg-purple-500",
       includeInEffective: true,
     },
     {
@@ -168,7 +181,7 @@ export function CalendarStatistics({
         statistics.diasEfectivos > 0
           ? (statistics.diasFestivosTrabajados / statistics.diasEfectivos) * 100
           : 0,
-      color: "bg-purple-500 dark:bg-purple-400",
+      color: "bg-red-500 dark:bg-red-400",
       includeInEffective: true,
     },
     {
@@ -180,7 +193,7 @@ export function CalendarStatistics({
         statistics.diasEfectivos > 0
           ? (statistics.diasFestivos / statistics.diasEfectivos) * 100
           : 0,
-      color: "bg-red-500 dark:bg-red-400",
+      color: "bg-orange-400 dark:bg-orange-300",
       includeInEffective: true,
     },
     {
@@ -450,6 +463,11 @@ export function CalendarStatistics({
                           statistics.desgloseHorasPorTipo.festivosTrabajados,
                         total: statistics.balanceHoras.horasTrabajadas,
                       },
+                      ...(statistics.horasGuardias > 0 ? [{
+                        label: "Guardias",
+                        hours: statistics.horasGuardias,
+                        total: statistics.balanceHoras.horasTrabajadas,
+                      }] : []),
                     ].map(({ label, hours, total }) => {
                       const percentage = total > 0 ? (hours / total) * 100 : 0;
                       return (
@@ -611,7 +629,7 @@ export function CalendarStatistics({
                     {statistics.totalDiasLaborables}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Trabajo + Festivos trabajados
+                    Trabajo + Guardias + Festivos trabajados
                   </p>
                 </div>
 

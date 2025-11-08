@@ -97,6 +97,17 @@ export class CalculateDayStatisticsUseCase {
             horasPorMes[day.mes - 1] += day.horasTrabajadas;
             diasTrabajadosPorMes[day.mes - 1]++;
             break;
+          case 'Guardia':
+            // Guardias count separately with their specified hours
+            // Note: Guardias are NOT included in desgloseHorasPorTipo to avoid double-counting
+            stats.diasGuardias++;
+            stats.horasGuardias += day.horasTrabajadas;
+            this.incrementWeekdayDistribution(stats, day.diaSemana);
+            totalHorasTrabajadas += day.horasTrabajadas;
+            // Monthly statistics (mes is 1-indexed, array is 0-indexed)
+            horasPorMes[day.mes - 1] += day.horasTrabajadas;
+            diasTrabajadosPorMes[day.mes - 1]++;
+            break;
           case 'Descanso':
             stats.diasDescanso++;
             break;
@@ -131,7 +142,7 @@ export class CalculateDayStatisticsUseCase {
       }
 
       // Calculate derived totals
-      stats.totalDiasLaborables = stats.diasTrabajados + stats.diasFestivosTrabajados;
+      stats.totalDiasLaborables = stats.diasTrabajados + stats.diasGuardias + stats.diasFestivosTrabajados;
       stats.totalDiasNoLaborables = stats.diasDescanso + stats.diasVacaciones + stats.diasFestivos;
       stats.totalDiasAnio = days.length;
       stats.diasEfectivos = stats.totalDiasAnio - stats.diasNoContratados;
@@ -139,6 +150,7 @@ export class CalculateDayStatisticsUseCase {
       // Validate that all days are accounted for
       const totalCounted =
         stats.diasTrabajados +
+        stats.diasGuardias +
         stats.diasDescanso +
         stats.diasVacaciones +
         stats.diasFestivos +

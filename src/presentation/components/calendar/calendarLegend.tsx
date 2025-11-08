@@ -16,6 +16,7 @@ import {
   PartyPopper,
   CalendarClock,
   Ban,
+  Shield,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
@@ -55,9 +56,16 @@ const LEGEND_ITEMS: LegendItem[] = [
   {
     estado: "Vacaciones",
     label: "Vacaciones",
-    color: "bg-amber-500 dark:bg-amber-400",
+    color: "bg-yellow-400 dark:bg-yellow-300",
     description: "Período de vacaciones",
     icon: <Plane className="w-3 h-3" />,
+  },
+  {
+    estado: "Guardia",
+    label: "Guardia",
+    color: "bg-purple-600 dark:bg-purple-500",
+    description: "Guardia en día de descanso/festivo",
+    icon: <Shield className="w-3 h-3" />,
   },
   {
     estado: "Festivo",
@@ -92,6 +100,7 @@ function getDayCount(estado: EstadoDia, statistics?: EstadisticasDias | null): n
     Trabajo: statistics.diasTrabajados,
     Descanso: statistics.diasDescanso,
     Vacaciones: statistics.diasVacaciones,
+    Guardia: statistics.diasGuardias,
     Festivo: statistics.diasFestivos,
     FestivoTrabajado: statistics.diasFestivosTrabajados,
     NoContratado: statistics.diasNoContratados,

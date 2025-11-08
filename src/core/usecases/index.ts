@@ -14,6 +14,7 @@ export { ConfigureAnnualContractHoursUseCase } from './configureAnnualContractHo
 export type { ConfigureAnnualContractHoursInput } from './configureAnnualContractHours.usecase';
 export * from './manageHolidays.usecase';
 export * from './manageVacations.usecase';
+export * from './manageGuardias.usecase';
 export * from './validateConfiguration.usecase';
 export { GenerateAnnualCalendarUseCase } from './generateAnnualCalendar.usecase';
 export type { GenerateAnnualCalendarInput, GenerateAnnualCalendarOutput } from './generateAnnualCalendar.usecase';
@@ -25,6 +26,8 @@ export { ApplyVacationsToDaysUseCase } from './applyVacationsToDays.usecase';
 export type { ApplyVacationsToDaysInput, ApplyVacationsToDaysOutput } from './applyVacationsToDays.usecase';
 export { ApplyHolidaysToDaysUseCase } from './applyHolidaysToDays.usecase';
 export type { ApplyHolidaysToDaysInput, ApplyHolidaysToDaysOutput } from './applyHolidaysToDays.usecase';
+export { ApplyGuardiasToDaysUseCase } from './applyGuardiasToDays.usecase';
+export type { ApplyGuardiasToDaysInput, ApplyGuardiasToDaysOutput } from './applyGuardiasToDays.usecase';
 export { CalculateDayHoursUseCase } from './calculateDayHours.usecase';
 export type { CalculateDayHoursInput, CalculateDayHoursOutput } from './calculateDayHours.usecase';
 export { ApplyHoursToCalendarUseCase } from './applyHoursToCalendar.usecase';

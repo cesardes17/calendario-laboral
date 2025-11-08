@@ -85,6 +85,12 @@ export interface EstadisticasDias {
   /** Number of vacation days (estado = 'Vacaciones') */
   diasVacaciones: number;
 
+  /** Number of on-call shift days (estado = 'Guardia') */
+  diasGuardias: number;
+
+  /** Total hours worked on guardias */
+  horasGuardias: number;
+
   /** Number of non-worked holidays (estado = 'Festivo') */
   diasFestivos: number;
 
@@ -145,6 +151,8 @@ export function createEmptyStatistics(): EstadisticasDias {
     diasTrabajados: 0,
     diasDescanso: 0,
     diasVacaciones: 0,
+    diasGuardias: 0,
+    horasGuardias: 0,
     diasFestivos: 0,
     diasFestivosTrabajados: 0,
     diasNoContratados: 0,

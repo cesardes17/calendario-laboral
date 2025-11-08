@@ -295,8 +295,11 @@ function getEstadoColor(estado: CalendarDay['estado']): string {
       // #10B981 (light) / #34D399 (dark)
       return 'bg-green-500 dark:bg-green-400 text-white';
     case 'Vacaciones':
-      // #F59E0B (light) / #FBBF24 (dark)
-      return 'bg-amber-500 dark:bg-amber-400 text-white';
+      // #FBBF24 (light) / #FCD34D (dark) - Yellow 400/300
+      return 'bg-yellow-400 dark:bg-yellow-300 text-gray-900';
+    case 'Guardia':
+      // #9333EA (light) / #A855F7 (dark) - Purple 600/500
+      return 'bg-purple-600 dark:bg-purple-500 text-white';
     case 'Festivo':
       // #FB923C (light) / #FDBA74 (dark)
       return 'bg-orange-400 dark:bg-orange-300 text-white';

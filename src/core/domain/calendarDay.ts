@@ -11,13 +11,15 @@
  * Priority order (highest to lowest):
  * 1. NoContratado (Not Contracted)
  * 2. Vacaciones (Vacation)
- * 3. Festivo / FestivoTrabajado (Holiday / Worked Holiday)
- * 4. Descanso (Rest - immutable from cycle)
- * 5. Trabajo (Work)
+ * 3. Guardia (On-call shift - only for weekly cycles on rest/holiday days)
+ * 4. Festivo / FestivoTrabajado (Holiday / Worked Holiday)
+ * 5. Descanso (Rest - immutable from cycle)
+ * 6. Trabajo (Work)
  */
 export type EstadoDia =
   | 'NoContratado'
   | 'Vacaciones'
+  | 'Guardia'
   | 'Festivo'
   | 'FestivoTrabajado'
   | 'Descanso'

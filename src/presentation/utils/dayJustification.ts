@@ -37,6 +37,11 @@ export interface WizardData {
     name: string;
     worked: boolean;
   }>;
+  guardias?: Array<{
+    date: string;
+    hours: number;
+    description: string;
+  }>;
   annualHours?: number;
 }
 
@@ -67,6 +72,9 @@ export function generateDayJustification(
 
     case 'Vacaciones':
       return generateVacationJustification(day, wizardData);
+
+    case 'Guardia':
+      return generateGuardiaJustification(day, wizardData);
 
     case 'Festivo':
       return generateHolidayJustification(day, wizardData);
@@ -124,6 +132,35 @@ function generateVacationJustification(
   }
 
   return 'Día de vacaciones';
+}
+
+/**
+ * Generates justification for Guardia days
+ */
+function generateGuardiaJustification(
+  day: CalendarDay,
+  wizardData?: WizardData
+): string {
+  if (!wizardData?.guardias) {
+    return `Guardia - ${day.horasTrabajadas} horas trabajadas`;
+  }
+
+  // Find matching guardia
+  const dayDateStr = day.fecha.toISOString().split('T')[0];
+  const matchingGuardia = wizardData.guardias.find((guardia) => {
+    const guardiaDateStr = new Date(guardia.date).toISOString().split('T')[0];
+    return guardiaDateStr === dayDateStr;
+  });
+
+  if (matchingGuardia) {
+    const hoursText = `${matchingGuardia.hours} ${matchingGuardia.hours === 1 ? 'hora' : 'horas'}`;
+    if (matchingGuardia.description) {
+      return `Guardia (${hoursText}): ${matchingGuardia.description}`;
+    }
+    return `Guardia - ${hoursText} trabajadas`;
+  }
+
+  return `Guardia - ${day.horasTrabajadas} horas trabajadas`;
 }
 
 /**

@@ -5,7 +5,10 @@
  * based on their state and the configured working hours.
  *
  * This use case should be executed after all day states have been
- * determined (after cycle, vacations, and holidays have been applied).
+ * determined (after cycle, vacations, holidays, and guardias have been applied).
+ *
+ * Note: Guardias already have their hours set by ApplyGuardiasToDaysUseCase,
+ * so this use case skips them to avoid overwriting their custom hours.
  */
 
 import { CalendarDay, WorkingHours, Result } from '../domain';
@@ -106,6 +109,16 @@ export class ApplyHoursToCalendarUseCase {
 
       // Apply hours to each day
       for (const day of days) {
+        // Skip guardias - they already have their hours set by ApplyGuardiasToDaysUseCase
+        if (day.estado === 'Guardia') {
+          // Just update metrics with existing hours
+          totalHours += day.horasTrabajadas;
+          if (day.horasTrabajadas > 0) {
+            workDaysCount++;
+          }
+          continue;
+        }
+
         const result = this.calculateDayHours.execute({ day, workingHours });
 
         if (result.isFailure()) {
