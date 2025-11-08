@@ -358,6 +358,7 @@ export function getEstadoLabel(estado: EstadoDia | null): string {
   const labels: Record<EstadoDia, string> = {
     NoContratado: 'No contratado',
     Vacaciones: 'Vacaciones',
+    Guardia: 'Guardia',
     Festivo: 'Festivo',
     FestivoTrabajado: 'Festivo trabajado',
     Descanso: 'Descanso',
