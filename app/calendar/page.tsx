@@ -23,10 +23,11 @@ import Link from "next/link";
 import { CalculateDayStatisticsUseCase } from "@/src/core/usecases";
 
 export default function CalendarPage() {
-  const { days, year, isLoading, error } = useCalendar();
-
   const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
   const [wizardData, setWizardData] = useState<WizardData | undefined>(
+    undefined
+  );
+  const [selectedYear, setSelectedYear] = useState<number | undefined>(
     undefined
   );
 
@@ -37,11 +38,16 @@ export default function CalendarPage() {
       if (savedConfig) {
         const data = JSON.parse(savedConfig);
         setWizardData(data);
+        setSelectedYear(data.selectedYear);
       }
     } catch (error) {
       console.warn("Failed to load wizard data:", error);
     }
   }, []);
+
+  const { days, year, isLoading, error } = useCalendar({
+    year: selectedYear,
+  });
 
   // Group days by month
   const monthsData = useMemo(() => {

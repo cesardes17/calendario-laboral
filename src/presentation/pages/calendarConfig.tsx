@@ -45,10 +45,12 @@ import Link from "next/link";
 // Configuration Summary
 interface ConfigurationSummaryContentProps {
   onEditConfiguration: () => void;
+  selectedYear: number;
 }
 
 function ConfigurationSummaryContent({
   onEditConfiguration,
+  selectedYear,
 }: ConfigurationSummaryContentProps) {
   return (
     <div className="space-y-8">
@@ -83,7 +85,7 @@ function ConfigurationSummaryContent({
           {
             icon: "🗓️",
             label: "Año Seleccionado",
-            value: new Date().getFullYear(),
+            value: selectedYear,
           },
           { icon: "📝", label: "Inicio de Contrato", value: "Configurado" },
           { icon: "⏰", label: "Horas de Trabajo", value: "Configuradas" },
@@ -565,6 +567,7 @@ export function CalendarWizard() {
         ) : (
           <ConfigurationSummaryContent
             onEditConfiguration={handleEditConfiguration}
+            selectedYear={selectedYear}
           />
         )}
       </div>
