@@ -237,9 +237,66 @@ export default function HelpPage() {
                     </p>
                   </div>
 
-                  {/* Paso 8: Revisión Final */}
+                  {/* Paso 8: Guardias (Ciclo Semanal) */}
                   <div className="space-y-3">
-                    <h4 className="font-semibold">8. Revisión Final</h4>
+                    <h4 className="font-semibold">8. Guardias (Solo para Ciclos Semanales)</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Las <strong>guardias</strong> son turnos especiales de trabajo que se realizan
+                      en días que normalmente serían de descanso o festivos. Esta funcionalidad
+                      <strong> solo está disponible para ciclos semanales</strong>.
+                    </p>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 ml-4">
+                      <li>
+                        <strong>¿Cuándo usarlas?</strong> Para registrar guardias, localizaciones u
+                        horas trabajadas en días que tu ciclo marca como descanso o en festivos.
+                      </li>
+                      <li>
+                        <strong>Restricción:</strong> Solo puedes añadir guardias en días de descanso
+                        según tu ciclo semanal o en días festivos (no en días laborables normales).
+                      </li>
+                      <li>
+                        <strong>Configuración:</strong> Especifica la fecha, las horas trabajadas y
+                        opcionalmente una descripción (ej: &ldquo;Guardia de fin de semana&rdquo;).
+                      </li>
+                      <li>
+                        <strong>Impacto:</strong> Las horas de las guardias se suman al total anual y
+                        se reflejan en el balance de horas.
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Paso 9: Turnos Extras */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold">9. Turnos Extras</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Los <strong>turnos extras</strong> son horas adicionales trabajadas cuando cubres
+                      a un compañero que no puede realizar su turno. A diferencia de las guardias, los
+                      turnos extras se pueden aplicar a <strong>cualquier día</strong> del calendario.
+                    </p>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 ml-4">
+                      <li>
+                        <strong>Flexibilidad:</strong> Puedes añadir turnos extras en cualquier día
+                        (laboral, descanso, festivo, vacaciones, etc.).
+                      </li>
+                      <li>
+                        <strong>Acumulación de horas:</strong> Las horas del turno extra se
+                        <strong> suman a las horas base</strong> del día. Por ejemplo, si tu jornada
+                        normal es de 8h y haces un turno extra de 8h, ese día trabajarás 16h en total.
+                      </li>
+                      <li>
+                        <strong>Configuración:</strong> Indica la fecha, las horas del turno extra y
+                        opcionalmente una descripción (ej: &ldquo;Cubriendo turno de tarde&rdquo;).
+                      </li>
+                      <li>
+                        <strong>Uso típico:</strong> Ideal para registrar coberturas de turnos,
+                        sustituciones o cualquier trabajo adicional realizado.
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Paso 10: Revisión Final */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold">10. Revisión Final</h4>
                     <p className="text-sm text-muted-foreground">
                       Revisa toda la configuración antes de generar el
                       calendario. Podrás ver un resumen de tu ciclo de trabajo,
@@ -539,6 +596,132 @@ export default function HelpPage() {
                       </span>
                     </li>
                   </ul>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Section 6: Guardias */}
+              <AccordionItem value="item-6">
+                <AccordionTrigger className="text-left">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    <span className="font-semibold">Guardias (Ciclos Semanales)</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-4">
+                  <p className="text-sm text-muted-foreground">
+                    Las guardias permiten registrar horas de trabajo en días que normalmente
+                    serían de descanso o festivos. Esta funcionalidad está diseñada específicamente
+                    para ciclos semanales.
+                  </p>
+
+                  <div className="space-y-3">
+                    <h4 className="font-semibold">¿Qué son las guardias?</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Son turnos especiales de trabajo (como localizaciones, guardias de fin de semana,
+                      etc.) que se realizan fuera del horario laboral habitual, en días que tu ciclo
+                      define como descanso o en festivos.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h4 className="font-semibold">Restricciones importantes</h4>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 ml-4">
+                      <li>
+                        <strong>Solo para ciclos semanales:</strong> Esta funcionalidad no está
+                        disponible si usas ciclos por partes.
+                      </li>
+                      <li>
+                        <strong>Solo en días de descanso o festivos:</strong> No puedes añadir
+                        guardias en días que ya están marcados como laborables en tu ciclo.
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h4 className="font-semibold">Cómo añadir una guardia</h4>
+                    <ol className="list-decimal list-inside text-sm text-muted-foreground space-y-1 ml-4">
+                      <li>Selecciona la fecha (debe ser un día de descanso o festivo)</li>
+                      <li>Indica las horas trabajadas durante esa guardia</li>
+                      <li>Opcionalmente, añade una descripción (ej: &ldquo;Guardia fin de semana&rdquo;)</li>
+                      <li>Las horas se sumarán automáticamente a tu total anual</li>
+                    </ol>
+                  </div>
+
+                  <div className="bg-amber-50 dark:bg-amber-950/20 p-4 rounded-lg mt-4 border border-amber-200 dark:border-amber-900/50">
+                    <p className="text-sm font-semibold mb-2 text-amber-900 dark:text-amber-100">
+                      Ejemplo práctico
+                    </p>
+                    <p className="text-sm text-amber-800 dark:text-amber-200">
+                      Si trabajas de lunes a viernes y tienes una guardia localizada el sábado 15 de
+                      junio de 12 horas, puedes añadirla como guardia. Estas 12 horas se contabilizarán
+                      en tu balance anual de horas trabajadas.
+                    </p>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Section 7: Extra Shifts */}
+              <AccordionItem value="item-7">
+                <AccordionTrigger className="text-left">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    <span className="font-semibold">Turnos Extras</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-4">
+                  <p className="text-sm text-muted-foreground">
+                    Los turnos extras son horas adicionales que trabajas cuando cubres a un compañero
+                    o realizas trabajo adicional. A diferencia de las guardias, son mucho más flexibles
+                    y se pueden aplicar a cualquier día del año.
+                  </p>
+
+                  <div className="space-y-3">
+                    <h4 className="font-semibold">¿Qué son los turnos extras?</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Son horas de trabajo adicionales que se suman a las horas base de cualquier día.
+                      Se usan típicamente para registrar coberturas de turnos, sustituciones o cualquier
+                      trabajo extra realizado.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h4 className="font-semibold">Diferencias con las guardias</h4>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 ml-4">
+                      <li>
+                        <strong>Sin restricciones de día:</strong> Puedes añadir turnos extras en
+                        cualquier día (laboral, descanso, festivo, vacaciones, etc.).
+                      </li>
+                      <li>
+                        <strong>Se suman a las horas base:</strong> Las horas del turno extra se
+                        añaden a las horas que ya trabajas ese día.
+                      </li>
+                      <li>
+                        <strong>Disponible para todos los ciclos:</strong> Funciona tanto con
+                        ciclos semanales como con ciclos por partes.
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h4 className="font-semibold">Cómo añadir un turno extra</h4>
+                    <ol className="list-decimal list-inside text-sm text-muted-foreground space-y-1 ml-4">
+                      <li>Selecciona cualquier fecha del año</li>
+                      <li>Indica las horas del turno extra</li>
+                      <li>Opcionalmente, añade una descripción (ej: &ldquo;Cubriendo turno de tarde&rdquo;)</li>
+                      <li>Las horas se sumarán a las horas base de ese día</li>
+                    </ol>
+                  </div>
+
+                  <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg mt-4 border border-blue-200 dark:border-blue-800">
+                    <p className="text-sm font-semibold mb-2 text-blue-900 dark:text-blue-300">
+                      Ejemplo práctico
+                    </p>
+                    <p className="text-sm text-blue-800 dark:text-blue-400">
+                      Si normalmente trabajas 8 horas el lunes y ese día cubres a un compañero
+                      haciendo 8 horas adicionales, puedes añadir un turno extra de 8h. El resultado
+                      final será que ese lunes trabajaste 16 horas (8h base + 8h extra).
+                    </p>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
             </Accordion>

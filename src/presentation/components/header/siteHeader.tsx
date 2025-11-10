@@ -20,7 +20,7 @@ export function SiteHeader() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ">
           <Link href="/help">
             <Button variant="ghost" size="icon" aria-label="Ayuda">
               <HelpCircle className="h-5 w-5" />
