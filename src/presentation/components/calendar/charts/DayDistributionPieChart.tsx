@@ -20,6 +20,8 @@ const DAY_STATE_COLORS = {
   Trabajo: "#22c55e", // green-500
   Descanso: "#64748b", // slate-500
   Vacaciones: "#f59e0b", // amber-500
+  Guardia: "#9333ea", // purple-600
+  TurnoExtra: "#d97706", // amber-600
   Festivo: "#ef4444", // red-500
   FestivoTrabajado: "#a855f7", // purple-500
   NoContratado: "#9ca3af", // gray-400
@@ -30,7 +32,8 @@ interface ChartDataItem {
   value: number;
   color: string;
   percentage: number;
-  [key: string]: string | number; // Index signature for Recharts compatibility
+  hours?: number; // Optional hours for items that track time
+  [key: string]: string | number | undefined; // Index signature for Recharts compatibility
 }
 
 interface TooltipPayload {
@@ -97,6 +100,11 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
         <p className="text-sm">
           <span className="font-semibold">{data.value}</span> días
         </p>
+        {data.hours !== undefined && data.hours > 0 && (
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold">{data.hours.toFixed(1)}</span> horas
+          </p>
+        )}
         <p className="text-xs text-muted-foreground">
           {data.percentage.toFixed(2)}% del total
         </p>
@@ -126,6 +134,20 @@ export function DayDistributionPieChart({ statistics }: DayDistributionPieChartP
       value: statistics.diasVacaciones,
       color: DAY_STATE_COLORS.Vacaciones,
       percentage: (statistics.diasVacaciones / statistics.totalDiasAnio) * 100,
+    },
+    {
+      name: "Guardia",
+      value: statistics.diasGuardias,
+      color: DAY_STATE_COLORS.Guardia,
+      percentage: (statistics.diasGuardias / statistics.totalDiasAnio) * 100,
+      hours: statistics.horasGuardias,
+    },
+    {
+      name: "Turno extra",
+      value: statistics.diasTurnosExtras,
+      color: DAY_STATE_COLORS.TurnoExtra,
+      percentage: (statistics.diasTurnosExtras / statistics.totalDiasAnio) * 100,
+      hours: statistics.horasTurnosExtras,
     },
     {
       name: "Festivo",
