@@ -15,7 +15,8 @@ import {
   CalendarStatistics,
   CalendarCharts,
 } from "@/src/presentation/components/calendar";
-import type { CalendarDay } from "@/src/core/domain";
+import type { CalendarDay, TurnoExtra } from "@/src/core/domain";
+import { TurnoExtra as TurnoExtraClass } from "@/src/core/domain/turnoExtra";
 import type { WizardData } from "@/src/presentation/utils/dayJustification";
 import { Calendar as CalendarIcon, Home } from "lucide-react";
 import { Button } from "@/src/presentation/components/ui/button";
@@ -27,6 +28,7 @@ export default function CalendarPage() {
   const [wizardData, setWizardData] = useState<WizardData | undefined>(
     undefined
   );
+  const [extraShifts, setExtraShifts] = useState<TurnoExtra[]>([]);
   const [selectedYear, setSelectedYear] = useState<number>(() => {
     // Try to load year from localStorage on initial render
     try {
@@ -50,6 +52,22 @@ export default function CalendarPage() {
         setWizardData(data);
         if (data.selectedYear) {
           setSelectedYear(data.selectedYear);
+        }
+
+        // Load extra shifts
+        if (data.extraShifts && Array.isArray(data.extraShifts)) {
+          const loadedExtraShifts: TurnoExtra[] = [];
+          for (const extraShiftData of data.extraShifts) {
+            const extraShiftResult = TurnoExtraClass.create({
+              date: new Date(extraShiftData.date),
+              hours: extraShiftData.hours,
+              description: extraShiftData.description || '',
+            });
+            if (extraShiftResult.isSuccess()) {
+              loadedExtraShifts.push(extraShiftResult.getValue());
+            }
+          }
+          setExtraShifts(loadedExtraShifts);
         }
       }
     } catch (error) {
@@ -82,6 +100,7 @@ export default function CalendarPage() {
     const result = useCase.execute({
       days,
       horasConvenio,
+      extraShifts,
     });
 
     if (!result.isSuccess()) {
@@ -90,7 +109,7 @@ export default function CalendarPage() {
     }
 
     return result.getValue();
-  }, [days, wizardData]);
+  }, [days, wizardData, extraShifts]);
 
   const handleDayClick = (day: CalendarDay) => {
     setSelectedDay(day);
@@ -168,6 +187,7 @@ export default function CalendarPage() {
               onDayClick={handleDayClick}
               canGoPrevious={false}
               canGoNext={false}
+              extraShifts={extraShifts}
             />
           </motion.div>
         ))}

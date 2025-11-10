@@ -22,6 +22,8 @@ export interface DesgloseHorasPorTipo {
   domingos: number;
   /** Hours worked on holidays */
   festivosTrabajados: number;
+  /** Hours worked on extra shifts */
+  turnosExtras: number;
 }
 
 /**
@@ -91,6 +93,12 @@ export interface EstadisticasDias {
   /** Total hours worked on guardias */
   horasGuardias: number;
 
+  /** Number of days with extra shifts */
+  diasTurnosExtras: number;
+
+  /** Total hours worked on extra shifts */
+  horasTurnosExtras: number;
+
   /** Number of non-worked holidays (estado = 'Festivo') */
   diasFestivos: number;
 
@@ -153,6 +161,8 @@ export function createEmptyStatistics(): EstadisticasDias {
     diasVacaciones: 0,
     diasGuardias: 0,
     horasGuardias: 0,
+    diasTurnosExtras: 0,
+    horasTurnosExtras: 0,
     diasFestivos: 0,
     diasFestivosTrabajados: 0,
     diasNoContratados: 0,
@@ -170,6 +180,7 @@ export function createEmptyStatistics(): EstadisticasDias {
       sabados: 0,
       domingos: 0,
       festivosTrabajados: 0,
+      turnosExtras: 0,
     },
     promedioHorasPorDiaTrabajado: 0,
     promedioHorasPorSemana: 0,

@@ -15,6 +15,7 @@ export type { ConfigureAnnualContractHoursInput } from './configureAnnualContrac
 export * from './manageHolidays.usecase';
 export * from './manageVacations.usecase';
 export * from './manageGuardias.usecase';
+export * from './manageExtraShifts.usecase';
 export * from './validateConfiguration.usecase';
 export { GenerateAnnualCalendarUseCase } from './generateAnnualCalendar.usecase';
 export type { GenerateAnnualCalendarInput, GenerateAnnualCalendarOutput } from './generateAnnualCalendar.usecase';

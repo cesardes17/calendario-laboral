@@ -13,6 +13,7 @@ export { AnnualContractHours, AnnualContractHoursError, ANNUAL_CONTRACT_HOURS_CO
 export { Holiday } from './holiday';
 export { VacationPeriod } from './vacationPeriod';
 export { Guardia } from './guardia';
+export { TurnoExtra } from './turnoExtra';
 export type { CalendarDay, EstadoDia, DayMetadata } from './calendarDay';
 export { WEEKDAY_NAMES, MONTH_NAMES } from './calendarDay';
 export type { ResultadoValidacion } from './calendarValidation';

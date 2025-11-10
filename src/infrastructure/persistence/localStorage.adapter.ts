@@ -24,6 +24,7 @@ export interface StoredConfiguration {
     annualContractHours: number | null;
     holidays: Array<{ date: string; name: string }>;
     vacations: Array<{ startDate: string; endDate: string; description: string }>;
+    extraShifts: Array<{ date: string; hours: number; description: string }>;
   };
 }
 

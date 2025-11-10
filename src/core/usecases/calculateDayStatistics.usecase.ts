@@ -14,6 +14,7 @@ import {
   Result,
   WEEKDAY_NAMES_MAP,
   type WeekdayName,
+  TurnoExtra,
 } from '../domain';
 import { CalculateHoursBalanceUseCase } from './calculateHoursBalance.usecase';
 
@@ -26,6 +27,9 @@ export interface CalculateDayStatisticsInput {
 
   /** Optional annual contract hours for balance calculation */
   horasConvenio?: number;
+
+  /** Optional list of extra shifts to track separately in statistics */
+  extraShifts?: TurnoExtra[];
 }
 
 /**
@@ -67,7 +71,7 @@ export class CalculateDayStatisticsUseCase {
    */
   public execute(input: CalculateDayStatisticsInput): Result<EstadisticasDias> {
     try {
-      const { days, horasConvenio } = input;
+      const { days, horasConvenio, extraShifts = [] } = input;
 
       // Validate input
       if (!days || days.length === 0) {
@@ -79,6 +83,20 @@ export class CalculateDayStatisticsUseCase {
       // Initialize statistics
       const stats = createEmptyStatistics();
       let totalHorasTrabajadas = 0;
+
+      // Process extra shifts statistics
+      stats.diasTurnosExtras = extraShifts.length;
+      stats.horasTurnosExtras = extraShifts.reduce((sum, shift) => sum + shift.hours, 0);
+      stats.desgloseHorasPorTipo.turnosExtras = stats.horasTurnosExtras;
+
+      // Count extra shifts by weekday
+      for (const extraShift of extraShifts) {
+        const dayOfWeek = extraShift.date.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+        const weekdayName = WEEKDAY_NAMES_MAP[dayOfWeek] as WeekdayName;
+        if (weekdayName) {
+          stats.distribucionSemanal.turnosExtrasPorSemana[weekdayName]++;
+        }
+      }
 
       // Arrays for monthly statistics (12 months)
       const horasPorMes = Array(12).fill(0);

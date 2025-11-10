@@ -179,6 +179,29 @@ export function CalendarLegend({
                 </div>
               );
             })}
+
+            {/* Extra shift indicator legend (if there are extra shifts) */}
+            {statistics && statistics.diasTurnosExtras > 0 && (
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded bg-muted flex-shrink-0 flex items-center justify-center relative">
+                  {/* Show the triangle indicator */}
+                  <div className="absolute top-0 right-0 w-0 h-0 border-t-[12px] border-t-amber-500 border-l-[12px] border-l-transparent" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-1">
+                    <p className="text-sm font-medium text-foreground">
+                      Turno Extra
+                    </p>
+                    <span className="text-xs font-semibold text-muted-foreground">
+                      ({statistics.diasTurnosExtras})
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate">
+                    Horas adicionales ({statistics.horasTurnosExtras.toFixed(1)}h)
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       )}

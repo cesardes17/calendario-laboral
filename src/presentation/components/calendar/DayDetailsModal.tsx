@@ -266,6 +266,11 @@ function DayDetailsContent({
             </Card>
           )}
 
+        {/* Extra shift info (if applicable) */}
+        {wizardData?.extraShifts && (
+          <ExtraShiftInfo day={day} extraShifts={wizardData.extraShifts} />
+        )}
+
         {/* Description (if any) */}
         {day.descripcion && (
           <Card>
@@ -423,4 +428,67 @@ function formatShortDate(date: Date): string {
   const year = date.getFullYear();
 
   return `${day} ${month} ${year}`;
+}
+
+/**
+ * Renders extra shift information (if applicable)
+ */
+interface ExtraShiftInfoProps {
+  day: CalendarDay;
+  extraShifts: WizardData['extraShifts'];
+}
+
+function ExtraShiftInfo({ day, extraShifts }: ExtraShiftInfoProps) {
+  if (!extraShifts || extraShifts.length === 0) {
+    return null;
+  }
+
+  const dayDateStr = day.fecha.toISOString().split('T')[0];
+  const matchingExtraShift = extraShifts.find(
+    (shift) => shift.date.split('T')[0] === dayDateStr
+  );
+
+  if (!matchingExtraShift) {
+    return null;
+  }
+
+  return (
+    <Card className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30">
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <div className="w-0 h-0 border-t-[10px] border-t-amber-500 border-l-[10px] border-l-transparent" />
+          <span className="text-amber-900 dark:text-amber-300">Turno Extra</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-amber-700 dark:text-amber-400">Horas extras:</span>
+          <span className="font-bold text-lg text-amber-900 dark:text-amber-300">
+            +{matchingExtraShift.hours}h
+          </span>
+        </div>
+        {matchingExtraShift.description && (
+          <>
+            <Separator className="bg-amber-200 dark:bg-amber-800" />
+            <div>
+              <span className="text-sm text-amber-700 dark:text-amber-400">Descripción:</span>
+              <p className="mt-1 text-sm text-amber-900 dark:text-amber-300">
+                {matchingExtraShift.description}
+              </p>
+            </div>
+          </>
+        )}
+        <Separator className="bg-amber-200 dark:bg-amber-800" />
+        <div className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded text-xs text-amber-800 dark:text-amber-400">
+          <p>
+            Este día trabajaste <strong>{day.horasTrabajadas.toFixed(2)}h totales</strong>:
+          </p>
+          <ul className="mt-1 ml-4 list-disc space-y-0.5">
+            <li>{(day.horasTrabajadas - matchingExtraShift.hours).toFixed(2)}h de tu jornada base</li>
+            <li>+{matchingExtraShift.hours}h de turno extra</li>
+          </ul>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }

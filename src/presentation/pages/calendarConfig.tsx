@@ -15,12 +15,14 @@ import {
   HolidayManagerConfigurator,
   VacationManagerConfigurator,
   GuardiaManagerConfigurator,
+  ExtraShiftManagerConfigurator,
   ConfigurationReviewConfigurator,
 } from "../components";
 import { WorkCycle } from "@/src/core/domain/workCycle";
 import { Holiday } from "@/src/core/domain/holiday";
 import { VacationPeriod } from "@/src/core/domain/vacationPeriod";
 import { Guardia } from "@/src/core/domain/guardia";
+import { TurnoExtra } from "@/src/core/domain/turnoExtra";
 import type { WorkingHoursConfig } from "@/src/core/domain/workingHours";
 import type { HolidayPolicyType } from "@/src/core/domain/holidayPolicy";
 import { HolidayPolicyType as HolidayPolicyTypeEnum } from "@/src/core/domain/holidayPolicy";
@@ -161,6 +163,7 @@ export function CalendarWizard() {
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [vacations, setVacations] = useState<VacationPeriod[]>([]);
   const [guardias, setGuardias] = useState<Guardia[]>([]);
+  const [extraShifts, setExtraShifts] = useState<TurnoExtra[]>([]);
 
   // Track validation state for each step
   const [stepsValidation, setStepsValidation] = useState({
@@ -171,6 +174,7 @@ export function CalendarWizard() {
     annualHours: true, // Always valid, starts valid
     holidays: true, // Always valid, starts valid
     guardias: true, // Always valid, starts valid (only for weekly cycles)
+    extraShifts: true, // Always valid, starts valid
     vacations: true, // Always valid, starts valid
     review: false, // Review requires user confirmation
   });
@@ -229,6 +233,13 @@ export function CalendarWizard() {
     []
   );
 
+  const handleExtraShiftsChange = useCallback(
+    (extraShiftList: TurnoExtra[]) => {
+      setExtraShifts(extraShiftList);
+    },
+    []
+  );
+
   const handleContractStartValidation = useCallback((isValid: boolean) => {
     setStepsValidation((prev) => ({ ...prev, contractStart: isValid }));
   }, []);
@@ -251,6 +262,10 @@ export function CalendarWizard() {
 
   const handleGuardiasValidation = useCallback((isValid: boolean) => {
     setStepsValidation((prev) => ({ ...prev, guardias: isValid }));
+  }, []);
+
+  const handleExtraShiftsValidation = useCallback((isValid: boolean) => {
+    setStepsValidation((prev) => ({ ...prev, extraShifts: isValid }));
   }, []);
 
   const handleReviewValidation = useCallback((isValid: boolean) => {
@@ -384,6 +399,25 @@ export function CalendarWizard() {
         setStepsValidation((prev) => ({ ...prev, guardias: true }));
       }
 
+      // Restore extra shifts
+      if (data.extraShifts && Array.isArray(data.extraShifts)) {
+        const restoredExtraShifts: TurnoExtra[] = [];
+        data.extraShifts.forEach(
+          (es: { date: string; hours: number; description: string }) => {
+            const extraShiftResult = TurnoExtra.create({
+              date: new Date(es.date),
+              hours: es.hours,
+              description: es.description,
+            });
+            if (extraShiftResult.isSuccess()) {
+              restoredExtraShifts.push(extraShiftResult.getValue());
+            }
+          }
+        );
+        setExtraShifts(restoredExtraShifts);
+        setStepsValidation((prev) => ({ ...prev, extraShifts: true }));
+      }
+
       setShowLoadDialog(false);
       console.log("Configuration loaded from localStorage");
 
@@ -513,6 +547,20 @@ export function CalendarWizard() {
         ]
       : []),
     {
+      id: "extraShifts",
+      title: "Turnos Extras",
+      description: "Registra turnos extras cubriendo a compañeros",
+      component: (
+        <ExtraShiftManagerConfigurator
+          initialYear={selectedYear}
+          initialExtraShifts={extraShifts}
+          onConfigurationChange={handleExtraShiftsValidation}
+          onExtraShiftsChange={handleExtraShiftsChange}
+        />
+      ),
+      isValid: stepsValidation.extraShifts,
+    },
+    {
       id: "vacations",
       title: "Vacaciones del Año",
       description: "Planifica tus períodos de vacaciones",
@@ -569,6 +617,11 @@ export function CalendarWizard() {
         date: g.date.toISOString(),
         hours: g.hours,
         description: g.description,
+      })),
+      extraShifts: extraShifts.map((e) => ({
+        date: e.date.toISOString(),
+        hours: e.hours,
+        description: e.description,
       })),
       vacations: vacations.map((v) => ({
         startDate: v.startDate.toISOString(),

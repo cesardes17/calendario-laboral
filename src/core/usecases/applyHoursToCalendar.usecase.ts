@@ -9,9 +9,11 @@
  *
  * Note: Guardias already have their hours set by ApplyGuardiasToDaysUseCase,
  * so this use case skips them to avoid overwriting their custom hours.
+ *
+ * Extra shifts (TurnoExtra) are added on top of base hours for any day.
  */
 
-import { CalendarDay, WorkingHours, Result } from '../domain';
+import { CalendarDay, WorkingHours, Result, TurnoExtra } from '../domain';
 import { CalculateDayHoursUseCase } from './calculateDayHours.usecase';
 
 /**
@@ -23,6 +25,9 @@ export interface ApplyHoursToCalendarInput {
 
   /** Working hours configuration */
   workingHours: WorkingHours;
+
+  /** Optional list of extra shifts to add hours on top of base hours */
+  extraShifts?: TurnoExtra[];
 }
 
 /**
@@ -92,7 +97,7 @@ export class ApplyHoursToCalendarUseCase {
    */
   public execute(input: ApplyHoursToCalendarInput): Result<ApplyHoursToCalendarOutput> {
     try {
-      const { days, workingHours } = input;
+      const { days, workingHours, extraShifts = [] } = input;
 
       // Validate input
       if (!days || days.length === 0) {
@@ -119,7 +124,11 @@ export class ApplyHoursToCalendarUseCase {
           continue;
         }
 
-        const result = this.calculateDayHours.execute({ day, workingHours });
+        const result = this.calculateDayHours.execute({
+          day,
+          workingHours,
+          extraShifts
+        });
 
         if (result.isFailure()) {
           return Result.fail<ApplyHoursToCalendarOutput>(

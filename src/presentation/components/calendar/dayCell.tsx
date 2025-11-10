@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import type { CalendarDay, EstadoDia } from '@/src/core/domain';
+import type { CalendarDay, EstadoDia, TurnoExtra } from '@/src/core/domain';
 import { motion } from 'framer-motion';
 import {
   Briefcase,
@@ -20,6 +20,7 @@ import {
 interface DayCellProps {
   day: CalendarDay;
   onClick?: (day: CalendarDay) => void;
+  extraShifts?: TurnoExtra[];
 }
 
 /**
@@ -78,12 +79,16 @@ function getDayColorClass(estado: EstadoDia | null): string {
   return colorMap[estado];
 }
 
-export function DayCell({ day, onClick }: DayCellProps) {
+export function DayCell({ day, onClick, extraShifts = [] }: DayCellProps) {
   const colorClass = getDayColorClass(day.estado);
   const dayIcon = getDayIcon(day.estado);
   const isWeekend = day.diaSemana === 0 || day.diaSemana === 6; // Sunday or Saturday
   const isToday =
     new Date().toDateString() === day.fecha.toDateString();
+
+  // Check if this day has an extra shift
+  const hasExtraShift = extraShifts.some(shift => shift.isOnDate(day.fecha));
+  const extraShift = extraShifts.find(shift => shift.isOnDate(day.fecha));
 
   return (
     <motion.button
@@ -127,6 +132,15 @@ export function DayCell({ day, onClick }: DayCellProps) {
 
       {/* Day number */}
       <span className="font-semibold leading-none">{day.diaNumero}</span>
+
+      {/* Extra shift indicator (amber triangle in top-right corner) */}
+      {hasExtraShift && (
+        <div
+          className="absolute top-0 right-0 w-0 h-0 border-t-[12px] border-t-amber-500 border-l-[12px] border-l-transparent"
+          title={extraShift ? `Turno extra: ${extraShift.hours}h` : 'Turno extra'}
+          aria-label={extraShift ? `Turno extra de ${extraShift.hours} horas` : 'Turno extra'}
+        />
+      )}
 
       {/* Today indicator */}
       {isToday && (

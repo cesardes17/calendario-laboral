@@ -9,7 +9,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { Year, CalendarDay, EmploymentStatus, ContractStartDate, EmploymentStatusType, WorkCycle, CycleMode, CycleOffset, CycleDayType, VacationPeriod, Holiday, WorkingHours, Guardia } from '@/src/core/domain';
+import { Year, CalendarDay, EmploymentStatus, ContractStartDate, EmploymentStatusType, WorkCycle, CycleMode, CycleOffset, CycleDayType, VacationPeriod, Holiday, WorkingHours, Guardia, TurnoExtra } from '@/src/core/domain';
 import { HolidayPolicy, HolidayPolicyType } from '@/src/core/domain/holidayPolicy';
 import { GenerateAnnualCalendarUseCase, ApplyWeeklyCycleToDaysUseCase, ApplyPartsCycleToDaysUseCase, ApplyVacationsToDaysUseCase, ApplyHolidaysToDaysUseCase, ApplyGuardiasToDaysUseCase, ApplyHoursToCalendarUseCase } from '@/src/core/usecases';
 
@@ -409,6 +409,7 @@ export function useCalendar(options: UseCalendarOptions = {}): UseCalendarReturn
         try {
           const savedConfig = localStorage.getItem('calendarWizardData');
           let workingHours = WorkingHours.default();
+          const extraShifts: TurnoExtra[] = [];
 
           if (savedConfig) {
             const wizardData = JSON.parse(savedConfig);
@@ -422,12 +423,30 @@ export function useCalendar(options: UseCalendarOptions = {}): UseCalendarReturn
                 holiday: workingHoursData.holiday,
               });
             }
+
+            // Load extra shifts
+            const extraShiftsData = wizardData.extraShifts;
+            if (extraShiftsData && Array.isArray(extraShiftsData) && extraShiftsData.length > 0) {
+              for (const extraShiftData of extraShiftsData) {
+                const extraShiftDate = new Date(extraShiftData.date);
+                const extraShiftResult = TurnoExtra.create({
+                  date: extraShiftDate,
+                  hours: extraShiftData.hours,
+                  description: extraShiftData.description || '',
+                });
+
+                if (extraShiftResult.isSuccess()) {
+                  extraShifts.push(extraShiftResult.getValue());
+                }
+              }
+            }
           }
 
           const applyHoursUseCase = new ApplyHoursToCalendarUseCase();
           const applyHoursResult = applyHoursUseCase.execute({
             days: finalDays,
             workingHours,
+            extraShifts,
           });
 
           if (!applyHoursResult.isSuccess()) {

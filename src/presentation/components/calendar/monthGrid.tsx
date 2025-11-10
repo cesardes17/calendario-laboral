@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import type { CalendarDay } from '@/src/core/domain';
+import type { CalendarDay, TurnoExtra } from '@/src/core/domain';
 import { DayCell } from './dayCell';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
@@ -18,6 +18,7 @@ interface MonthGridProps {
   onDayClick?: (day: CalendarDay) => void;
   canGoPrevious?: boolean;
   canGoNext?: boolean;
+  extraShifts?: TurnoExtra[];
 }
 
 /**
@@ -59,6 +60,7 @@ export function MonthGrid({
   days,
   month,
   onDayClick,
+  extraShifts = [],
 }: MonthGridProps) {
   const leadingEmptyCells = getLeadingEmptyCells(days);
   const monthName = getMonthName(month);
@@ -97,7 +99,7 @@ export function MonthGrid({
 
           {/* Day cells */}
           {days.map((day) => (
-            <DayCell key={day.fecha.toISOString()} day={day} onClick={onDayClick} />
+            <DayCell key={day.fecha.toISOString()} day={day} onClick={onDayClick} extraShifts={extraShifts} />
           ))}
         </div>
       </CardContent>

@@ -44,6 +44,7 @@ export interface PorcentajesPorSemana {
  * - Array position mapping: 0=Sunday, 1=Monday, ..., 6=Saturday (JS Date.getDay())
  * - diaMasTrabajado: weekday with highest count (tie-breaker: first occurrence)
  * - diaMenosTrabajado: weekday with lowest count (tie-breaker: first occurrence)
+ * - turnosExtrasPorSemana: Count of extra shifts by weekday (independent of work state)
  *
  * @example
  * ```typescript
@@ -66,6 +67,15 @@ export interface PorcentajesPorSemana {
  *     sabado: 0,
  *     domingo: 0
  *   },
+ *   turnosExtrasPorSemana: {
+ *     lunes: 2,
+ *     martes: 1,
+ *     miercoles: 0,
+ *     jueves: 1,
+ *     viernes: 0,
+ *     sabado: 1,
+ *     domingo: 0
+ *   },
  *   diaMasTrabajado: 'lunes',
  *   diaMenosTrabajado: 'sabado',
  *   totalDiasTrabajados: 150
@@ -78,6 +88,9 @@ export interface DistribucionSemanal {
 
   /** Percentage of worked days for each weekday (over total worked days) */
   porcentajes: PorcentajesPorSemana;
+
+  /** Count of extra shifts for each weekday */
+  turnosExtrasPorSemana: DiasPorSemana;
 
   /** Name of the weekday with most worked days */
   diaMasTrabajado: string;
@@ -104,6 +117,15 @@ export function createEmptyWeeklyDistribution(): DistribucionSemanal {
       domingo: 0,
     },
     porcentajes: {
+      lunes: 0,
+      martes: 0,
+      miercoles: 0,
+      jueves: 0,
+      viernes: 0,
+      sabado: 0,
+      domingo: 0,
+    },
+    turnosExtrasPorSemana: {
       lunes: 0,
       martes: 0,
       miercoles: 0,

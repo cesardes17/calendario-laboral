@@ -26,6 +26,9 @@ export type { VacationManagerConfiguratorProps } from "./vacationManagerConfigur
 export { GuardiaManagerConfigurator } from "./guardiaManagerConfigurator";
 export type { GuardiaManagerConfiguratorProps } from "./guardiaManagerConfigurator";
 
+export { ExtraShiftManagerConfigurator } from "./extraShiftManagerConfigurator";
+export type { ExtraShiftManagerConfiguratorProps } from "./extraShiftManagerConfigurator";
+
 export { ConfigurationReviewConfigurator } from "./configurationReviewConfigurator";
 export type { ConfigurationReviewConfiguratorProps } from "./configurationReviewConfigurator";
 

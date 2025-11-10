@@ -42,6 +42,11 @@ export interface WizardData {
     hours: number;
     description: string;
   }>;
+  extraShifts?: Array<{
+    date: string;
+    hours: number;
+    description: string;
+  }>;
   annualHours?: number;
 }
 

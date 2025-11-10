@@ -468,6 +468,11 @@ export function CalendarStatistics({
                         hours: statistics.horasGuardias,
                         total: statistics.balanceHoras.horasTrabajadas,
                       }] : []),
+                      ...(statistics.horasTurnosExtras > 0 ? [{
+                        label: "Turnos extras",
+                        hours: statistics.horasTurnosExtras,
+                        total: statistics.balanceHoras.horasTrabajadas,
+                      }] : []),
                     ].map(({ label, hours, total }) => {
                       const percentage = total > 0 ? (hours / total) * 100 : 0;
                       return (
@@ -533,6 +538,8 @@ export function CalendarStatistics({
                       statistics.distribucionSemanal.diasPorSemana[dia];
                     const percentage =
                       statistics.distribucionSemanal.porcentajes[dia];
+                    const extraShiftsCount =
+                      statistics.distribucionSemanal.turnosExtrasPorSemana[dia];
                     const isHighest =
                       statistics.distribucionSemanal.diaMasTrabajado === dia;
                     const isLowest =
@@ -574,6 +581,16 @@ export function CalendarStatistics({
                               : "bg-indigo-500 dark:bg-indigo-400"
                           }
                         />
+
+                        {/* Extra shifts indicator */}
+                        {extraShiftsCount > 0 && (
+                          <div className="flex items-center gap-1.5 pl-2 pt-0.5">
+                            <div className="w-0 h-0 border-t-[6px] border-t-amber-500 border-l-[6px] border-l-transparent" />
+                            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                              {extraShiftsCount} turno{extraShiftsCount !== 1 ? 's' : ''} extra{extraShiftsCount !== 1 ? 's' : ''}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -654,6 +671,23 @@ export function CalendarStatistics({
                     Por cada día de descanso
                   </p>
                 </div>
+
+                {statistics.diasTurnosExtras > 0 && (
+                  <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
+                    <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">
+                      Turnos extras realizados
+                    </p>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-lg font-bold text-amber-900 dark:text-amber-300">
+                        {statistics.diasTurnosExtras}
+                      </p>
+                      <div className="w-0 h-0 border-t-[8px] border-t-amber-500 border-l-[8px] border-l-transparent" />
+                    </div>
+                    <p className="text-xs text-amber-700 dark:text-amber-400">
+                      {statistics.horasTurnosExtras.toFixed(2)} horas extras
+                    </p>
+                  </div>
+                )}
 
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <p className="text-xs text-muted-foreground">Total año</p>

@@ -10,9 +10,10 @@
  * - 'FestivoTrabajado' always uses holiday hours regardless of day of week
  * - All other states (NoContratado, Descanso, Vacaciones, Festivo) = 0 hours
  * - Hours are rounded to 2 decimals (handled by WorkingHours value object)
+ * - Extra shifts (TurnoExtra) add hours on top of base hours
  */
 
-import { CalendarDay, EstadoDia, Result, WorkingHours } from '../domain';
+import { CalendarDay, EstadoDia, Result, WorkingHours, TurnoExtra } from '../domain';
 
 /**
  * Input for calculating day hours
@@ -23,6 +24,9 @@ export interface CalculateDayHoursInput {
 
   /** The working hours configuration */
   workingHours: WorkingHours;
+
+  /** Optional list of extra shifts to check for additional hours */
+  extraShifts?: TurnoExtra[];
 }
 
 /**
@@ -106,14 +110,21 @@ export class CalculateDayHoursUseCase {
    */
   public execute(input: CalculateDayHoursInput): Result<CalculateDayHoursOutput> {
     try {
-      const { day, workingHours } = input;
+      const { day, workingHours, extraShifts = [] } = input;
       const { estado, diaSemana } = day;
 
-      // Calculate hours based on day state
-      const hours = this.calculateHours(estado, diaSemana, workingHours);
+      // Calculate base hours based on day state
+      const baseHours = this.calculateHours(estado, diaSemana, workingHours);
+
+      // Check if this day has an extra shift
+      const extraShift = extraShifts.find(shift => shift.isOnDate(day.fecha));
+      const extraHours = extraShift ? extraShift.hours : 0;
+
+      // Total hours = base + extra
+      const totalHours = baseHours + extraHours;
 
       return Result.ok<CalculateDayHoursOutput>({
-        hours,
+        hours: totalHours,
         estado,
         diaSemana,
       });
