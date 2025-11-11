@@ -163,7 +163,9 @@ export function CalendarStatistics({
     {
       icon: <Shield className="w-4 h-4" />,
       label: "Guardia",
-      description: `Guardias en días de descanso o festivos (${statistics.horasGuardias.toFixed(2)} horas)`,
+      description: `Guardias en días de descanso o festivos (${statistics.horasGuardias.toFixed(
+        2
+      )} horas)`,
       count: statistics.diasGuardias,
       percentage:
         statistics.diasEfectivos > 0
@@ -463,16 +465,24 @@ export function CalendarStatistics({
                           statistics.desgloseHorasPorTipo.festivosTrabajados,
                         total: statistics.balanceHoras.horasTrabajadas,
                       },
-                      ...(statistics.horasGuardias > 0 ? [{
-                        label: "Guardias",
-                        hours: statistics.horasGuardias,
-                        total: statistics.balanceHoras.horasTrabajadas,
-                      }] : []),
-                      ...(statistics.horasTurnosExtras > 0 ? [{
-                        label: "Turnos extras",
-                        hours: statistics.horasTurnosExtras,
-                        total: statistics.balanceHoras.horasTrabajadas,
-                      }] : []),
+                      ...(statistics.horasGuardias > 0
+                        ? [
+                            {
+                              label: "Guardias",
+                              hours: statistics.horasGuardias,
+                              total: statistics.balanceHoras.horasTrabajadas,
+                            },
+                          ]
+                        : []),
+                      ...(statistics.horasTurnosExtras > 0
+                        ? [
+                            {
+                              label: "Turnos extras",
+                              hours: statistics.horasTurnosExtras,
+                              total: statistics.balanceHoras.horasTrabajadas,
+                            },
+                          ]
+                        : []),
                     ].map(({ label, hours, total }) => {
                       const percentage = total > 0 ? (hours / total) * 100 : 0;
                       return (
@@ -502,14 +512,14 @@ export function CalendarStatistics({
                       {statistics.promedioHorasPorDiaTrabajado.toFixed(2)} h
                     </p>
                   </div>
-                  <div className="p-3 bg-muted/50 rounded-lg">
+                  {/* <div className="p-3 bg-muted/50 rounded-lg">
                     <p className="text-xs text-muted-foreground">
                       Promedio por semana
                     </p>
                     <p className="text-lg font-bold">
                       {statistics.promedioHorasPorSemana.toFixed(2)} h
                     </p>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             )}
@@ -587,7 +597,9 @@ export function CalendarStatistics({
                           <div className="flex items-center gap-1.5 pl-2 pt-0.5">
                             <div className="w-0 h-0 border-t-[6px] border-t-amber-500 border-l-[6px] border-l-transparent" />
                             <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                              {extraShiftsCount} turno{extraShiftsCount !== 1 ? 's' : ''} extra{extraShiftsCount !== 1 ? 's' : ''}
+                              {extraShiftsCount} turno
+                              {extraShiftsCount !== 1 ? "s" : ""} extra
+                              {extraShiftsCount !== 1 ? "s" : ""}
                             </span>
                           </div>
                         )}
