@@ -512,14 +512,14 @@ export function CalendarStatistics({
                       {statistics.promedioHorasPorDiaTrabajado.toFixed(2)} h
                     </p>
                   </div>
-                  {/* <div className="p-3 bg-muted/50 rounded-lg">
+                  <div className="p-3 bg-muted/50 rounded-lg">
                     <p className="text-xs text-muted-foreground">
                       Promedio por semana
                     </p>
                     <p className="text-lg font-bold">
                       {statistics.promedioHorasPorSemana.toFixed(2)} h
                     </p>
-                  </div> */}
+                  </div>
                 </div>
               </div>
             )}
